@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from django.contrib.auth.models import User
+from rest_framework import viewsets
+from .serializers import InternalUserSerializer
 
-# Create your views here.
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.prefetch_related('folders').all()
+    serializer_class = InternalUserSerializer
+    lookup_field = 'id'

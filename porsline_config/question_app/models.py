@@ -5,6 +5,7 @@ from django.db import models
 
 
 class Folder(models.Model):
+    owner = models.ForeignKey(get_user_model(), default=None, null=True, on_delete=models.CASCADE, related_name='folders')
     name = models.CharField(max_length=255)
 
     def __str__(self):
@@ -18,7 +19,7 @@ class Questionnaire(models.Model):
     has_auto_start = models.BooleanField(default=False)
     pub_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
-    timer = models.PositiveBigIntegerField(null=True, blank=True)  # Recievs seconds
+    timer = models.PositiveBigIntegerField(null=True, blank=True)  # Seconds
     folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='questionnaires')
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='questionnaires')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
