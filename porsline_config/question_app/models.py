@@ -129,8 +129,6 @@ class TextAnswerQuestion(Question):
 
 
 # TODO - Float, Negative
-# TODO - validation should be done in view
-# Default ones are set here
 class NumberAnswerQuestion(Question):
     min = models.IntegerField(default=0, null=True, blank=True)
     max = models.IntegerField(default=1000, null=True, blank=True)
