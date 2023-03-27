@@ -65,17 +65,11 @@ class OptionalQuestion(Question):
     nothing_selected = models.BooleanField(default=False, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if not self.multiple_choice:
-            self.max_selected_options = None
-            self.min_selected_options = None
-        if not self.additional_options:
-            self.all_options = None
-            self.nothing_selected = None
-        if self.nothing_selected or self.all_options:
-            self.all_options = False
-            self.multiple_choice = False
         self.question_type = 'optional'
         super(OptionalQuestion, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.question_text
 
 
 class Option(models.Model):
@@ -95,12 +89,11 @@ class DropDownQuestion(Question):
     min_selected_options = models.PositiveIntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if not self.multiple_choice:
-            self.max_selected_options = None
-            self.min_selected_options = None
         self.question_type = 'drop_down'
         super(DropDownQuestion, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.question_text
 
 class DropDownOption(models.Model):
     drop_down_question = models.ForeignKey(DropDownQuestion, on_delete=models.CASCADE, related_name='options')
@@ -111,8 +104,6 @@ class DropDownOption(models.Model):
         return f'{self.drop_down_question} - {self.text}'
 
 
-# TODO - validation should be done in view
-# Default ones are set here
 class TextAnswerQuestion(Question):
     min = models.PositiveIntegerField(default=10, null=True, blank=True)
     max = models.PositiveIntegerField(default=1000, null=True, blank=True)
@@ -122,11 +113,11 @@ class TextAnswerQuestion(Question):
     ])
 
     def save(self, *args, **kwargs):
-        if self.min > self.max:
-            self.min, self.max = self.max, self.min
         self.question_type = 'text_answer'
         super(TextAnswerQuestion, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.question_text
 
 # TODO - Float, Negative
 class NumberAnswerQuestion(Question):
@@ -138,11 +129,11 @@ class NumberAnswerQuestion(Question):
     ])
 
     def save(self, *args, **kwargs):
-        if self.min > self.max:
-            self.min, self.max = self.max, self.min
         self.question_type = 'number_answer'
         super(NumberAnswerQuestion, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.question_text
 
 class IntegerRangeQuestion(Question):
     ZERO_CHOICE = 0
@@ -165,6 +156,8 @@ class IntegerRangeQuestion(Question):
         self.question_type = 'integer_range'
         super(IntegerRangeQuestion, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.question_text
 
 class IntegerSelectiveQuestion(Question):
     HEART = 'H'
@@ -187,6 +180,8 @@ class IntegerSelectiveQuestion(Question):
         self.question_type = 'integer_selective'
         super(IntegerSelectiveQuestion, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.question_text
 
 class PictureFieldQuestion(Question):
     answer = models.ImageField(null=True, blank=True, upload_to='images/')
@@ -195,6 +190,8 @@ class PictureFieldQuestion(Question):
         self.question_type = 'picture_field'
         super(PictureFieldQuestion, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.question_text
 
 class EmailFieldQuestion(Question):
     answer = models.EmailField(default='', null=True, blank=True, max_length=255)
@@ -203,6 +200,8 @@ class EmailFieldQuestion(Question):
         self.question_type = 'email_field'
         super(EmailFieldQuestion, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.question_text
 
 class LinkQuestion(Question):
     answer = models.URLField(null=True, blank=True, max_length=255)
@@ -210,6 +209,9 @@ class LinkQuestion(Question):
     def save(self, *args, **kwargs):
         self.question_type = 'link'
         super(LinkQuestion, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.question_text
 
 
 class FileQuestion(Question):
@@ -219,3 +221,6 @@ class FileQuestion(Question):
     def save(self, *args, **kwargs):
         self.question_type = 'file'
         super(FileQuestion, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.question_text
