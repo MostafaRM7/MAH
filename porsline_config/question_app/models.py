@@ -5,7 +5,8 @@ from django.db import models
 
 
 class Folder(models.Model):
-    owner = models.ForeignKey(get_user_model(), default=None, null=True, on_delete=models.CASCADE, related_name='folders')
+    owner = models.ForeignKey(get_user_model(), default=None, null=True, on_delete=models.CASCADE,
+                              related_name='folders')
     name = models.CharField(max_length=255)
 
     def __str__(self):
