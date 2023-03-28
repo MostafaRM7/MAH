@@ -95,6 +95,7 @@ class DropDownQuestion(Question):
     def __str__(self):
         return self.question_text
 
+
 class DropDownOption(models.Model):
     drop_down_question = models.ForeignKey(DropDownQuestion, on_delete=models.CASCADE, related_name='options')
     text = models.CharField(max_length=250)
@@ -119,6 +120,7 @@ class TextAnswerQuestion(Question):
     def __str__(self):
         return self.question_text
 
+
 # TODO - Float, Negative
 class NumberAnswerQuestion(Question):
     min = models.IntegerField(default=0, null=True, blank=True)
@@ -134,6 +136,7 @@ class NumberAnswerQuestion(Question):
 
     def __str__(self):
         return self.question_text
+
 
 class IntegerRangeQuestion(Question):
     ZERO_CHOICE = 0
@@ -159,6 +162,7 @@ class IntegerRangeQuestion(Question):
     def __str__(self):
         return self.question_text
 
+
 class IntegerSelectiveQuestion(Question):
     HEART = 'H'
     STAR = 'S'
@@ -183,6 +187,7 @@ class IntegerSelectiveQuestion(Question):
     def __str__(self):
         return self.question_text
 
+
 class PictureFieldQuestion(Question):
     answer = models.ImageField(null=True, blank=True, upload_to='images/')
 
@@ -193,6 +198,7 @@ class PictureFieldQuestion(Question):
     def __str__(self):
         return self.question_text
 
+
 class EmailFieldQuestion(Question):
     answer = models.EmailField(default='', null=True, blank=True, max_length=255)
 
@@ -202,6 +208,7 @@ class EmailFieldQuestion(Question):
 
     def __str__(self):
         return self.question_text
+
 
 class LinkQuestion(Question):
     answer = models.URLField(null=True, blank=True, max_length=255)
@@ -224,3 +231,4 @@ class FileQuestion(Question):
 
     def __str__(self):
         return self.question_text
+

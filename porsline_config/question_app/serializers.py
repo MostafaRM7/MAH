@@ -61,24 +61,29 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         if not additional_options and (nothing_selected or all_options):
             raise serializers.ValidationError(
                 {
-                    'additional_options': 'you cannot select any of all options or nothing selected with additional options false'},
+                    'additional_options':
+                        'you cannot select any of all options or nothing selected with additional options false'
+                },
                 status.HTTP_400_BAD_REQUEST
             )
-        if min_selected_options > max_selected_options:
-            raise serializers.ValidationError(
-                {'max_selected_options': 'min is bigger than max'},
-                status.HTTP_400_BAD_REQUEST
-            )
-        if selected_count > max_selected_options:
-            raise serializers.ValidationError(
-                {'max_selected_options': 'selected options are more than maximum value'},
-                status.HTTP_400_BAD_REQUEST
-            )
-        elif selected_count < min_selected_options:
-            raise serializers.ValidationError(
-                {'min_selected_options': 'selected options are less than minimum value'},
-                status.HTTP_400_BAD_REQUEST
-            )
+        if min_selected_options is not None and max_selected_options is not None:
+            if min_selected_options > max_selected_options:
+                raise serializers.ValidationError(
+                    {'max_selected_options': 'min is bigger than max'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            if selected_count > max_selected_options:
+                raise serializers.ValidationError(
+                    {'max_selected_options': 'selected options are more than maximum value'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            elif selected_count < min_selected_options:
+                raise serializers.ValidationError(
+                    {'min_selected_options': 'selected options are less than minimum value'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                pass
         return data
 
     def create(self, validated_data):
@@ -87,6 +92,28 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         for option_data in options_data:
             Option.objects.create(optional_question=optional_question, **option_data)
         return optional_question
+
+    def update(self, instance, validated_data):
+        options_data = validated_data.pop('options', None)
+        if options_data is not None:
+            options = instance.options.all()
+            options = {option.id: option for option in options}
+
+            for option_data in options_data:
+                option_id = option_data.get('id', None)
+                if option_id is None:
+                    Option.objects.create(optional_question=instance, **option_data)
+                else:
+                    option = options.pop(option_id, None)
+                    if option is not None:
+                        for attr, value in option_data.items():
+                            setattr(option, attr, value)
+                        option.save()
+
+            for option in options.values():
+                option.delete()
+
+        return super().update(instance, validated_data)
 
 
 class DropDownOptionSerializer(serializers.ModelSerializer):
@@ -117,21 +144,25 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
                 {'is_required': 'you cannot select nothing when is required is true'},
                 status.HTTP_400_BAD_REQUEST
             )
-        if selected_count > max_selected_options:
-            raise serializers.ValidationError(
-                {'max_selected_options': 'selected options are more than maximum value'},
-                status.HTTP_400_BAD_REQUEST
-            )
-        elif selected_count < min_selected_options:
-            raise serializers.ValidationError(
-                {'min_selected_options': 'selected options are less than minimum value'},
-                status.HTTP_400_BAD_REQUEST
-            )
-        if min_selected_options > max_selected_options:
-            raise serializers.ValidationError(
-                {'max_selected_options': 'min is bigger than max'},
-                status.HTTP_400_BAD_REQUEST
-            )
+        if min_selected_options is not None and max_selected_options is not None:
+
+            if selected_count > max_selected_options:
+                raise serializers.ValidationError(
+                    {'max_selected_options': 'selected options are more than maximum value'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            elif selected_count < min_selected_options:
+                raise serializers.ValidationError(
+                    {'min_selected_options': 'selected options are less than minimum value'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            if min_selected_options > max_selected_options:
+                raise serializers.ValidationError(
+                    {'max_selected_options': 'min is bigger than max'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            pass
         return data
 
     def create(self, validated_data):
@@ -140,6 +171,28 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         for option_data in options_data:
             DropDownOption.objects.create(drop_down__question=drop_down_question, **option_data)
         return drop_down_question
+
+    def update(self, instance, validated_data):
+        options_data = validated_data.pop('options', None)
+        if options_data is not None:
+            options = instance.options.all()
+            options = {option.id: option for option in options}
+
+            for option_data in options_data:
+                option_id = option_data.get('id', None)
+                if option_id is None:
+                    DropDownOption.objects.create(drop_down_question=instance, **option_data)
+                else:
+                    option = options.pop(option_id, None)
+                    if option is not None:
+                        for attr, value in option_data.items():
+                            setattr(option, attr, value)
+                        option.save()
+
+            for option in options.values():
+                option.delete()
+
+        return super().update(instance, validated_data)
 
 
 class TextAnswerQuestionSerializer(serializers.ModelSerializer):
@@ -275,3 +328,13 @@ class FileQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileQuestion
         fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'answer', 'max_volume')
+
+    def validate(self, data):
+        max_volume = data['max_volume']
+        answer = data['answer']
+        if answer.size > max_volume:
+            raise serializers.ValidationError(
+                {'max_volume': 'answer volume is bigger than maximum volume'},
+                status.HTTP_400_BAD_REQUEST
+            )
+        return data
