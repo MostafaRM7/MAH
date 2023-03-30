@@ -261,13 +261,29 @@ class FolderSerializer(serializers.ModelSerializer):
 
 class QuestionnaireSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
-    folder = FolderSerializer()
-    owner = QuestionnaireOwnerSerializer()
+    folder = serializers.PrimaryKeyRelatedField(queryset=Folder.objects.all())
+    owner = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
 
     class Meta:
         model = Questionnaire
         fields = ('id', 'name', 'is_active', 'has_timer', 'has_auto_start', 'pub_date', 'end_date', 'timer', 'folder',
                   'owner', 'uuid', 'questions')
+
+    def create(self, validated_data):
+        questions_data = validated_data.pop('questions')
+        questionnaire = Questionnaire.objects.create(**validated_data)
+        for question_data in questions_data:
+            Question.objects.create(questionnaire=questionnaire, **question_data)
+        return questionnaire
+
+    def update(self, instance, validated_data):
+        questions_data = validated_data.pop('questions', None)
+        if questions_data is not None:
+            # first delete all objects than create the new ones
+            Question.objects.filter(questionnaire=instance).delete()
+            for question_data in questions_data:
+                Question.objects.create(**question_data, questionnaire=instance)
+        return super().update(instance, validated_data)
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
@@ -281,7 +297,8 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         model = IntegerRangeQuestion
         fields = (
             'id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'min', 'max', 'min_label',
-            'mid_label', 'max_label', 'answer')
+            'mid_label', 'max_label', 'answer'
+        )
 
     def validate(self, data):
         max_value = data['max']
