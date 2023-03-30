@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework import status
 from .models import *
@@ -86,6 +87,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                 pass
         return data
 
+    @transaction.atomic()
     def create(self, validated_data):
         options_data = validated_data.pop('options')
         optional_question = OptionalQuestion.objects.create(**validated_data)
@@ -93,6 +95,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             Option.objects.create(optional_question=optional_question, **option_data)
         return optional_question
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         options_data = validated_data.pop('options', None)
         if options_data is not None:
@@ -165,6 +168,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
             pass
         return data
 
+    @transaction.atomic()
     def create(self, validated_data):
         options_data = validated_data.pop('options')
         drop_down_question = DropDownOption.objects.create(**validated_data)
@@ -172,6 +176,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
             DropDownOption.objects.create(drop_down__question=drop_down_question, **option_data)
         return drop_down_question
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         options_data = validated_data.pop('options', None)
         if options_data is not None:
@@ -269,6 +274,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'is_active', 'has_timer', 'has_auto_start', 'pub_date', 'end_date', 'timer', 'folder',
                   'owner', 'uuid', 'questions')
 
+    @transaction.atomic()
     def create(self, validated_data):
         questions_data = validated_data.pop('questions')
         questionnaire = Questionnaire.objects.create(**validated_data)
@@ -276,6 +282,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
             Question.objects.create(questionnaire=questionnaire, **question_data)
         return questionnaire
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         questions_data = validated_data.pop('questions', None)
         if questions_data is not None:
