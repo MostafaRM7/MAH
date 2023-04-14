@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinLengthValidator, MaxLengthValidator, MaxValueValidator, MinValueValidator
-from uuid import uuid4
 from django.db import models
+from uuid import uuid4
 
 
 class Folder(models.Model):
@@ -20,7 +19,7 @@ class Questionnaire(models.Model):
     has_auto_start = models.BooleanField(default=False)
     pub_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
-    timer = models.PositiveBigIntegerField(null=True, blank=True)  # Seconds
+    timer = models.DurationField(null=True, blank=True)
     folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='questionnaires')
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='questionnaires')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
@@ -41,26 +40,64 @@ class Question(models.Model):
         ('email_field', 'Email Field'),
         ('link', 'Link'),
         ('file', 'File'),
+        ('group', 'Group'),
     )
+    title = models.CharField(max_length=255)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions')
     question_text = models.TextField()
     question_type = models.CharField(max_length=50, choices=QUESTION_TYPES)
     is_required = models.BooleanField(default=False)
-    media = models.FileField(upload_to='question_media', null=True, blank=True)
+    media = models.FileField(upload_to='uploads/question_media', null=True, blank=True)
 
     def __str__(self):
         return f'{self.questionnaire} - {self.question_type}'
 
 
+class TextAnswer(models.Model):
+    question = models.ForeignKey('TextAnswerQuestion', on_delete=models.CASCADE, related_name='answers')
+    answer = models.TextField()
+
+
+class LinkAnswer(models.Model):
+    question = models.ForeignKey('LinkQuestion', on_delete=models.CASCADE, related_name='answers')
+    answer = models.URLField()
+
+
+class FileAnswer(models.Model):
+    question = models.ForeignKey('FileQuestion', on_delete=models.CASCADE, related_name='answers')
+    answer = models.FileField(upload_to='uploads/files')
+
+
+class EmailAnswer(models.Model):
+    question = models.ForeignKey('EmailFieldQuestion', on_delete=models.CASCADE, related_name='answers')
+    answer = models.EmailField()
+
+
+class NumberAnswer(models.Model):
+    question = models.ForeignKey('NumberAnswerQuestion', on_delete=models.CASCADE, related_name='answers')
+    answer = models.IntegerField()
+
+
+class PictureAnswer(models.Model):
+    question = models.ForeignKey('PictureFieldQuestion', on_delete=models.CASCADE, related_name='answers')
+    answer = models.ImageField(upload_to='uploads/images')
+
+
+class IntegerRangeAnswer(models.Model):
+    question = models.ForeignKey('IntegerRangeQuestion', on_delete=models.CASCADE, related_name='answers')
+    answer = models.IntegerField()
+
+
+class IntegerSelectiveAnswer(models.Model):
+    question = models.ForeignKey('IntegerSelectiveQuestion', on_delete=models.CASCADE, related_name='answers')
+    answer = models.IntegerField()
+
+
 class OptionalQuestion(Question):
     multiple_choice = models.BooleanField(default=False)
     additional_options = models.BooleanField(default=False)
-
-    # If multiple_choice is True, then max_selected_options and min_selected_options will be used
     max_selected_options = models.IntegerField(null=True, blank=True)
     min_selected_options = models.IntegerField(null=True, blank=True)
-
-    # If additional_options is True, then all_options and nothing_selected will be used
     all_options = models.BooleanField(default=False, null=True, blank=True)
     nothing_selected = models.BooleanField(default=False, null=True, blank=True)
 
@@ -75,16 +112,18 @@ class OptionalQuestion(Question):
 class Option(models.Model):
     optional_question = models.ForeignKey(OptionalQuestion, on_delete=models.CASCADE, related_name='options')
     text = models.CharField(max_length=250)
-    is_selected = models.BooleanField(default=False, null=True, blank=True)
 
     def __str__(self):
         return f'{self.optional_question} - {self.text}'
 
 
+class OptionSelection(models.Model):
+    option = models.ForeignKey('Option', on_delete=models.CASCADE, related_name='selections')
+    is_selected = models.BooleanField(default=False)
+
+
 class DropDownQuestion(Question):
     multiple_choice = models.BooleanField(default=False)
-
-    # If multiple_choice is True, then max_selected_options and min_selected_options will be used
     max_selected_options = models.PositiveIntegerField(null=True, blank=True)
     min_selected_options = models.PositiveIntegerField(null=True, blank=True)
 
@@ -99,19 +138,19 @@ class DropDownQuestion(Question):
 class DropDownOption(models.Model):
     drop_down_question = models.ForeignKey(DropDownQuestion, on_delete=models.CASCADE, related_name='options')
     text = models.CharField(max_length=250)
-    is_selected = models.BooleanField(default=False, null=True, blank=True)
 
     def __str__(self):
         return f'{self.drop_down_question} - {self.text}'
 
 
+class DropDownSelection(models.Model):
+    drop_down_option = models.ForeignKey('DropDownOption', on_delete=models.CASCADE, related_name='selections')
+    is_selected = models.BooleanField(default=False)
+
+
 class TextAnswerQuestion(Question):
     min = models.PositiveIntegerField(default=10, null=True, blank=True)
     max = models.PositiveIntegerField(default=1000, null=True, blank=True)
-    answer = models.TextField(null=True, validators=[
-        MinLengthValidator(10),
-        MaxLengthValidator(1000)
-    ])
 
     def save(self, *args, **kwargs):
         self.question_type = 'text_answer'
@@ -121,14 +160,9 @@ class TextAnswerQuestion(Question):
         return self.question_text
 
 
-# TODO - Float, Negative
 class NumberAnswerQuestion(Question):
     min = models.IntegerField(default=0, null=True, blank=True)
     max = models.IntegerField(default=1000, null=True, blank=True)
-    answer = models.IntegerField(null=True, validators=[
-        MinValueValidator(0),
-        MaxValueValidator(1000)
-    ])
 
     def save(self, *args, **kwargs):
         self.question_type = 'number_answer'
@@ -150,10 +184,6 @@ class IntegerRangeQuestion(Question):
     min_label = models.CharField(max_length=50, null=True, blank=True)
     mid_label = models.CharField(max_length=50, null=True, blank=True)
     max_label = models.CharField(max_length=50, null=True, blank=True)
-    answer = models.PositiveIntegerField(null=True, blank=True, validators=[
-        MinValueValidator(1),
-        MaxValueValidator(5)
-    ])
 
     def save(self, *args, **kwargs):
         self.question_type = 'integer_range'
@@ -176,9 +206,6 @@ class IntegerSelectiveQuestion(Question):
     ]
     shape = models.CharField(choices=STYLE_CHOICES, default=STAR, max_length=2)
     max = models.PositiveIntegerField(default=5, null=True, blank=True)
-    answer = models.PositiveIntegerField(validators=[
-        MaxValueValidator(5)
-    ])
 
     def save(self, *args, **kwargs):
         self.question_type = 'integer_selective'
@@ -200,8 +227,6 @@ class PictureFieldQuestion(Question):
 
 
 class EmailFieldQuestion(Question):
-    answer = models.EmailField(default='', null=True, blank=True, max_length=255)
-
     def save(self, *args, **kwargs):
         self.question_type = 'email_field'
         super(EmailFieldQuestion, self).save(*args, **kwargs)
@@ -211,7 +236,6 @@ class EmailFieldQuestion(Question):
 
 
 class LinkQuestion(Question):
-    answer = models.URLField(null=True, blank=True, max_length=255)
 
     def save(self, *args, **kwargs):
         self.question_type = 'link'
@@ -222,7 +246,6 @@ class LinkQuestion(Question):
 
 
 class FileQuestion(Question):
-    answer = models.FileField(null=True, blank=True, upload_to='files/')
     max_volume = models.PositiveIntegerField(default=5, null=True, blank=True)  # In MB
 
     def save(self, *args, **kwargs):
@@ -231,4 +254,3 @@ class FileQuestion(Question):
 
     def __str__(self):
         return self.question_text
-
