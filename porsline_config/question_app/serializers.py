@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework import status
+
 from .models import *
 
 
@@ -63,7 +64,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OptionalQuestion
-        fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'multiple_choice',
+        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'multiple_choice',
                   'max_selected_options', 'min_selected_options', 'additional_options', 'all_options',
                   'nothing_selected', 'options')
 
@@ -123,9 +124,13 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         options_data = validated_data.pop('options')
         optional_question = OptionalQuestion.objects.create(**validated_data)
         for option_data in options_data:
-            Option.objects.create(optional_question=optional_question, **option_data)
+            selections_data = option_data.pop('selections')
+            option = Option.objects.create(optional_question=optional_question, **option_data)
+            for selection_data in selections_data:
+                OptionSelection.objects.create(option=option, **selection_data)
         return optional_question
 
+    # TODO - Need rework
     @transaction.atomic()
     def update(self, instance, validated_data):
         options_data = validated_data.pop('options', None)
@@ -136,7 +141,10 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             for option_data in options_data:
                 option_id = option_data.get('id', None)
                 if option_id is None:
-                    Option.objects.create(optional_question=instance, **option_data)
+                    selections_data = option_data.pop('selections')
+                    option = Option.objects.create(optional_question=instance, **option_data)
+                    for selection_data in selections_data:
+                        OptionSelection.objects.create(option=option, **selection_data)
                 else:
                     option = options.pop(option_id, None)
                     if option is not None:
@@ -191,7 +199,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DropDownQuestion
-        fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'multiple_choice',
+        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'multiple_choice',
                   'max_selected_options', 'min_selected_options', 'options')
 
     def validate(self, data):
@@ -201,7 +209,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         selected_count = 0
         for option in data.get('options'):
             for select in option.get('selections'):
-                if select.is_selected:
+                if select.get('is_selected'):
                     selected_count += 1
 
         if is_required and selected_count == 0:
@@ -233,11 +241,15 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
     @transaction.atomic()
     def create(self, validated_data):
         options_data = validated_data.pop('options')
-        drop_down_question = DropDownOption.objects.create(**validated_data)
+        drop_down_question = DropDownQuestion.objects.create(**validated_data)
         for option_data in options_data:
-            DropDownOption.objects.create(drop_down__question=drop_down_question, **option_data)
+            selections_data = option_data.pop('selections')
+            drop_down_option = DropDownOption.objects.create(drop_down_question=drop_down_question, **option_data)
+            for selection_data in selections_data:
+                DropDownSelection.objects.create(drop_down_option=drop_down_option, **selection_data)
         return drop_down_question
 
+    # TODO - Need rework
     @transaction.atomic()
     def update(self, instance, validated_data):
         options_data = validated_data.pop('options', None)
@@ -248,7 +260,10 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
             for option_data in options_data:
                 option_id = option_data.get('id', None)
                 if option_id is None:
-                    DropDownOption.objects.create(drop_down_question=instance, **option_data)
+                    selections_data = option_data.pop('selections')
+                    drop_down_option = DropDownOption.objects.create(drop_down_question=instance, **option_data)
+                    for selection_data in selections_data:
+                        DropDownSelection.objects.create(drop_down_option=drop_down_option, **selection_data)
                 else:
                     option = options.pop(option_id, None)
                     if option is not None:
@@ -273,7 +288,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TextAnswerQuestion
-        fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'min', 'max', 'answers')
+        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'min', 'max', 'answers')
 
     def validate(self, data):
         max_len = data.get('max')
@@ -337,7 +352,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NumberAnswerQuestion
-        fields = ('id', 'questionnaire', 'question_text', 'answers', 'question_type', 'is_required', 'min', 'max')
+        fields = ('id', 'questionnaire', 'title', 'question_text', 'answers', 'question_type', 'is_required', 'min', 'max')
 
     def validate(self, data):
         max_value = data.get('max')
@@ -397,7 +412,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'media')
+        fields = '__all__'
 
 
 class FolderSerializer(serializers.ModelSerializer):
@@ -426,6 +441,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
             Question.objects.create(questionnaire=questionnaire, **question_data)
         return questionnaire
 
+    # TODO
     @transaction.atomic()
     def update(self, instance, validated_data):
         questions_data = validated_data.pop('questions', None)
@@ -444,9 +460,11 @@ class IntegerSelectiveAnswerSerializer(serializers.ModelSerializer):
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
+    answers = IntegerSelectiveAnswerSerializer(many=True)
+
     class Meta:
         model = IntegerSelectiveQuestion
-        fields = ('id', 'question_text', 'shape', 'max', 'answer')
+        fields = ('id', 'question_text', 'title', 'shape', 'max', 'answers')
 
     @transaction.atomic()
     def create(self, validated_data):
@@ -481,67 +499,267 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-# From here
+class IntegerRangeAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IntegerRangeAnswer
+        fields = ('id', 'answer')
+
+
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
+    answers = IntegerRangeAnswerSerializer(many=True)
+
     class Meta:
         model = IntegerRangeQuestion
         fields = (
-            'id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'min', 'max', 'min_label',
-            'mid_label', 'max_label', 'answer'
+            'id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'min', 'max', 'min_label',
+            'mid_label', 'max_label', 'answers'
         )
 
     def validate(self, data):
-        max_value = data['max']
-        min_value = data['min']
-        answer = data['answer']
-
-        if answer > max_value:
-            raise serializers.ValidationError(
-                {'max': 'answer value is bigger than maximum value'},
-                status.HTTP_400_BAD_REQUEST
-            )
-        if answer < min_value:
-            raise serializers.ValidationError(
-                {'min': 'answer value is less than maximum value'},
-                status.HTTP_400_BAD_REQUEST
-            )
-        if max_value < min_value:
-            raise serializers.ValidationError(
-                {'max': 'min is bigger than max'},
-                status.HTTP_400_BAD_REQUEST
-            )
+        max_value = data.get('max')
+        min_value = data.get('min')
+        answers = data.get('answers')
+        for answer in answers:
+            if answer > max_value:
+                raise serializers.ValidationError(
+                    {'max': 'answer value is bigger than maximum value'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            if answer < min_value:
+                raise serializers.ValidationError(
+                    {'min': 'answer value is less than maximum value'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            if max_value < min_value:
+                raise serializers.ValidationError(
+                    {'max': 'min is bigger than max'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         return data
+
+    @transaction.atomic()
+    def create(self, validated_data):
+        answers_data = validated_data.pop('answers')
+        question = IntegerRangeQuestion.objects.create(**validated_data)
+        if answers_data is not None:
+            for answer_data in answers_data:
+                IntegerRangeAnswer.objects.create(question=question, **answer_data)
+        return question
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop('answers', None)
+        if answers_data is not None:
+            answers = instance.answers.all()
+            answers = {answer.id: answer for answer in answers}
+
+            for answer_data in answers_data:
+                answer_id = answer_data.get('id', None)
+                if answer_id is None:
+                    IntegerRangeAnswer.objects.create(question=instance, **answer_data)
+                else:
+                    answer = answers.pop(answer_id, None)
+                    if answer is not None:
+                        for attr, value in answer_data.items():
+                            setattr(answer, attr, value)
+                        answer.save()
+
+            for answer in answers.values():
+                answer.delete()
+
+        return super().update(instance, validated_data)
+
+
+class PictureFieldAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PictureAnswer
+        fields = ('id', 'answer')
 
 
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
+    answers = PictureFieldAnswerSerializer(many=True)
+
     class Meta:
         model = PictureFieldQuestion
-        fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'answer')
+        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'answers')
+
+    @transaction.atomic()
+    def create(self, validated_data):
+        answers_data = validated_data.pop('answers')
+        question = PictureFieldQuestion.objects.create(**validated_data)
+        if answers_data is not None:
+            for answer_data in answers_data:
+                PictureAnswer.objects.create(question=question, **answer_data)
+        return question
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop('answers', None)
+        if answers_data is not None:
+            answers = instance.answers.all()
+            answers = {answer.id: answer for answer in answers}
+
+            for answer_data in answers_data:
+                answer_id = answer_data.get('id', None)
+                if answer_id is None:
+                    PictureAnswer.objects.create(question=instance, **answer_data)
+                else:
+                    answer = answers.pop(answer_id, None)
+                    if answer is not None:
+                        for attr, value in answer_data.items():
+                            setattr(answer, attr, value)
+                        answer.save()
+
+            for answer in answers.values():
+                answer.delete()
+
+        return super().update(instance, validated_data)
+
+
+class EmailFieldAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmailAnswer
+        fields = ('id', 'answer')
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
+    answers = EmailFieldAnswerSerializer(many=True)
+
     class Meta:
         model = EmailFieldQuestion
-        fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'answer')
+        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'answers')
+
+    @transaction.atomic()
+    def create(self, validated_data):
+        answers_data = validated_data.pop('answers')
+        question = EmailFieldQuestion.objects.create(**validated_data)
+        if answers_data is not None:
+            for answer_data in answers_data:
+                EmailAnswer.objects.create(question=question, **answer_data)
+        return question
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop('answers', None)
+        if answers_data is not None:
+            answers = instance.answers.all()
+            answers = {answer.id: answer for answer in answers}
+
+            for answer_data in answers_data:
+                answer_id = answer_data.get('id', None)
+                if answer_id is None:
+                    EmailAnswer.objects.create(question=instance, **answer_data)
+                else:
+                    answer = answers.pop(answer_id, None)
+                    if answer is not None:
+                        for attr, value in answer_data.items():
+                            setattr(answer, attr, value)
+                        answer.save()
+
+            for answer in answers.values():
+                answer.delete()
+
+        return super().update(instance, validated_data)
+
+
+class LinkAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LinkAnswer
+        fields = ('id', 'answer')
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
+    answers = LinkAnswerSerializer(many=True)
+
     class Meta:
         model = LinkQuestion
-        fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'answer')
+        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'answers')
+
+    @transaction.atomic()
+    def create(self, validated_data):
+        answers_data = validated_data.pop('answers')
+        question = LinkQuestion.objects.create(**validated_data)
+        if answers_data is not None:
+            for answer_data in answers_data:
+                LinkAnswer.objects.create(question=question, **answer_data)
+        return question
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop('answers', None)
+        if answers_data is not None:
+            answers = instance.answers.all()
+            answers = {answer.id: answer for answer in answers}
+
+            for answer_data in answers_data:
+                answer_id = answer_data.get('id', None)
+                if answer_id is None:
+                    LinkAnswer.objects.create(question=instance, **answer_data)
+                else:
+                    answer = answers.pop(answer_id, None)
+                    if answer is not None:
+                        for attr, value in answer_data.items():
+                            setattr(answer, attr, value)
+                        answer.save()
+
+            for answer in answers.values():
+                answer.delete()
+
+        return super().update(instance, validated_data)
+
+
+class FileAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FileAnswer
+        fields = ('id', 'answer')
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
+    answers = FileAnswerSerializer(many=True)
+
     class Meta:
         model = FileQuestion
-        fields = ('id', 'questionnaire', 'question_text', 'question_type', 'is_required', 'answer', 'max_volume')
+        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'answers', 'max_volume')
 
     def validate(self, data):
-        max_volume = data['max_volume']
-        answer = data['answer']
-        if answer.size > max_volume:
-            raise serializers.ValidationError(
-                {'max_volume': 'answer volume is bigger than maximum volume'},
-                status.HTTP_400_BAD_REQUEST
-            )
+        max_volume = data.get('max_volume')
+        answers = data.get('answers')
+        for answer in answers:
+            if answer.size > max_volume:
+                raise serializers.ValidationError(
+                    {'max_volume': 'answer volume is bigger than maximum volume'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         return data
+
+    @transaction.atomic()
+    def create(self, validated_data):
+        answers_data = validated_data.pop('answers')
+        question = FileQuestion.objects.create(**validated_data)
+        if answers_data is not None:
+            for answer_data in answers_data:
+                FileAnswer.objects.create(question=question, **answer_data)
+        return question
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop('answers', None)
+        if answers_data is not None:
+            answers = instance.answers.all()
+            answers = {answer.id: answer for answer in answers}
+
+            for answer_data in answers_data:
+                answer_id = answer_data.get('id', None)
+                if answer_id is None:
+                    FileAnswer.objects.create(question=instance, **answer_data)
+                else:
+                    answer = answers.pop(answer_id, None)
+                    if answer is not None:
+                        for attr, value in answer_data.items():
+                            setattr(answer, attr, value)
+                        answer.save()
+
+            for answer in answers.values():
+                answer.delete()
+
+        return super().update(instance, validated_data)
