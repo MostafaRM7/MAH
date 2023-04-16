@@ -1,32 +1,8 @@
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework import status
-
-from .models import *
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ('id', 'username', 'email', 'password', 'is_active', 'is_staff', 'is_superuser', 'last_login',
-                  'date_joined', 'groups', 'user_permissions')
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        user = get_user_model().objects.create_user(**validated_data)
-        return user
-
-
-class QuestionnaireOwnerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ('id', 'username')
-
-
-class OptionSelectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OptionSelection
-        fields = ('id', 'is_selected')
+from .answer_serializers import *
+from ..models import *
 
 
 class OptionSerializer(serializers.ModelSerializer):
@@ -158,12 +134,6 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class DropDownSelectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DropDownSelection
-        fields = ('id', 'is_selected')
-
-
 class DropDownOptionSerializer(serializers.ModelSerializer):
     selections = DropDownSelectionSerializer(many=True)
 
@@ -277,18 +247,13 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class TextAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TextAnswer
-        fields = ('id', 'answer')
-
-
 class TextAnswerQuestionSerializer(serializers.ModelSerializer):
     answers = TextAnswerSerializer(many=True)
 
     class Meta:
         model = TextAnswerQuestion
-        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'min', 'max', 'answers')
+        fields = (
+            'id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'min', 'max', 'answers')
 
     def validate(self, data):
         max_len = data.get('max')
@@ -341,18 +306,13 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class NumberAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = NumberAnswer
-        fields = ('id', 'answer')
-
-
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
     answers = NumberAnswerSerializer(many=True)
 
     class Meta:
         model = NumberAnswerQuestion
-        fields = ('id', 'questionnaire', 'title', 'question_text', 'answers', 'question_type', 'is_required', 'min', 'max')
+        fields = (
+            'id', 'questionnaire', 'title', 'question_text', 'answers', 'question_type', 'is_required', 'min', 'max')
 
     def validate(self, data):
         max_value = data.get('max')
@@ -415,50 +375,6 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FolderSerializer(serializers.ModelSerializer):
-    questionnaires = serializers.StringRelatedField(many=True, read_only=True)
-
-    class Meta:
-        model = Folder
-        fields = ('id', 'name', 'questionnaires')
-
-
-class QuestionnaireSerializer(serializers.ModelSerializer):
-    questions = QuestionSerializer(many=True)
-    folder = serializers.PrimaryKeyRelatedField(queryset=Folder.objects.all())
-    owner = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
-
-    class Meta:
-        model = Questionnaire
-        fields = ('id', 'name', 'is_active', 'has_timer', 'has_auto_start', 'pub_date', 'end_date', 'timer', 'folder',
-                  'owner', 'uuid', 'questions')
-
-    @transaction.atomic()
-    def create(self, validated_data):
-        questions_data = validated_data.pop('questions')
-        questionnaire = Questionnaire.objects.create(**validated_data)
-        for question_data in questions_data:
-            Question.objects.create(questionnaire=questionnaire, **question_data)
-        return questionnaire
-
-    # TODO
-    @transaction.atomic()
-    def update(self, instance, validated_data):
-        questions_data = validated_data.pop('questions', None)
-        if questions_data is not None:
-            # first delete all objects than create the new ones
-            Question.objects.filter(questionnaire=instance).delete()
-            for question_data in questions_data:
-                Question.objects.create(**question_data, questionnaire=instance)
-        return super().update(instance, validated_data)
-
-
-class IntegerSelectiveAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IntegerSelectiveAnswer
-        fields = ('id', 'answer')
-
-
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
     answers = IntegerSelectiveAnswerSerializer(many=True)
 
@@ -497,12 +413,6 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
                 answer.delete()
 
         return super().update(instance, validated_data)
-
-
-class IntegerRangeAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IntegerRangeAnswer
-        fields = ('id', 'answer')
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
@@ -570,12 +480,6 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class PictureFieldAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PictureAnswer
-        fields = ('id', 'answer')
-
-
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
     answers = PictureFieldAnswerSerializer(many=True)
 
@@ -614,12 +518,6 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
                 answer.delete()
 
         return super().update(instance, validated_data)
-
-
-class EmailFieldAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EmailAnswer
-        fields = ('id', 'answer')
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
@@ -662,12 +560,6 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class LinkAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LinkAnswer
-        fields = ('id', 'answer')
-
-
 class LinkQuestionSerializer(serializers.ModelSerializer):
     answers = LinkAnswerSerializer(many=True)
 
@@ -708,18 +600,13 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class FileAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FileAnswer
-        fields = ('id', 'answer')
-
-
 class FileQuestionSerializer(serializers.ModelSerializer):
     answers = FileAnswerSerializer(many=True)
 
     class Meta:
         model = FileQuestion
-        fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'answers', 'max_volume')
+        fields = (
+            'id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'answers', 'max_volume')
 
     def validate(self, data):
         max_volume = data.get('max_volume')
