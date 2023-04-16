@@ -1,5 +1,6 @@
 from rest_framework import viewsets
-from .serializers import *
+from .serializers.serializers import *
+from .serializers.question_serializers import *
 from .models import *
 
 
@@ -109,5 +110,3 @@ class FileQuestionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = FileQuestion.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
-
-
