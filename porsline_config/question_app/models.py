@@ -53,46 +53,6 @@ class Question(models.Model):
         return f'{self.questionnaire} - {self.question_type}'
 
 
-class TextAnswer(models.Model):
-    question = models.ForeignKey('TextAnswerQuestion', on_delete=models.CASCADE, related_name='answers')
-    answer = models.TextField()
-
-
-class LinkAnswer(models.Model):
-    question = models.ForeignKey('LinkQuestion', on_delete=models.CASCADE, related_name='answers')
-    answer = models.URLField()
-
-
-class FileAnswer(models.Model):
-    question = models.ForeignKey('FileQuestion', on_delete=models.CASCADE, related_name='answers')
-    answer = models.FileField(upload_to='uploads/files')
-
-
-class EmailAnswer(models.Model):
-    question = models.ForeignKey('EmailFieldQuestion', on_delete=models.CASCADE, related_name='answers')
-    answer = models.EmailField()
-
-
-class NumberAnswer(models.Model):
-    question = models.ForeignKey('NumberAnswerQuestion', on_delete=models.CASCADE, related_name='answers')
-    answer = models.IntegerField()
-
-
-class PictureAnswer(models.Model):
-    question = models.ForeignKey('PictureFieldQuestion', on_delete=models.CASCADE, related_name='answers')
-    answer = models.ImageField(upload_to='uploads/images')
-
-
-class IntegerRangeAnswer(models.Model):
-    question = models.ForeignKey('IntegerRangeQuestion', on_delete=models.CASCADE, related_name='answers')
-    answer = models.IntegerField()
-
-
-class IntegerSelectiveAnswer(models.Model):
-    question = models.ForeignKey('IntegerSelectiveQuestion', on_delete=models.CASCADE, related_name='answers')
-    answer = models.IntegerField()
-
-
 class OptionalQuestion(Question):
     multiple_choice = models.BooleanField(default=False)
     additional_options = models.BooleanField(default=False)
@@ -117,11 +77,6 @@ class Option(models.Model):
         return f'{self.optional_question} - {self.text}'
 
 
-class OptionSelection(models.Model):
-    option = models.ForeignKey('Option', on_delete=models.CASCADE, related_name='selections')
-    is_selected = models.BooleanField(default=False)
-
-
 class DropDownQuestion(Question):
     multiple_choice = models.BooleanField(default=False)
     max_selected_options = models.PositiveIntegerField(null=True, blank=True)
@@ -141,11 +96,6 @@ class DropDownOption(models.Model):
 
     def __str__(self):
         return f'{self.drop_down_question} - {self.text}'
-
-
-class DropDownSelection(models.Model):
-    drop_down_option = models.ForeignKey('DropDownOption', on_delete=models.CASCADE, related_name='selections')
-    is_selected = models.BooleanField(default=False)
 
 
 class TextAnswerQuestion(Question):
@@ -254,3 +204,20 @@ class FileQuestion(Question):
 
     def __str__(self):
         return self.question_text
+
+
+class AnswerSet(models.Model):
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='answer_set')
+
+    def __str__(self):
+        return f'{self.questionnaire} Answer set'
+
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
+    answer_set = models.ForeignKey(AnswerSet, on_delete=models.CASCADE, related_name='answers')
+    answer = models.JSONField()
+    file = models.FileField(upload_to='files/', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.answer_set} - {self.question}'

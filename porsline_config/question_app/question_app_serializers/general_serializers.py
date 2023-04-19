@@ -1,4 +1,5 @@
 from .question_serializers import *
+from rest_framework import serializers
 from ..models import *
 
 
@@ -50,53 +51,53 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
                   'picture_field_questions', 'link_questions', 'file_questions', 'email_field_questions')
 
     def optional_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='optional').all()
-        optional_questions = OptionalQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.filter(question_type='optional')
+        optional_questions = OptionalQuestion.objects.filter(question_ptr__in=questions)
         return OptionalQuestionSerializer(optional_questions, many=True).data
 
     def drop_down_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='drop_down').all()
-        drop_down_questions = DropDownQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='drop_down')
+        drop_down_questions = DropDownQuestion.objects.filter(question_ptr__in=questions)
         return DropDownQuestionSerializer(drop_down_questions, many=True).data
 
     def text_answer_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='text_answer').all()
-        text_answer_questions = TextAnswerQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='text_answer')
+        text_answer_questions = TextAnswerQuestion.objects.filter(question_ptr__in=questions)
         return TextAnswerQuestionSerializer(text_answer_questions, many=True).data
 
     def number_answer_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='number_answer').all()
-        number_answer_questions = NumberAnswerQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='number_answer')
+        number_answer_questions = NumberAnswerQuestion.objects.filter(question_ptr__in=questions)
         return NumberAnswerQuestionSerializer(number_answer_questions, many=True).data
 
     def integer_selective_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='integer_selective').all()
-        integer_selective_questions = IntegerSelectiveQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='integer_selective')
+        integer_selective_questions = IntegerSelectiveQuestion.objects.filter(question_ptr__in=questions)
         return IntegerSelectiveQuestionSerializer(integer_selective_questions, many=True).data
 
     def integer_range_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='integer_range').all()
-        integer_range_questions = IntegerRangeQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='integer_range')
+        integer_range_questions = IntegerRangeQuestion.objects.filter(question_ptr__in=questions)
         return IntegerRangeQuestionSerializer(integer_range_questions, many=True).data
 
     def picture_field_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='picture_field').all()
-        picture_field_questions = PictureFieldQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='picture_field')
+        picture_field_questions = PictureFieldQuestion.objects.filter(question_ptr__in=questions)
         return PictureFieldQuestionSerializer(picture_field_questions, many=True).data
 
     def link_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='link').all()
-        link_questions = LinkQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='link')
+        link_questions = LinkQuestion.objects.filter(question_ptr__in=questions)
         return LinkQuestionSerializer(link_questions, many=True).data
 
     def file_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='file_field').all()
-        file_field_questions = FileQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='file_field')
+        file_field_questions = FileQuestion.objects.filter(question_ptr__in=questions)
         return FileQuestionSerializer(file_field_questions, many=True).data
 
     def email_field_question_queryset(self, instance):
-        questions = instance.questions.all().filter(question_type='email').all()
-        email_questions = EmailFieldQuestion.objects.filter(question_ptr__in=questions).all()
+        questions = instance.questions.all().filter(question_type='email_field')
+        email_questions = EmailFieldQuestion.objects.filter(question_ptr__in=questions)
         return EmailFieldQuestionSerializer(email_questions, many=True).data
 
     @transaction.atomic()

@@ -6,6 +6,7 @@ router = routers.DefaultRouter()
 router.register('questionnaires', views.QuestionnaireViewSet)
 
 questionnaire_router = routers.NestedDefaultRouter(router, 'questionnaires', lookup='questionnaire')
+questionnaire_router.register('answer-set', views.AnswerSetViewSet, basename='answer-sets')
 questionnaire_router.register('questions', views.QuestionViewSet, basename='questions')
 questionnaire_router.register('optional-questions', views.OptionalQuestionViewSet, basename='optional_questions')
 questionnaire_router.register('dropdown-questions', views.DropDownQuestionViewSet, basename='dropdown_questions')

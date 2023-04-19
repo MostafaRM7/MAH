@@ -1,6 +1,8 @@
 from rest_framework import viewsets
-from .serializers.serializers import *
-from .serializers.question_serializers import *
+
+from .question_app_serializers.answer_serializers import AnswerSetSerializer
+from .question_app_serializers.general_serializers import *
+from .question_app_serializers.question_serializers import *
 from .models import *
 
 
@@ -110,3 +112,13 @@ class FileQuestionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = FileQuestion.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
+
+
+class AnswerSetViewSet(viewsets.ModelViewSet):
+    serializer_class = AnswerSetSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        queryset = AnswerSet.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        return queryset
+

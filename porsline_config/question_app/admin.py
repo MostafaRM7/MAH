@@ -14,6 +14,7 @@ admin.site.register(models.NumberAnswerQuestion)
 admin.site.register(models.EmailFieldQuestion)
 admin.site.register(models.LinkQuestion)
 admin.site.register(models.PictureFieldQuestion)
-# admin.site.register(models.NoAnswerQuestion)
+admin.site.register(models.Answer)
+admin.site.register(models.AnswerSet)
 admin.site.register(models.Folder)
 

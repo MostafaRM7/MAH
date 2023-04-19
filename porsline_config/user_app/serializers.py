@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from question_app.serializers.serializers import FolderSerializer
+from question_app.question_app_serializers.general_serializers import FolderSerializer
 
 
 class InternalUserSerializer(serializers.ModelSerializer):
