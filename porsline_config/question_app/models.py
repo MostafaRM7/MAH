@@ -210,7 +210,7 @@ class AnswerSet(models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='answer_set')
 
     def __str__(self):
-        return f'{self.questionnaire} Answer set'
+        return f'{self.questionnaire} - AnswerSet'
 
 
 class Answer(models.Model):

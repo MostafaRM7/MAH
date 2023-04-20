@@ -1,5 +1,4 @@
 from rest_framework import viewsets
-
 from .question_app_serializers.answer_serializers import AnswerSetSerializer
 from .question_app_serializers.general_serializers import *
 from .question_app_serializers.question_serializers import *
@@ -120,4 +119,3 @@ class AnswerSetViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = AnswerSet.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
-

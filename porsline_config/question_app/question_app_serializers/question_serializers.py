@@ -20,28 +20,11 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                   'nothing_selected', 'options')
 
     def validate(self, data):
-        is_required = data.get('is_required')
         additional_options = data.get('additional_options')
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
         all_options = data.get('all_options')
         nothing_selected = data.get('nothing_selected')
-        multiple_choice = data.get('multiple_choice')
-        selected_count = 0
-        for option in data.get('options'):
-            for select in option.get('selections'):
-                if select.is_selected:
-                    selected_count += 1
-        if not multiple_choice and selected_count > 1:
-            raise serializers.ValidationError(
-                {'multiple_choice': 'you cannot select more than one option when multiple choice is false'},
-                status.HTTP_400_BAD_REQUEST
-            )
-        if is_required and selected_count == 0:
-            raise serializers.ValidationError(
-                {'is_required': 'you cannot select nothing when is required is true'},
-                status.HTTP_400_BAD_REQUEST
-            )
         if not additional_options and (nothing_selected or all_options):
             raise serializers.ValidationError(
                 {
@@ -56,18 +39,6 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                     {'max_selected_options': 'min is bigger than max'},
                     status.HTTP_400_BAD_REQUEST
                 )
-            if selected_count > max_selected_options:
-                raise serializers.ValidationError(
-                    {'max_selected_options': 'selected options are more than maximum value'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            elif selected_count < min_selected_options:
-                raise serializers.ValidationError(
-                    {'min_selected_options': 'selected options are less than minimum value'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                pass
         return data
 
     @transaction.atomic()
