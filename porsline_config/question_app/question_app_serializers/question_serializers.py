@@ -74,8 +74,8 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         options_data = validated_data.pop('options')
         optional_question = OptionalQuestion.objects.create(**validated_data)
-        for option_data in options_data:
-            Option.objects.create(optional_question=optional_question, **option_data)
+        options = [Option(optional_question=optional_question, **option_data) for option_data in options_data]
+        Option.objects.bulk_create(options)
         return optional_question
 
     # TODO - Need rework
@@ -157,8 +157,8 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         options_data = validated_data.pop('options')
         drop_down_question = DropDownQuestion.objects.create(**validated_data)
-        for option_data in options_data:
-            DropDownOption.objects.create(drop_down_question=drop_down_question, **option_data)
+        options = [DropDownOption(optional_question=drop_down_question, **option_data) for option_data in options_data]
+        DropDownOption.objects.bulk_create(options)
         return drop_down_question
 
     # TODO - Need rework

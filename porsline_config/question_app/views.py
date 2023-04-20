@@ -18,7 +18,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Question.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
-        print(self.kwargs)
         return queryset
 
 

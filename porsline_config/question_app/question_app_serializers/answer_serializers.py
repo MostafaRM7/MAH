@@ -1,12 +1,11 @@
 from .general_serializers import *
 from ..models import *
-from rest_framework import serializers
 
 
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        exclude = ('question',)
+        fields = ('question', 'answer', 'file')
 
 
 class AnswerSetSerializer(serializers.ModelSerializer):
@@ -20,6 +19,6 @@ class AnswerSetSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         answers_data = validated_data.pop('answers')
         answer_set = AnswerSet.objects.create(**validated_data)
-        for answer_data in answers_data:
-            Answer.objects.create(answer_set=answer_set, **answer_data)
+        answers = [Answer(answer_set=answer_set, **answer_data) for answer_data in answers_data]
+        Answer.objects.bulk_create(answers)
         return answer_set
