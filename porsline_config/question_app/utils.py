@@ -1,5 +1,4 @@
 import re
-
 import jdatetime
 
 
@@ -60,3 +59,8 @@ def is_jalali_date(date):
         return True
     except ValueError:
         return False
+
+
+def is_numeric(string):
+    pattern = '^[0-9]+$'
+    return bool(re.match(pattern, string))

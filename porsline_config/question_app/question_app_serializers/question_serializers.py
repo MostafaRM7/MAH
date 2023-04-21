@@ -30,14 +30,15 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {
                     'additional_options':
-                        'you cannot select any of all options or nothing selected with additional options false'
+                        'برای اضافه کردن گزینه همه گزینه ها یا گزینه هیچ کدام ابتدا باید گزینه های اضافی را فعال کنید'
                 },
                 status.HTTP_400_BAD_REQUEST
             )
         if min_selected_options is not None and max_selected_options is not None:
             if min_selected_options > max_selected_options:
                 raise serializers.ValidationError(
-                    {'max_selected_options': 'min is bigger than max'},
+                    {
+                        'max_selected_options': 'مقدار حداقل گزینه های انتخابی نمی تواند از حداکثر گزینه های انتحابی بیشتر باشد'},
                     status.HTTP_400_BAD_REQUEST
                 )
         return data
@@ -95,7 +96,8 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         if min_selected_options is not None and max_selected_options is not None:
             if min_selected_options > max_selected_options:
                 raise serializers.ValidationError(
-                    {'max_selected_options': 'min is bigger than max'},
+                    {
+                        'max_selected_options': 'مقدار حداقل گزینه های انتخابی نمی تواند از حداکثر گزینه های انتحابی بیشتر باشد'},
                     status.HTTP_400_BAD_REQUEST
                 )
         else:
@@ -148,15 +150,9 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
 
         if max_len < min_len:
             raise serializers.ValidationError(
-                {'max': 'min is bigger than max'},
+                {'max': 'مقدار حداقل طول پاسخ نمی تواند از حداکثر طول پاسخ بیشتر باشد'},
                 status.HTTP_400_BAD_REQUEST
             )
-        for answer in answers:
-            if len(answer) < min_len or len(answer) > max_len:
-                raise serializers.ValidationError(
-                    {'answer': 'answer length is not in range'},
-                    status.HTTP_400_BAD_REQUEST
-                )
         return data
 
 
@@ -171,7 +167,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         min_value = data.get('min')
         if max_value < min_value:
             raise serializers.ValidationError(
-                {'max': 'min is bigger than max'},
+                {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باشد'},
                 status.HTTP_400_BAD_REQUEST
             )
         return data
@@ -202,7 +198,7 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         min_value = data.get('min')
         if max_value < min_value:
             raise serializers.ValidationError(
-                {'max': 'min is bigger than max'},
+                {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باش'},
                 status.HTTP_400_BAD_REQUEST
             )
         return data
@@ -231,14 +227,3 @@ class FileQuestionSerializer(serializers.ModelSerializer):
         model = FileQuestion
         fields = (
             'id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'max_volume')
-
-    def validate(self, data):
-        max_volume = data.get('max_volume')
-        answers = data.get('answers')
-        for answer in answers:
-            if answer.size > max_volume:
-                raise serializers.ValidationError(
-                    {'max_volume': 'answer volume is bigger than maximum volume'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-        return data
