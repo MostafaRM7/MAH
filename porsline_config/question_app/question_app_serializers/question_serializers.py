@@ -1,6 +1,7 @@
 from django.db import transaction
-from rest_framework import status
 from rest_framework import serializers
+from rest_framework import status
+
 from ..models import *
 
 
@@ -91,30 +92,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
-        is_required = data.get('is_required')
-        selected_count = 0
-        for option in data.get('options'):
-            for select in option.get('selections'):
-                if select.get('is_selected'):
-                    selected_count += 1
-
-        if is_required and selected_count == 0:
-            raise serializers.ValidationError(
-                {'is_required': 'you cannot select nothing when is required is true'},
-                status.HTTP_400_BAD_REQUEST
-            )
         if min_selected_options is not None and max_selected_options is not None:
-
-            if selected_count > max_selected_options:
-                raise serializers.ValidationError(
-                    {'max_selected_options': 'selected options are more than maximum value'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            elif selected_count < min_selected_options:
-                raise serializers.ValidationError(
-                    {'min_selected_options': 'selected options are less than minimum value'},
-                    status.HTTP_400_BAD_REQUEST
-                )
             if min_selected_options > max_selected_options:
                 raise serializers.ValidationError(
                     {'max_selected_options': 'min is bigger than max'},
@@ -158,11 +136,10 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
 
 
 class TextAnswerQuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = TextAnswerQuestion
         fields = (
-            'id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required', 'min', 'max')
+            'id', 'questionnaire', 'title', 'question_text', 'pattern', 'question_type', 'is_required', 'min', 'max')
 
     def validate(self, data):
         max_len = data.get('max')
@@ -184,7 +161,6 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
 
 
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = NumberAnswerQuestion
         fields = (
@@ -193,23 +169,11 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         max_value = data.get('max')
         min_value = data.get('min')
-        answers = data.get('answers')
-        for answer in answers:
-            if answer > max_value:
-                raise serializers.ValidationError(
-                    {'max': 'answer value is bigger than maximum value'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            if answer < min_value:
-                raise serializers.ValidationError(
-                    {'min': 'answer value is less than maximum value'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            if max_value < min_value:
-                raise serializers.ValidationError(
-                    {'max': 'min is bigger than max'},
-                    status.HTTP_400_BAD_REQUEST
-                )
+        if max_value < min_value:
+            raise serializers.ValidationError(
+                {'max': 'min is bigger than max'},
+                status.HTTP_400_BAD_REQUEST
+            )
         return data
 
 
@@ -220,14 +184,12 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = IntegerSelectiveQuestion
         fields = ('id', 'question_text', 'title', 'shape', 'max')
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = IntegerRangeQuestion
         fields = (
@@ -238,49 +200,33 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         max_value = data.get('max')
         min_value = data.get('min')
-        answers = data.get('answers')
-        for answer in answers:
-            if answer > max_value:
-                raise serializers.ValidationError(
-                    {'max': 'answer value is bigger than maximum value'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            if answer < min_value:
-                raise serializers.ValidationError(
-                    {'min': 'answer value is less than maximum value'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            if max_value < min_value:
-                raise serializers.ValidationError(
-                    {'max': 'min is bigger than max'},
-                    status.HTTP_400_BAD_REQUEST
-                )
+        if max_value < min_value:
+            raise serializers.ValidationError(
+                {'max': 'min is bigger than max'},
+                status.HTTP_400_BAD_REQUEST
+            )
         return data
 
 
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = PictureFieldQuestion
         fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required')
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = EmailFieldQuestion
         fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required')
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = LinkQuestion
         fields = ('id', 'questionnaire', 'title', 'question_text', 'question_type', 'is_required')
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = FileQuestion
         fields = (

@@ -99,6 +99,18 @@ class DropDownOption(models.Model):
 
 
 class TextAnswerQuestion(Question):
+    PATTERNS = (
+        ('free', 'Free Text'),
+        ('jalali_date', 'Jalali Date'),
+        ('gregorian_date', 'Gregorian Date'),
+        ('mobile_number', 'Mobile Number'),
+        ('phone_number', 'Phone Number'),
+        ('number_character', 'Number Character'),
+        ('persian_letters', 'Persian Letters'),
+        ('english_letters', 'English Letters')
+
+    )
+    pattern = models.CharField(max_length=50, choices=PATTERNS, default='free')
     min = models.PositiveIntegerField(default=10, null=True, blank=True)
     max = models.PositiveIntegerField(default=1000, null=True, blank=True)
 

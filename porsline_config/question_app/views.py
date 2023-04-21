@@ -115,6 +115,7 @@ class FileQuestionViewSet(viewsets.ModelViewSet):
 class AnswerSetViewSet(viewsets.ModelViewSet):
     serializer_class = AnswerSetSerializer
     lookup_field = 'id'
+    http_method_names = ['get', 'post', 'head', 'options']
 
     def get_queryset(self):
         queryset = AnswerSet.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
