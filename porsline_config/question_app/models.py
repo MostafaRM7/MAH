@@ -1,6 +1,7 @@
+from uuid import uuid4
+
 from django.contrib.auth import get_user_model
 from django.db import models
-from uuid import uuid4
 
 
 class Folder(models.Model):
@@ -13,16 +14,16 @@ class Folder(models.Model):
 
 
 class Questionnaire(models.Model):
-    name = models.CharField(max_length=255, verbose_name='نام')
-    is_active = models.BooleanField(default=False, verbose_name='فعال/غیرفعال')
-    has_timer = models.BooleanField(default=False, verbose_name='تایمر/بدون تایمر')
-    has_auto_start = models.BooleanField(default=False, verbose_name='')
-    pub_date = models.DateField(null=True, blank=True, verbose_name='')
-    end_date = models.DateField(null=True, blank=True, verbose_name='')
-    timer = models.DurationField(null=True, blank=True, verbose_name='')
-    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='questionnaires', verbose_name='')
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='questionnaires', verbose_name='')
-    uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='')
+    name = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=False)
+    has_timer = models.BooleanField(default=False)
+    has_auto_start = models.BooleanField(default=False)
+    pub_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    timer = models.DurationField(null=True, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='questionnaires')
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='questionnaires')
+    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
 
     def __str__(self):
         return self.name
@@ -49,6 +50,9 @@ class Question(models.Model):
     question_type = models.CharField(max_length=50, choices=QUESTION_TYPES)
     is_required = models.BooleanField(default=False)
     media = models.FileField(upload_to='uploads/question_media', null=True, blank=True)
+    show_number = models.BooleanField(null=True, blank=True, default=True)
+    group = models.ForeignKey('QuestionGroup', on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name='child_questions')
 
     def __str__(self):
         return f'{self.questionnaire} - {self.question_type}'
@@ -61,6 +65,8 @@ class OptionalQuestion(Question):
     min_selected_options = models.IntegerField(null=True, blank=True)
     all_options = models.BooleanField(default=False, null=True, blank=True)
     nothing_selected = models.BooleanField(default=False, null=True, blank=True)
+    is_vertical = models.BooleanField(default=False, null=True, blank=True)
+    is_random_options = models.BooleanField(default=False, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.question_type = 'optional'
@@ -82,6 +88,8 @@ class DropDownQuestion(Question):
     multiple_choice = models.BooleanField(default=False)
     max_selected_options = models.PositiveIntegerField(null=True, blank=True)
     min_selected_options = models.PositiveIntegerField(null=True, blank=True)
+    is_alphabetic_order = models.BooleanField(default=False, null=True, blank=True)
+    is_random_options = models.BooleanField(default=False, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.question_type = 'drop_down'
@@ -100,18 +108,26 @@ class DropDownOption(models.Model):
 
 
 class TextAnswerQuestion(Question):
+    FREE = 'free'
+    JALALI_DATE = 'jalali_date'
+    GEORGIAN_DATE = 'gregorian_date'
+    MOBILE_NUMBER = 'mobile_number'
+    PHONE_NUMBER = 'phone_number'
+    NUMBER_CHARACTERS = 'number_character'
+    PERSIAN_LETTERS = 'persian_letters'
+    ENGLISH_LETTERS = 'english_letters'
     PATTERNS = (
-        ('free', 'Free Text'),
-        ('jalali_date', 'Jalali Date'),
-        ('gregorian_date', 'Gregorian Date'),
-        ('mobile_number', 'Mobile Number'),
-        ('phone_number', 'Phone Number'),
-        ('number_character', 'Number Character'),
-        ('persian_letters', 'Persian Letters'),
-        ('english_letters', 'English Letters')
+        (FREE, 'Free Text'),
+        (JALALI_DATE, 'Jalali Date'),
+        (GEORGIAN_DATE, 'Gregorian Date'),
+        (MOBILE_NUMBER, 'Mobile Number'),
+        (PHONE_NUMBER, 'Phone Number'),
+        (NUMBER_CHARACTERS, 'Number Character'),
+        (PERSIAN_LETTERS, 'Persian Letters'),
+        (ENGLISH_LETTERS, 'English Letters')
 
     )
-    pattern = models.CharField(max_length=50, choices=PATTERNS, default='free')
+    pattern = models.CharField(max_length=50, choices=PATTERNS, default=FREE)
     min = models.PositiveIntegerField(default=10, null=True, blank=True)
     max = models.PositiveIntegerField(default=1000, null=True, blank=True)
 
@@ -234,3 +250,16 @@ class Answer(models.Model):
 
     def __str__(self):
         return f'{self.answer_set} - {self.question}'
+
+
+class QuestionGroup(Question):
+    SHARP = 'sharp'
+    ROUND = 'round'
+    OVAL = 'oval'
+    BUTTON_SHAPES = (
+        (SHARP, 'Sharp corners'),
+        (ROUND, 'Round corners'),
+        (OVAL, 'Oval')
+    )
+    button_shape = models.CharField(max_length=6, default=ROUND)
+    button_text = models.CharField(max_length=100)

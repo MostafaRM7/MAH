@@ -18,9 +18,8 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         model = OptionalQuestion
         fields = (
             'id', 'questionnaire', 'title', 'question_text', 'question_type', 'placement', 'is_required',
-            'multiple_choice',
-            'max_selected_options', 'min_selected_options', 'additional_options', 'all_options',
-            'nothing_selected', 'options')
+            'multiple_choice', 'is_vertical', 'is_random_options', 'max_selected_options', 'min_selected_options',
+            'additional_options', 'all_options', 'nothing_selected', 'options')
 
     def validate(self, data):
         additional_options = data.get('additional_options')
@@ -92,8 +91,8 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         model = DropDownQuestion
         fields = (
             'id', 'questionnaire', 'title', 'question_text', 'placement', 'question_type', 'is_required',
-            'multiple_choice',
-            'max_selected_options', 'min_selected_options', 'options')
+            'multiple_choice', 'is_alphabetic', 'is_random_options', 'max_selected_options', 'min_selected_options',
+            'options')
 
     def validate(self, data):
         max_selected_options = data.get('max_selected_options')
@@ -152,7 +151,6 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         max_len = data.get('max')
         min_len = data.get('min')
-        answers = data.get('answers')
 
         if max_len < min_len:
             raise serializers.ValidationError(
@@ -214,23 +212,33 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PictureFieldQuestion
-        fields = ('id', 'questionnaire', 'title', 'question_type', 'placement', 'question_text', 'is_required')
+        fields = (
+            'id', 'questionnaire', 'title', 'question_type', 'placement', 'show_number', 'question_text', 'is_required')
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmailFieldQuestion
-        fields = ('id', 'questionnaire', 'title', 'question_type', 'placement', 'question_text', 'is_required')
+        fields = (
+            'id', 'questionnaire', 'title', 'question_type', 'placement', 'show_number', 'question_text', 'is_required')
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = LinkQuestion
-        fields = ('id', 'questionnaire', 'title', 'question_type', 'placement', 'question_text', 'is_required')
+        fields = (
+            'id', 'questionnaire', 'title', 'question_type', 'placement', 'show_number', 'question_text', 'is_required')
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileQuestion
         fields = (
-            'id', 'questionnaire', 'title', 'question_type', 'placement', 'question_text', 'is_required', 'max_volume')
+            'id', 'questionnaire', 'title', 'question_type', 'placement', 'show_number', 'question_text', 'is_required',
+            'max_volume')
+
+
+class QuestionGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionGroup
+        fields = ('id', 'questionnaire', 'title', 'placement', 'child_questions')

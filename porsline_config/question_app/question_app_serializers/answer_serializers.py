@@ -14,7 +14,6 @@ class AnswerSerializer(serializers.ModelSerializer):
         print(answer)
         file = data.get('file')
         is_required = question.is_required
-        # TODO - Nothing selected
         if question.question_type == "optional":
             optional_question: OptionalQuestion = question.optionalquestion
             max_selected_options = optional_question.max_selected_options
