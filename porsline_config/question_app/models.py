@@ -13,16 +13,16 @@ class Folder(models.Model):
 
 
 class Questionnaire(models.Model):
-    name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
-    has_timer = models.BooleanField(default=False)
-    has_auto_start = models.BooleanField(default=False)
-    pub_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    timer = models.DurationField(null=True, blank=True)
-    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='questionnaires')
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='questionnaires')
-    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
+    name = models.CharField(max_length=255, verbose_name='نام')
+    is_active = models.BooleanField(default=False, verbose_name='فعال/غیرفعال')
+    has_timer = models.BooleanField(default=False, verbose_name='تایمر/بدون تایمر')
+    has_auto_start = models.BooleanField(default=False, verbose_name='')
+    pub_date = models.DateField(null=True, blank=True, verbose_name='')
+    end_date = models.DateField(null=True, blank=True, verbose_name='')
+    timer = models.DurationField(null=True, blank=True, verbose_name='')
+    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='questionnaires', verbose_name='')
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='questionnaires', verbose_name='')
+    uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='')
 
     def __str__(self):
         return self.name
@@ -42,6 +42,7 @@ class Question(models.Model):
         ('file', 'File'),
         ('group', 'Group'),
     )
+    placement = models.PositiveIntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions')
     question_text = models.TextField()
