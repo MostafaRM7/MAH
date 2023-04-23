@@ -1,5 +1,6 @@
-from .question_serializers import *
 from rest_framework import serializers
+
+from .question_serializers import *
 from ..models import *
 
 
@@ -99,22 +100,3 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         questions = instance.questions.all().filter(question_type='email_field')
         email_questions = EmailFieldQuestion.objects.filter(question_ptr__in=questions)
         return EmailFieldQuestionSerializer(email_questions, many=True).data
-
-    @transaction.atomic()
-    def create(self, validated_data):
-        questions_data = validated_data.pop('questions')
-        questionnaire = Questionnaire.objects.create(**validated_data)
-        for question_data in questions_data:
-            Question.objects.create(questionnaire=questionnaire, **question_data)
-        return questionnaire
-
-    # TODO
-    @transaction.atomic()
-    def update(self, instance, validated_data):
-        questions_data = validated_data.pop('questions', None)
-        if questions_data is not None:
-            # first delete all objects than create the new ones
-            Question.objects.filter(questionnaire=instance).delete()
-            for question_data in questions_data:
-                Question.objects.create(**question_data, questionnaire=instance)
-        return super().update(instance, validated_data)

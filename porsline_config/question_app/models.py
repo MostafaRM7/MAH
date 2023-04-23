@@ -261,5 +261,5 @@ class QuestionGroup(Question):
         (ROUND, 'Round corners'),
         (OVAL, 'Oval')
     )
-    button_shape = models.CharField(max_length=6, default=ROUND)
+    button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND)
     button_text = models.CharField(max_length=100)
