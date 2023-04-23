@@ -18,6 +18,7 @@ questionnaire_router.register('picture-questions', views.IntegerSelectiveQuestio
 questionnaire_router.register('email-questions', views.EmailFieldQuestionViewSet, basename='email_questions')
 questionnaire_router.register('link-questions', views.LinkQuestionViewSet, basename='link_questions')
 questionnaire_router.register('file-questions', views.FileQuestionViewSet, basename='file_questions')
+questionnaire_router.register('question-groups', views.QuestionGroupViewSet, basename='question_groups')
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(questionnaire_router.urls)),

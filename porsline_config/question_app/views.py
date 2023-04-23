@@ -1,8 +1,9 @@
 from rest_framework import viewsets
+
+from .models import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer
 from .question_app_serializers.general_serializers import *
 from .question_app_serializers.question_serializers import *
-from .models import *
 
 
 class QuestionnaireViewSet(viewsets.ModelViewSet):
@@ -109,6 +110,15 @@ class FileQuestionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = FileQuestion.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        return queryset
+
+
+class QuestionGroupViewSet(viewsets.ModelViewSet):
+    serializer_class = QuestionGroupSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        queryset = QuestionGroup.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
 
 
