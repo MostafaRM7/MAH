@@ -171,7 +171,7 @@ class AnswerSerializer(serializers.ModelSerializer):
                                     status.HTTP_400_BAD_REQUEST
                                 )
                         elif pattern == 'phone_number':
-                            if not utils.validate_mobile_number(answer):
+                            if not utils.validate_city_phone_number(answer):
                                 raise serializers.ValidationError(
                                     {'question': 'پاسخ در قالب شماره تلفن ثابت نیست'},
                                     status.HTTP_400_BAD_REQUEST

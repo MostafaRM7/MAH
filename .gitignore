@@ -9,7 +9,7 @@ db.sqlite3-journal
 media
 
 # Environments
-.env
+porsline_config/.env
 .venv
 env/
 venv/
