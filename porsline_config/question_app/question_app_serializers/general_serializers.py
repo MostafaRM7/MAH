@@ -1,5 +1,3 @@
-from rest_framework import serializers
-
 from .question_serializers import *
 from ..models import *
 
@@ -30,6 +28,20 @@ class FolderSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'questionnaires')
 
 
+class WelcomePageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WelcomePage
+        fields = ('id', 'title', 'description', 'media', 'button_text', 'button_shape', 'questionnaire')
+
+
+class ThanksPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ThanksPage
+        fields = (
+            'id', 'title', 'description', 'media', 'share_link', 'instagram', 'telegram', 'whatsapp', 'eitaa', 'sorush',
+            'questionnaire')
+
+
 class QuestionnaireSerializer(serializers.ModelSerializer):
     optional_questions = serializers.SerializerMethodField(method_name='optional_question_queryset')
     drop_down_questions = serializers.SerializerMethodField(method_name='drop_down_question_queryset')
@@ -49,7 +61,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'is_active', 'has_timer', 'has_auto_start', 'pub_date', 'end_date', 'timer', 'folder',
                   'owner', 'uuid', 'optional_questions', 'drop_down_questions', 'text_answer_questions',
                   'number_answer_questions', 'integer_selective_questions', 'integer_range_questions',
-                  'picture_field_questions', 'link_questions', 'file_questions', 'email_field_questions')
+                  'picture_field_questions', 'link_questions', 'file_questions', 'email_field_questions', 'welcome_page', 'thanks_page')
 
     def optional_question_queryset(self, instance):
         questions = instance.questions.filter(question_type='optional')
@@ -100,3 +112,4 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         questions = instance.questions.all().filter(question_type='email_field')
         email_questions = EmailFieldQuestion.objects.filter(question_ptr__in=questions)
         return EmailFieldQuestionSerializer(email_questions, many=True).data
+

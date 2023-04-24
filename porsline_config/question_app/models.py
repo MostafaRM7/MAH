@@ -285,3 +285,33 @@ class QuestionGroup(Question):
     def save(self, *args, **kwargs):
         self.question_type = 'group'
         super(QuestionGroup, self).save(*args, **kwargs)
+
+
+class WelcomePage(models.Model):
+    SHARP = 'sharp'
+    ROUND = 'round'
+    OVAL = 'oval'
+    BUTTON_SHAPES = (
+        (SHARP, 'Sharp corners'),
+        (ROUND, 'Round corners'),
+        (OVAL, 'Oval')
+    )
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    media = models.FileField(upload_to='welcome_page/medias', null=True, blank=True)
+    button_text = models.CharField(max_length=100)
+    button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND)
+    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='welcome_page')
+
+
+class ThanksPage(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    media = models.FileField(upload_to='thanks_page/medias', null=True, blank=True)
+    share_link = models.URLField(null=True, blank=True)
+    instagram = models.URLField(null=True, blank=True)
+    telegram = models.URLField(null=True, blank=True)
+    whatsapp = models.URLField(null=True, blank=True)
+    eitaa = models.URLField(null=True, blank=True)
+    sorush = models.URLField(null=True, blank=True)
+    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='thanks_page')

@@ -1,26 +1,27 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class IsStaffOrOwner(BasePermission):
-    """
-    Custom DRF permission class that allows access only to staff users or
-    the owner of the object being accessed.
-    """
-
+class IsStaff(BasePermission):
+    # GET, POST
     def has_permission(self, request, view):
-        """
-        Check if the requesting user is a staff user or the owner of the object being accessed.
-        """
-        if request.user.is_staff:
-            return True
+        return request.user.is_staff
 
-        return False
-
+    # PUT, PATCH, DELETE
     def has_object_permission(self, request, view, obj):
-        """
-        Check if the requesting user is the owner of the object being accessed.
-        """
-        if request.user.is_staff:
-            return True
+        return request.user.is_staff
 
+
+class IsOwnerOrReadOnly(BasePermission):
+    # GET, POST
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user.is_authenticated
+
+    # GET, PUT, PATCH, DELETE
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
         return obj.owner == request.user
+
+#TODO - AnswerSet and Pages

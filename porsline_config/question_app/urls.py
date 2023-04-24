@@ -4,6 +4,8 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register('questionnaires', views.QuestionnaireViewSet)
+router.register('welcome-pages', views.WelcomePageViewSet)
+router.register('thanks-pages', views.ThanksPageViewSet)
 
 questionnaire_router = routers.NestedDefaultRouter(router, 'questionnaires', lookup='questionnaire')
 questionnaire_router.register('answer-set', views.AnswerSetViewSet, basename='answer_sets')

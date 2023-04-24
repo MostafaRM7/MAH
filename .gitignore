@@ -30,3 +30,5 @@ pyvenv.cfg
 pip-selfcheck.json
 
 .idea/
+/porsline_config/question_app/migrations/
+/porsline_config/user_app/migrations/
