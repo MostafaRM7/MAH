@@ -129,6 +129,7 @@ class FileQuestionViewSet(viewsets.ModelViewSet):
 class QuestionGroupViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionGroupSerializer
     lookup_field = 'id'
+    permission_classes = (IsStaffOrOwner,)
 
     def get_queryset(self):
         queryset = QuestionGroup.objects.prefetch_related('child_questions').filter(

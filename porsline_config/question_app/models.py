@@ -33,6 +33,7 @@ class Question(models.Model):
     QUESTION_TYPES = (
         ('optional', 'Optional'),
         ('drop_down', 'Drop Down'),
+        ('sort', 'Sort'),
         ('text_answer', 'Text Answer'),
         ('number_answer', 'Number Answer'),
         ('integer_range', 'Integer Range'),
@@ -110,6 +111,10 @@ class DropDownOption(models.Model):
 
 class SortQuestion(Question):
     is_random_options = models.BooleanField(default=False, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.question_type = 'sort'
+        super(SortQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.question_text
@@ -276,3 +281,7 @@ class QuestionGroup(Question):
     )
     button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND)
     button_text = models.CharField(max_length=100)
+
+    def save(self, *args, **kwargs):
+        self.question_type = 'group'
+        super(QuestionGroup, self).save(*args, **kwargs)
