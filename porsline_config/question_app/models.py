@@ -43,6 +43,7 @@ class Question(models.Model):
         ('file', 'File'),
         ('group', 'Group'),
     )
+
     placement = models.PositiveIntegerField(null=True, blank=True)
     title = models.CharField(max_length=255)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions')
@@ -105,6 +106,19 @@ class DropDownOption(models.Model):
 
     def __str__(self):
         return f'{self.drop_down_question} - {self.text}'
+
+
+class SortQuestion(Question):
+    is_random_options = models.BooleanField(default=False, null=True, blank=True)
+
+    def __str__(self):
+        return self.question_text
+
+
+class SortOption(models.Model):
+    sort_question = models.ForeignKey('SortQuestion', on_delete=models.CASCADE, related_name='options')
+    text = models.CharField(max_length=250)
+    placement = models.PositiveIntegerField()
 
 
 class TextAnswerQuestion(Question):
@@ -195,7 +209,6 @@ class IntegerSelectiveQuestion(Question):
 
 
 class PictureFieldQuestion(Question):
-    answer = models.ImageField(null=True, blank=True, upload_to='images/')
 
     def save(self, *args, **kwargs):
         self.question_type = 'picture_field'

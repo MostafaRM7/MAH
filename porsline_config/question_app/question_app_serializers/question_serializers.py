@@ -91,8 +91,8 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         model = DropDownQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
-            'show_number', 'media', 'multiple_choice', 'is_alphabetic_order', 'is_random_options', 'max_selected_options',
-            'min_selected_options', 'options')
+            'show_number', 'media', 'multiple_choice', 'is_alphabetic_order', 'is_random_options',
+            'max_selected_options', 'min_selected_options', 'options')
 
     def validate(self, data):
         max_selected_options = data.get('max_selected_options')
@@ -128,6 +128,50 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
                 option_id = option_data.get('id', None)
                 if option_id is None:
                     DropDownOption.objects.create(drop_down_question=instance, **option_data)
+                else:
+                    option = options.pop(option_id, None)
+                    if option is not None:
+                        for attr, value in option_data.items():
+                            setattr(option, attr, value)
+                        option.save()
+
+            for option in options.values():
+                option.delete()
+
+        return super().update(instance, validated_data)
+
+
+class SortOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SortOption
+        fields = ('id', 'text', 'placement')
+
+
+class SortQuestionSerializer(serializers.ModelSerializer):
+    options = SortOptionSerializer(many=True)
+
+    class Meta:
+        model = SortQuestion
+        fields = ('id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
+                  'show_number', 'media', 'is_random_options', 'options')
+
+    def create(self, validated_data):
+        options_data = validated_data.pop('options')
+        sort_question = SortQuestion.objects.create(**validated_data)
+        options = [SortOption(sort_question=sort_question, **option_data) for option_data in options_data]
+        SortOption.objects.bulk_create(options)
+        return sort_question
+
+    def update(self, instance, validated_data):
+        options_data = validated_data.pop('options', None)
+        if options_data is not None:
+            options = instance.options.all()
+            options = {option.id: option for option in options}
+
+            for option_data in options_data:
+                option_id = option_data.get('id', None)
+                if option_id is None:
+                    SortOption.objects.create(drop_down_question=instance, **option_data)
                 else:
                     option = options.pop(option_id, None)
                     if option is not None:

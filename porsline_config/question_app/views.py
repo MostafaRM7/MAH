@@ -13,16 +13,6 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
     permission_classes = (IsStaffOrOwner,)
 
 
-class QuestionViewSet(viewsets.ModelViewSet):
-    serializer_class = QuestionSerializer
-    lookup_field = 'id'
-    permission_classes = (IsStaffOrOwner,)
-
-    def get_queryset(self):
-        queryset = Question.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
-        return queryset
-
-
 class OptionalQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = OptionalQuestionSerializer
     lookup_field = 'id'
@@ -41,6 +31,17 @@ class DropDownQuestionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = DropDownQuestion.objects.prefetch_related('options').filter(
+            questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        return queryset
+
+
+class SortQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = SortQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsStaffOrOwner,)
+
+    def get_queryset(self):
+        queryset = SortQuestion.objects.prefetch_related('options').filter(
             questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
 
@@ -130,16 +131,18 @@ class QuestionGroupViewSet(viewsets.ModelViewSet):
     lookup_field = 'id'
 
     def get_queryset(self):
-        queryset = QuestionGroup.objects.prefetch_related('child_questions').filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        queryset = QuestionGroup.objects.prefetch_related('child_questions').filter(
+            questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
 
 
 class AnswerSetViewSet(viewsets.ModelViewSet):
     serializer_class = AnswerSetSerializer
     lookup_field = 'id'
-    http_method_names = ['get', 'post', 'head', 'options']
+    http_method_names = ['get', 'post', 'delete', 'head', 'options']
     permission_classes = (IsStaffOrOwner,)
 
     def get_queryset(self):
-        queryset = AnswerSet.objects.prefetch_related('answers').filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        queryset = AnswerSet.objects.prefetch_related('answers').filter(
+            questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
