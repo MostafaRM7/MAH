@@ -130,7 +130,7 @@ class QuestionGroupViewSet(viewsets.ModelViewSet):
     lookup_field = 'id'
 
     def get_queryset(self):
-        queryset = QuestionGroup.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        queryset = QuestionGroup.objects.prefetch_related('child_questions').filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
 
 
@@ -141,5 +141,5 @@ class AnswerSetViewSet(viewsets.ModelViewSet):
     permission_classes = (IsStaffOrOwner,)
 
     def get_queryset(self):
-        queryset = AnswerSet.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        queryset = AnswerSet.objects.prefetch_related('answers').filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset

@@ -16,5 +16,6 @@ admin.site.register(models.LinkQuestion)
 admin.site.register(models.PictureFieldQuestion)
 admin.site.register(models.Answer)
 admin.site.register(models.AnswerSet)
+admin.site.register(models.QuestionGroup)
 admin.site.register(models.Folder)
 
