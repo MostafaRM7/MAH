@@ -6,13 +6,10 @@ class IsQuestionnaireOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         uuid = view.kwargs.get('uuid')
         if uuid:
-            if request.method in SAFE_METHODS:
-                return True
-            else:
-                return request.user == Questionnaire.objects.get(uuid=uuid).owner or request.user.is_staff
+            return request.user == Questionnaire.objects.get(uuid=uuid).owner or request.user.is_staff
         else:
             if request.method == 'POST':
-                return request.user.is_authenticated or request.user.is_staff
+                return request.user.is_authenticated
             else:
                 return request.user.is_staff
 

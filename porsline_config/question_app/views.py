@@ -1,4 +1,6 @@
 from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from .permissions import IsQuestionOwnerOrReadOnly, IsQuestionnaireOwnerOrReadOnly, AnonPOSTOrOwner, \
     IsPageOwnerOrReadOnly
 from .question_app_serializers.answer_serializers import AnswerSetSerializer
@@ -6,11 +8,42 @@ from .question_app_serializers.general_serializers import *
 from .question_app_serializers.question_serializers import *
 
 
-class PublicQuestionnaireViewSet(viewsets.ModelViewSet):
-    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions').all()
-    serializer_class = QuestionnaireQuestionsSerializer
+class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+        This a retrieve only viewset for showing a questionnaire to everyone
+    """
+    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions').filter(
+        is_delete=False, is_active=True)
+    serializer_class = PublicQuestionnaireSerializer
+    lookup_field = 'uuid'
+    permission_classes = (AllowAny,)
+
+
+class QuestionnaireViewSet(viewsets.mixins.CreateModelMixin,
+                           viewsets.mixins.RetrieveModelMixin,
+                           viewsets.mixins.DestroyModelMixin,
+                           viewsets.mixins.ListModelMixin,
+                           viewsets.GenericViewSet):
+    """
+        This view is for creating, retrieving, deleting and listing questionnaires
+    """
+    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'owner', 'questions',
+                                                      'folder').filter(is_delete=False)
+    serializer_class = QuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_delete = True
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class OptionalQuestionViewSet(viewsets.ModelViewSet):

@@ -5,7 +5,7 @@ from question_app.models import Folder
 
 
 class FolderSerializer(serializers.ModelSerializer):
-    questionnaires = serializers.StringRelatedField(many=True, read_only=True)
+    questionnaires = general_serializers.QuestionnaireSerializer(many=True, read_only=True)
 
     class Meta:
         model = Folder
@@ -13,11 +13,11 @@ class FolderSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    questionnairs = general_serializers.QuestionnaireSerializer(many=True, read_only=True)
+    folders = FolderSerializer(many=True)
 
     class Meta:
         model = get_user_model()
-        fields = ('id', 'username', 'first_name', 'last_name', 'questionnaires',)
+        fields = ('id', 'username', 'first_name', 'last_name', 'folders')
 
     def create(self, validated_data):
         user = get_user_model().objects.create_user(**validated_data)

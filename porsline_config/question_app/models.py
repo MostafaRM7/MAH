@@ -1,5 +1,6 @@
 from uuid import uuid4
-
+from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -16,12 +17,13 @@ class Folder(models.Model):
 class Questionnaire(models.Model):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=False)
+    is_delete = models.BooleanField(default=False)
     has_timer = models.BooleanField(default=False)
     has_auto_start = models.BooleanField(default=False)
     pub_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     timer = models.DurationField(null=True, blank=True)
-    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='questionnaires')
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='questionnaires')
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='questionnaires')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
 
@@ -30,6 +32,8 @@ class Questionnaire(models.Model):
 
 
 class Question(models.Model):
+    ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
+                                'mkv', 'webm']
     QUESTION_TYPES = (
         ('optional', 'Optional'),
         ('drop_down', 'Drop Down'),
@@ -51,10 +55,16 @@ class Question(models.Model):
     question_text = models.TextField()
     question_type = models.CharField(max_length=50, choices=QUESTION_TYPES)
     is_required = models.BooleanField(default=False)
-    media = models.FileField(upload_to='uploads/question_media', null=True, blank=True)
+    media = models.FileField(upload_to='uploads/question_media', null=True, blank=True,
+                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)])
     show_number = models.BooleanField(null=True, blank=True, default=True)
     group = models.ForeignKey('QuestionGroup', on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='child_questions')
+
+    def clean(self):
+        super().clean()
+        if self.media.size > 1024 * 1024 * 10:
+            raise ValidationError('حجم فایل آپلود شده باید کمتر از ۱۰ مگابایت باشد')
 
     def __str__(self):
         return f'{self.questionnaire} - {self.question_type}'
@@ -283,11 +293,14 @@ class QuestionGroup(Question):
     button_text = models.CharField(max_length=100)
 
     def save(self, *args, **kwargs):
+        self.is_required = False
         self.question_type = 'group'
         super(QuestionGroup, self).save(*args, **kwargs)
 
 
 class WelcomePage(models.Model):
+    ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
+                                'mkv', 'webm']
     SHARP = 'sharp'
     ROUND = 'round'
     OVAL = 'oval'
@@ -298,16 +311,20 @@ class WelcomePage(models.Model):
     )
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    media = models.FileField(upload_to='welcome_page/medias', null=True, blank=True)
+    media = models.FileField(upload_to='welcome_page/medias', null=True, blank=True,
+                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)])
     button_text = models.CharField(max_length=100)
     button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND)
     questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='welcome_page')
 
 
 class ThanksPage(models.Model):
+    ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
+                                'mkv', 'webm']
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    media = models.FileField(upload_to='thanks_page/medias', null=True, blank=True)
+    media = models.FileField(upload_to='thanks_page/medias', null=True, blank=True,
+                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)])
     share_link = models.URLField(null=True, blank=True)
     instagram = models.URLField(null=True, blank=True)
     telegram = models.URLField(null=True, blank=True)

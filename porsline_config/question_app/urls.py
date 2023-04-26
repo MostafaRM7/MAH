@@ -2,10 +2,13 @@ from django.urls import path, include
 from rest_framework_nested import routers
 from . import views
 
-router = routers.DefaultRouter()
-router.register('questionnaires', views.PublicQuestionnaireViewSet)
+router = routers.SimpleRouter()
+router.register('', views.PublicQuestionnaireViewSet)
 
-questionnaire_router = routers.NestedDefaultRouter(router, 'questionnaires', lookup='questionnaire')
+base_router = routers.DefaultRouter()
+base_router.register('questionnaires', views.QuestionnaireViewSet)
+
+questionnaire_router = routers.NestedDefaultRouter(base_router, 'questionnaires', lookup='questionnaire')
 questionnaire_router.register('welcome-pages', views.WelcomePageViewSet, basename='welcome_pages')
 questionnaire_router.register('thanks-pages', views.ThanksPageViewSet, basename='thanks_pages')
 questionnaire_router.register('answer-sets', views.AnswerSetViewSet, basename='answer_sets')
@@ -27,6 +30,7 @@ questionnaire_router.register('file-questions', views.FileQuestionViewSet, basen
 questionnaire_router.register('question-groups', views.QuestionGroupViewSet, basename='question_groups')
 
 urlpatterns = [
+    path('', include(base_router.urls)),
     path('', include(router.urls)),
     path('', include(questionnaire_router.urls)),
 ]
