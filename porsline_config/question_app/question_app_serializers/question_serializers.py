@@ -22,11 +22,42 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             'min_selected_options', 'show_number', 'additional_options', 'all_options', 'nothing_selected', 'options')
 
     def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
         additional_options = data.get('additional_options')
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
+        multiple_choice = data.get('multiple_choice')
         all_options = data.get('all_options')
         nothing_selected = data.get('nothing_selected')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
+        if multiple_choice:
+            if max_selected_options is None or min_selected_options is None:
+                raise serializers.ValidationError(
+                    {
+                        'question': 'لطفا حداقل و حداکثر گزینه انتخابی را مشخص کنید'
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
+            elif max_selected_options == 0 or min_selected_options == 0:
+                raise serializers.ValidationError(
+                    {
+                        'question': 'لطفا حداقل و حداکثر گزینه انتخابی نمی تواند صفر باشد'
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
+            elif min_selected_options is not None and max_selected_options is not None:
+                if min_selected_options > max_selected_options:
+                    raise serializers.ValidationError(
+                        {
+                            'max_selected_options': 'مقدار حداقل گزینه های انتخابی نمی تواند از حداکثر گزینه های انتحابی بیشتر باشد'
+                        },
+                        status.HTTP_400_BAD_REQUEST
+                    )
         if not additional_options and (nothing_selected or all_options):
             raise serializers.ValidationError(
                 {
@@ -35,14 +66,6 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                 },
                 status.HTTP_400_BAD_REQUEST
             )
-        if min_selected_options is not None and max_selected_options is not None:
-            if min_selected_options > max_selected_options:
-                raise serializers.ValidationError(
-                    {
-                        'max_selected_options': 'مقدار حداقل گزینه های انتخابی نمی تواند از حداکثر گزینه های انتحابی بیشتر باشد'
-                    },
-                    status.HTTP_400_BAD_REQUEST
-                )
         return data
 
     @transaction.atomic()
@@ -95,17 +118,40 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
             'max_selected_options', 'min_selected_options', 'options')
 
     def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
-        if min_selected_options is not None and max_selected_options is not None:
-            if min_selected_options > max_selected_options:
+        multiple_choice = data.get('multiple_choice')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        if multiple_choice:
+            if max_selected_options is None or min_selected_options is None:
                 raise serializers.ValidationError(
                     {
-                        'max_selected_options': 'مقدار حداقل گزینه های انتخابی نمی تواند از حداکثر گزینه های انتحابی بیشتر باشد'},
+                        'question': 'لطفا حداقل و حداکثر گزینه انتخابی را مشخص کنید'
+                    },
                     status.HTTP_400_BAD_REQUEST
                 )
-        else:
-            pass
+            elif max_selected_options == 0 or min_selected_options == 0:
+                raise serializers.ValidationError(
+                    {
+                        'question': 'لطفا حداقل و حداکثر گزینه انتخابی نمی تواند صفر باشد'
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
+            elif min_selected_options is not None and max_selected_options is not None:
+                if min_selected_options > max_selected_options:
+                    raise serializers.ValidationError(
+                        {
+                            'max_selected_options': 'مقدار حداقل گزینه های انتخابی نمی تواند از حداکثر گزینه های انتحابی بیشتر باشد'
+                        },
+                        status.HTTP_400_BAD_REQUEST
+                    )
         return data
 
     @transaction.atomic()
@@ -184,6 +230,15 @@ class SortQuestionSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
+    def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
+
 
 class TextAnswerQuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -193,8 +248,15 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media', 'show_number', 'pattern', 'min', 'max')
 
     def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
         max_len = data.get('max')
         min_len = data.get('min')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
 
         if max_len < min_len:
             raise serializers.ValidationError(
@@ -212,20 +274,21 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media', 'min', 'max')
 
     def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
         max_value = data.get('max')
         min_value = data.get('min')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
         if max_value < min_value:
             raise serializers.ValidationError(
                 {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باشد'},
                 status.HTTP_400_BAD_REQUEST
             )
         return data
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = '__all__'
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
@@ -235,6 +298,15 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
             'show_number', 'media', 'shape', 'max'
         )
+
+    def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
@@ -246,11 +318,18 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
         max_value = data.get('max')
         min_value = data.get('min')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
         if max_value < min_value:
             raise serializers.ValidationError(
-                {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باش'},
+                {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باشد'},
                 status.HTTP_400_BAD_REQUEST
             )
         return data
@@ -263,6 +342,15 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
             'show_number', 'media')
 
+    def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
+
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -270,6 +358,16 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
             'show_number', 'media')
+
+    def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
+        return data
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
@@ -279,6 +377,15 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
             'show_number', 'media')
 
+    def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
+
 
 class FileQuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -286,6 +393,15 @@ class FileQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
             'show_number', 'media', 'max_volume')
+
+    def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
 
 
 class QuestionGroupSerializer(serializers.ModelSerializer):
@@ -295,3 +411,13 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
             'show_number', 'media', 'button_shape', 'button_text', 'child_questions'
         )
+
+    def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
+        return data

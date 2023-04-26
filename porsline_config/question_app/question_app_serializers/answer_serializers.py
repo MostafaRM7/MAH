@@ -11,7 +11,6 @@ class AnswerSerializer(serializers.ModelSerializer):
     def validate(self, data):
         question = data.get('question')
         answer = data.get('answer')
-        print(answer)
         file = data.get('file')
         is_required = question.is_required
         if question.question_type == "optional":
@@ -51,24 +50,17 @@ class AnswerSerializer(serializers.ModelSerializer):
                         status.HTTP_400_BAD_REQUEST
                     )
                 if multiple_choice:
-                    if max_selected_options is None or min_selected_options is None:
-                        raise serializers.ValidationError(
-                            {
-                                'question': 'اگر سوال چند انتخابی باشد باید حداقل و حداکثر گزینه انتخابی را مشخص کنید'},
-                            status.HTTP_400_BAD_REQUEST
-                        )
-                    elif max_selected_options is not None and min_selected_options is not None:
-                        if selected_count >= 1:
-                            if selected_count > max_selected_options:
-                                raise serializers.ValidationError(
-                                    {'question': f'حداکثر می توان {max_selected_options}گزینه انتخاب کرد'},
-                                    status.HTTP_400_BAD_REQUEST
-                                )
-                            elif selected_count < min_selected_options:
-                                raise serializers.ValidationError(
-                                    {'question': f'حداقل می توان {min_selected_options}گزینه انتخاب کرد'},
-                                    status.HTTP_400_BAD_REQUEST
-                                )
+                    if selected_count >= 1:
+                        if selected_count > max_selected_options:
+                            raise serializers.ValidationError(
+                                {'question': f'حداکثر می توان {max_selected_options}گزینه انتخاب کرد'},
+                                status.HTTP_400_BAD_REQUEST
+                            )
+                        elif selected_count < min_selected_options:
+                            raise serializers.ValidationError(
+                                {'question': f'حداقل می توان {min_selected_options}گزینه انتخاب کرد'},
+                                status.HTTP_400_BAD_REQUEST
+                            )
                 else:
                     if selected_count > 1:
                         raise serializers.ValidationError(
@@ -103,24 +95,17 @@ class AnswerSerializer(serializers.ModelSerializer):
                         status.HTTP_400_BAD_REQUEST
                     )
                 if multiple_choice:
-                    if max_selected_options is None or min_selected_options is None:
-                        raise serializers.ValidationError(
-                            {
-                                'question': 'اگر سوال چند انتخابی باشد باید حداقل و حداکثر گزینه انتخابی را مشخص کنید'},
-                            status.HTTP_400_BAD_REQUEST
-                        )
-                    elif max_selected_options is not None and min_selected_options is not None:
-                        if selected_count >= 1:
-                            if selected_count > max_selected_options:
-                                raise serializers.ValidationError(
-                                    {'question': f'حداکثر می توان {max_selected_options}گزینه انتخاب کرد'},
-                                    status.HTTP_400_BAD_REQUEST
-                                )
-                            elif selected_count < min_selected_options:
-                                raise serializers.ValidationError(
-                                    {'question': f'حداقل می توان {min_selected_options}گزینه انتخاب کرد'},
-                                    status.HTTP_400_BAD_REQUEST
-                                )
+                    if selected_count >= 1:
+                        if selected_count > max_selected_options:
+                            raise serializers.ValidationError(
+                                {'question': f'حداکثر می توان {max_selected_options}گزینه انتخاب کرد'},
+                                status.HTTP_400_BAD_REQUEST
+                            )
+                        elif selected_count < min_selected_options:
+                            raise serializers.ValidationError(
+                                {'question': f'حداقل می توان {min_selected_options}گزینه انتخاب کرد'},
+                                status.HTTP_400_BAD_REQUEST
+                            )
                 else:
                     if selected_count > 1:
                         raise serializers.ValidationError(

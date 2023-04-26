@@ -3,12 +3,12 @@ from rest_framework_nested import routers
 from . import views
 
 router = routers.DefaultRouter()
-router.register('questionnaires', views.QuestionnaireViewSet)
-router.register('welcome-pages', views.WelcomePageViewSet)
-router.register('thanks-pages', views.ThanksPageViewSet)
+router.register('questionnaires', views.PublicQuestionnaireViewSet)
 
 questionnaire_router = routers.NestedDefaultRouter(router, 'questionnaires', lookup='questionnaire')
-questionnaire_router.register('answer-set', views.AnswerSetViewSet, basename='answer_sets')
+questionnaire_router.register('welcome-pages', views.WelcomePageViewSet, basename='welcome_pages')
+questionnaire_router.register('thanks-pages', views.ThanksPageViewSet, basename='thanks_pages')
+questionnaire_router.register('answer-sets', views.AnswerSetViewSet, basename='answer_sets')
 questionnaire_router.register('optional-questions', views.OptionalQuestionViewSet, basename='optional_questions')
 questionnaire_router.register('dropdown-questions', views.DropDownQuestionViewSet, basename='dropdown_questions')
 questionnaire_router.register('sort-questions', views.SortQuestionViewSet, basename='sort_questions')
