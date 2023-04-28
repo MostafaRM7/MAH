@@ -186,9 +186,9 @@ class AnswerSerializer(serializers.ModelSerializer):
                         status.HTTP_400_BAD_REQUEST
                     )
         elif question.question_type == "number_answer":
-            integer_range_question: NumberAnswerQuestion = question.numberanswerquestion
-            max_value = integer_range_question.max
-            min_value = integer_range_question.min
+            number_answer_question: NumberAnswerQuestion = question.numberanswerquestion
+            max_value = number_answer_question.max
+            min_value = number_answer_question.min
             if answer is not None:
                 answer = answer.get('number_answer')
                 if max_value is not None and min_value is not None:
@@ -210,9 +210,9 @@ class AnswerSerializer(serializers.ModelSerializer):
                         status.HTTP_400_BAD_REQUEST
                     )
         elif question.question_type == "integer_range":
-            integer_range_question: IntegerRangeQuestion = question.integerrangequestion
-            max_value = integer_range_question.max
-            min_value = integer_range_question.min
+            number_answer_question: IntegerRangeQuestion = question.integerrangequestion
+            max_value = number_answer_question.max
+            min_value = number_answer_question.min
             if answer is not None:
                 answer = answer.get('integer_range')
                 if max_value is not None and min_value is not None:

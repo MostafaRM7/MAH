@@ -23,17 +23,22 @@ class Questionnaire(models.Model):
     pub_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     timer = models.DurationField(null=True, blank=True)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='questionnaires')
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='questionnaires')
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='questionnaires')  # TODO set null
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,
+                              related_name='questionnaires')  # TODO set null
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
 
     def __str__(self):
         return self.name
 
+    def delete(self, using=None, keep_parents=False):
+        self.is_delete = True
+        self.save()
+
 
 class Question(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']
+                                'mkv', 'webm']  # TODO formats?
     QUESTION_TYPES = (
         ('optional', 'Optional'),
         ('drop_down', 'Drop Down'),
@@ -53,11 +58,11 @@ class Question(models.Model):
     title = models.CharField(max_length=255)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions')
     question_text = models.TextField()
-    question_type = models.CharField(max_length=50, choices=QUESTION_TYPES)
+    question_type = models.CharField(max_length=50, choices=QUESTION_TYPES)#TODO editable false
     is_required = models.BooleanField(default=False)
     media = models.FileField(upload_to='uploads/question_media', null=True, blank=True,
                              validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)])
-    show_number = models.BooleanField(null=True, blank=True, default=True)
+    show_number = models.BooleanField(null=True, blank=True, default=True)#TODO remove null , blank
     group = models.ForeignKey('QuestionGroup', on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='child_questions')
 
@@ -73,8 +78,8 @@ class Question(models.Model):
 class OptionalQuestion(Question):
     multiple_choice = models.BooleanField(default=False)
     additional_options = models.BooleanField(default=False)
-    max_selected_options = models.IntegerField(null=True, blank=True)
-    min_selected_options = models.IntegerField(null=True, blank=True)
+    max_selected_options = models.IntegerField(null=True, blank=True)#TODO positve
+    min_selected_options = models.IntegerField(null=True, blank=True)#TODO positve
     all_options = models.BooleanField(default=False, null=True, blank=True)
     nothing_selected = models.BooleanField(default=False, null=True, blank=True)
     is_vertical = models.BooleanField(default=False, null=True, blank=True)
@@ -157,8 +162,8 @@ class TextAnswerQuestion(Question):
 
     )
     pattern = models.CharField(max_length=50, choices=PATTERNS, default=FREE)
-    min = models.PositiveIntegerField(default=10, null=True, blank=True)
-    max = models.PositiveIntegerField(default=1000, null=True, blank=True)
+    min = models.PositiveIntegerField(default=10, null=True, blank=True)# TODO remove default
+    max = models.PositiveIntegerField(default=1000, null=True, blank=True)# TODO remove default
 
     def save(self, *args, **kwargs):
         self.question_type = 'text_answer'
@@ -169,8 +174,8 @@ class TextAnswerQuestion(Question):
 
 
 class NumberAnswerQuestion(Question):
-    min = models.IntegerField(default=0, null=True, blank=True)
-    max = models.IntegerField(default=1000, null=True, blank=True)
+    min = models.IntegerField(default=0, null=True, blank=True)# TODO remove default
+    max = models.IntegerField(default=1000, null=True, blank=True)# TODO remove default
 
     def save(self, *args, **kwargs):
         self.question_type = 'number_answer'
@@ -187,8 +192,8 @@ class IntegerRangeQuestion(Question):
         (ZERO_CHOICE, '1'),
         (ONE_CHOICE, '0'),
     ]
-    min = models.PositiveIntegerField(choices=MIN_CHOICES, default=ONE_CHOICE, null=True, blank=True)
-    max = models.PositiveIntegerField(default=5, null=True, blank=True)
+    min = models.PositiveIntegerField(choices=MIN_CHOICES, default=ONE_CHOICE, null=True, blank=True)#TODO remove , null=True, blank=True
+    max = models.PositiveIntegerField(default=5, null=True, blank=True)# TODO remove default
     min_label = models.CharField(max_length=50, null=True, blank=True)
     mid_label = models.CharField(max_length=50, null=True, blank=True)
     max_label = models.CharField(max_length=50, null=True, blank=True)
@@ -212,8 +217,9 @@ class IntegerSelectiveQuestion(Question):
         (LIKE, 'Like'),
         (CHECK_MARK, 'Check Mark'),
     ]
+    #TODO asking from ui/ux
     shape = models.CharField(choices=STYLE_CHOICES, default=STAR, max_length=2)
-    max = models.PositiveIntegerField(default=5, null=True, blank=True)
+    max = models.PositiveIntegerField(default=5, null=True, blank=True) # TODO default
 
     def save(self, *args, **kwargs):
         self.question_type = 'integer_selective'
@@ -253,7 +259,7 @@ class LinkQuestion(Question):
 
 
 class FileQuestion(Question):
-    max_volume = models.PositiveIntegerField(default=5, null=True, blank=True)  # In MB
+    max_volume = models.PositiveIntegerField(default=5, null=True, blank=True)  # In MB # TODO remove default
 
     def save(self, *args, **kwargs):
         self.question_type = 'file'
@@ -264,7 +270,7 @@ class FileQuestion(Question):
 
 
 class AnswerSet(models.Model):
-    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='answer_set')
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='answer_set') # TODO Protect on_delete
 
     def __str__(self):
         return f'{self.questionnaire} - AnswerSet'
@@ -284,6 +290,7 @@ class QuestionGroup(Question):
     SHARP = 'sharp'
     ROUND = 'round'
     OVAL = 'oval'
+    #TODO Button colors
     BUTTON_SHAPES = (
         (SHARP, 'Sharp corners'),
         (ROUND, 'Round corners'),
@@ -300,7 +307,7 @@ class QuestionGroup(Question):
 
 class WelcomePage(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']
+                                'mkv', 'webm']  #TODO asking from ui/ux
     SHARP = 'sharp'
     ROUND = 'round'
     OVAL = 'oval'
@@ -308,7 +315,7 @@ class WelcomePage(models.Model):
         (SHARP, 'Sharp corners'),
         (ROUND, 'Round corners'),
         (OVAL, 'Oval')
-    )
+    )#TODO Button colors
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     media = models.FileField(upload_to='welcome_page/medias', null=True, blank=True,
@@ -320,11 +327,12 @@ class WelcomePage(models.Model):
 
 class ThanksPage(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']
+                                'mkv', 'webm']#TODO asking from ui/ux
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     media = models.FileField(upload_to='thanks_page/medias', null=True, blank=True,
                              validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)])
+    # TODO boolean fields
     share_link = models.URLField(null=True, blank=True)
     instagram = models.URLField(null=True, blank=True)
     telegram = models.URLField(null=True, blank=True)

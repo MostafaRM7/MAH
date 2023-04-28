@@ -22,25 +22,6 @@ class ThanksPageSerializer(serializers.ModelSerializer):
             'questionnaire')
 
 
-# class QuestionnaireInfoSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = Questionnaire
-#         fields = ('id', 'name', 'is_active', 'has_timer', 'has_auto_start', 'pub_date', 'end_date', 'timer', 'folder',
-#                   'owner', 'uuid')
-#
-#     def validate(self, data):
-#         owner = data.get('owner')
-#         folder = data.get('folder')
-#
-#         if owner != folder.owner:
-#             raise serializers.ValidationError(
-#                 {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
-#                 status.HTTP_400_BAD_REQUEST
-#             )
-#         return data
-
-
 class PublicQuestionnaireSerializer(serializers.ModelSerializer):
     optional_questions = serializers.SerializerMethodField(method_name='optional_question_queryset')
     drop_down_questions = serializers.SerializerMethodField(method_name='drop_down_question_queryset')
@@ -142,29 +123,14 @@ class PublicQuestionnaireSerializer(serializers.ModelSerializer):
 
 
 class QuestionnaireSerializer(serializers.ModelSerializer):
-    optional_questions = serializers.SerializerMethodField(method_name='optional_question_queryset')
-    drop_down_questions = serializers.SerializerMethodField(method_name='drop_down_question_queryset')
-    text_answer_questions = serializers.SerializerMethodField(method_name='text_answer_question_queryset')
-    number_answer_questions = serializers.SerializerMethodField(method_name='number_answer_question_queryset')
-    integer_selective_questions = serializers.SerializerMethodField(method_name='integer_selective_question_queryset')
-    integer_range_questions = serializers.SerializerMethodField(method_name='integer_range_question_queryset')
-    picture_field_questions = serializers.SerializerMethodField(method_name='picture_field_question_queryset')
-    link_questions = serializers.SerializerMethodField(method_name='link_question_queryset')
-    file_questions = serializers.SerializerMethodField(method_name='file_question_queryset')
-    email_field_questions = serializers.SerializerMethodField(method_name='email_field_question_queryset')
-    question_groups = serializers.SerializerMethodField(method_name='question_group_queryset')
-    folder = serializers.PrimaryKeyRelatedField(queryset=Folder.objects.all())
-    owner = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
     welcome_page = WelcomePageSerializer(read_only=True)
     thanks_page = ThanksPageSerializer(read_only=True)
+    questions = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Questionnaire
         fields = ('id', 'name', 'is_active', 'has_timer', 'has_auto_start', 'pub_date', 'end_date', 'timer', 'folder',
-                  'owner', 'uuid', 'optional_questions', 'drop_down_questions', 'text_answer_questions',
-                  'number_answer_questions', 'integer_selective_questions', 'integer_range_questions',
-                  'picture_field_questions', 'link_questions', 'file_questions', 'email_field_questions',
-                  'question_groups', 'welcome_page', 'thanks_page')
+                  'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page')
 
     def optional_question_queryset(self, instance):
         questions = instance.questions.filter(question_type='optional')

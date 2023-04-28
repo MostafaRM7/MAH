@@ -5,15 +5,22 @@ from question_app.models import Folder
 
 
 class FolderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Folder
+        fields = ('id', 'name', 'questionnaires', 'owner')
+
+
+class UserFolderSerializer(serializers.ModelSerializer):
     questionnaires = general_serializers.QuestionnaireSerializer(many=True, read_only=True)
 
     class Meta:
         model = Folder
         fields = ('id', 'name', 'questionnaires')
+        read_only_fields = ('id', 'questionnaires')
 
 
 class UserSerializer(serializers.ModelSerializer):
-    folders = FolderSerializer(many=True)
+    folders = UserFolderSerializer(many=True)
 
     class Meta:
         model = get_user_model()
