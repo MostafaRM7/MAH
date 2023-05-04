@@ -22,11 +22,17 @@ class IsQuestionOwnerOrReadOnly(BasePermission):
             if request.user.is_authenticated:
                 return questionnaire in request.user.questionnaires.all() or request.user.is_staff
         else:
-            if request.method == 'POST':
-                return request.user.is_authenticated
-            else:
-                if request.user.is_authenticated:
-                    return questionnaire in request.user.questionnaires.all() or request.user.is_staff
+            if request.user.is_authenticated:
+                return questionnaire in request.user.questionnaires.all() or request.user.is_staff
+
+
+class ChangePlacementForOwnerOrStaff(BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            questionnaire = Questionnaire.objects.get(uuid=view.kwargs.get('questionnaire_uuid'))
+            if request.user.is_authenticated:
+                return questionnaire in request.user.questionnaires.all() or request.user.is_staff
+        return False
 
 
 class AnonPOSTOrOwner(BasePermission):

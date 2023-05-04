@@ -1,8 +1,11 @@
+from django.db.models import Q
 from rest_framework import viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from .permissions import IsQuestionOwnerOrReadOnly, IsQuestionnaireOwnerOrReadOnly, AnonPOSTOrOwner, \
-    IsPageOwnerOrReadOnly
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer
 from .question_app_serializers.general_serializers import *
 from .question_app_serializers.question_serializers import *
@@ -59,6 +62,7 @@ class OptionalQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -75,6 +79,7 @@ class DropDownQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -91,6 +96,7 @@ class SortQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -106,6 +112,7 @@ class TextAnswerQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -121,6 +128,7 @@ class NumberAnswerQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -136,6 +144,7 @@ class IntegerRangeQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -151,6 +160,7 @@ class IntegerSelectiveQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -166,6 +176,7 @@ class PictureFieldQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -181,6 +192,7 @@ class EmailFieldQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -196,6 +208,7 @@ class LinkQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -211,6 +224,7 @@ class FileQuestionViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -227,6 +241,7 @@ class QuestionGroupViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
 
@@ -252,9 +267,44 @@ class WelcomePageViewSet(viewsets.ModelViewSet):
     lookup_field = 'id'
     permission_classes = (IsPageOwnerOrReadOnly,)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
+        return context
+
 
 class ThanksPageViewSet(viewsets.ModelViewSet):
     queryset = ThanksPage.objects.all()
     serializer_class = ThanksPageSerializer
     lookup_field = 'id'
     permission_classes = (IsPageOwnerOrReadOnly,)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
+        return context
+
+
+class ChangeQuestionsPlacements(APIView):
+    permission_classes = (ChangePlacementForOwnerOrStaff,)
+
+    def post(self, request, questionnaire_uuid):
+        placements = request.data.get('placements')
+        for placement in placements:
+            question = get_object_or_404(Question, id=placement.get('question_id'),
+                                         questionnaire__uuid=questionnaire_uuid)
+            question.placement = int(placement.get('new_placement'))
+            question.save()
+        return Response(status=status.HTTP_200_OK)
+
+
+class SearchQuestionnaire(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        search_string = request.query_params.get('search')
+        if search_string:
+            questionnaires = request.user.questionnaires.filter(name__icontains=search_string)
+            serializer = QuestionnaireSerializer(questionnaires, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

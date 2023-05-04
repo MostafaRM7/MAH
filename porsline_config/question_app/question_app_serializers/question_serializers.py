@@ -12,31 +12,75 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ('question',)
 
     def child_question(self, instance):
-        if instance.question_type == 'optional':
+        """
+            Using serializers dynamically for each question type
+        """
+        question_type = instance.question_type
+        print(f'Called from Group {question_type}')
+        if question_type == 'optional':
             return OptionalQuestionSerializer(instance.optionalquestion).data
-        elif instance.question_type == 'drop_down':
+        elif question_type == 'drop_down':
             return DropDownQuestionSerializer(instance.dropdownquestion).data
-        elif instance.question_type == 'sort':
+        elif question_type == 'sort':
             return SortQuestionSerializer(instance.sortquestion).data
-        elif instance.question_type == 'text_answer':
+        elif question_type == 'text_answer':
             return TextAnswerQuestionSerializer(instance.textanswerquestion).data
-        elif instance.question_type == 'number_answer':
+        elif question_type == 'number_answer':
             return NumberAnswerQuestionSerializer(instance.numberanswerquestion).data
-        elif instance.question_type == 'integer_range':
+        elif question_type == 'integer_range':
             return IntegerRangeQuestionSerializer(instance.integerrangequestion).data
-        elif instance.question_type == 'integer_selective':
+        elif question_type == 'integer_selective':
             return IntegerSelectiveQuestionSerializer(instance.integerselectivequestion).data
-        elif instance.question_type == 'picture_field':
+        elif question_type == 'picture_field':
             return PictureFieldQuestionSerializer(instance.picturefieldquestion).data
-        elif instance.question_type == 'email_field':
+        elif question_type == 'email_field':
             return EmailFieldQuestionSerializer(instance.emailfieldquestion).data
-        elif instance.question_type == 'link':
+        elif question_type == 'link':
             return LinkQuestionSerializer(instance.linkquestion).data
-        elif instance.question_type == 'file':
+        elif question_type == 'file':
             return FileQuestionSerializer(instance.filequestion).data
-        elif instance.question_type == 'group':
+        elif question_type == 'group':
             return QuestionGroupSerializer(instance.questiongroup).data
-        return None
+
+
+class NoGroupQuestionSerializer(serializers.ModelSerializer):
+    question = serializers.SerializerMethodField(method_name='child_question')
+
+    class Meta:
+        model = Question
+        fields = ('question',)
+
+    def child_question(self, instance):
+        """
+            Using serializers dynamically for each question type
+        """
+        question_type = instance.question_type
+        if instance.group is None:
+            if question_type == 'optional':
+                return OptionalQuestionSerializer(instance.optionalquestion).data
+            elif question_type == 'drop_down':
+                return DropDownQuestionSerializer(instance.dropdownquestion).data
+            elif question_type == 'sort':
+                return SortQuestionSerializer(instance.sortquestion).data
+            elif question_type == 'text_answer':
+                return TextAnswerQuestionSerializer(instance.textanswerquestion).data
+            elif question_type == 'number_answer':
+                return NumberAnswerQuestionSerializer(instance.numberanswerquestion).data
+            elif question_type == 'integer_range':
+                return IntegerRangeQuestionSerializer(instance.integerrangequestion).data
+            elif question_type == 'integer_selective':
+                return IntegerSelectiveQuestionSerializer(instance.integerselectivequestion).data
+            elif question_type == 'picture_field':
+                return PictureFieldQuestionSerializer(instance.picturefieldquestion).data
+            elif question_type == 'email_field':
+                return EmailFieldQuestionSerializer(instance.emailfieldquestion).data
+            elif question_type == 'link':
+                return LinkQuestionSerializer(instance.linkquestion).data
+            elif question_type == 'file':
+                return FileQuestionSerializer(instance.filequestion).data
+            elif question_type == 'group':
+                return QuestionGroupSerializer(instance.questiongroup).data
+        return {"in group"}
 
 
 class OptionSerializer(serializers.ModelSerializer):
@@ -52,9 +96,10 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         model = OptionalQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
-            'is_required',
-            'show_number', 'media', 'multiple_choice', 'is_vertical', 'is_random_options', 'max_selected_options',
+            'is_required', 'show_number', 'media', 'multiple_choice', 'is_vertical', 'is_random_options',
+            'max_selected_options',
             'min_selected_options', 'show_number', 'additional_options', 'all_options', 'nothing_selected', 'options')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -106,7 +151,8 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
     @transaction.atomic()
     def create(self, validated_data):
         options_data = validated_data.pop('options')
-        optional_question = OptionalQuestion.objects.create(**validated_data)
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        optional_question = OptionalQuestion.objects.create(**validated_data, questionnaire=questionnaire)
         options = [Option(optional_question=optional_question, **option_data) for option_data in options_data]
         Option.objects.bulk_create(options)
         return optional_question
@@ -152,6 +198,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'multiple_choice', 'is_alphabetic_order', 'is_random_options',
             'max_selected_options', 'min_selected_options', 'options')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -159,12 +206,11 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
         multiple_choice = data.get('multiple_choice')
-        if request.user != questionnaire.owner:
-            raise serializers.ValidationError(
-                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
-                status.HTTP_400_BAD_REQUEST
-            )
-
+        # if request.user != questionnaire.owner:
+        #     raise serializers.ValidationError(
+        #         {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+        #         status.HTTP_400_BAD_REQUEST
+        #     )
         if multiple_choice:
             if max_selected_options is None or min_selected_options is None:
                 raise serializers.ValidationError(
@@ -193,7 +239,8 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
     @transaction.atomic()
     def create(self, validated_data):
         options_data = validated_data.pop('options')
-        drop_down_question = DropDownQuestion.objects.create(**validated_data)
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        drop_down_question = DropDownQuestion.objects.create(**validated_data, questionnaire=questionnaire)
         options = [DropDownOption(drop_down_question=drop_down_question, **option_data) for option_data in options_data]
         DropDownOption.objects.bulk_create(options)
         return drop_down_question
@@ -238,10 +285,21 @@ class SortQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'is_random_options', 'options')
+        read_only_fields = ('question_type', 'questionnaire')
+
+    def validate(self, data):
+        request = self.context.get('request')
+        questionnaire = data.get('questionnaire')
+        if request.user != questionnaire.owner:
+            raise serializers.ValidationError(
+                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
+                status.HTTP_400_BAD_REQUEST
+            )
 
     def create(self, validated_data):
         options_data = validated_data.pop('options')
-        sort_question = SortQuestion.objects.create(**validated_data)
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        sort_question = SortQuestion.objects.create(**validated_data, questionnaire=questionnaire)
         options = [SortOption(sort_question=sort_question, **option_data) for option_data in options_data]
         SortOption.objects.bulk_create(options)
         return sort_question
@@ -268,15 +326,6 @@ class SortQuestionSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
-    def validate(self, data):
-        request = self.context.get('request')
-        questionnaire = data.get('questionnaire')
-        if request.user != questionnaire.owner:
-            raise serializers.ValidationError(
-                {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
-                status.HTTP_400_BAD_REQUEST
-            )
-
 
 class TextAnswerQuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -285,6 +334,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'show_number', 'pattern', 'min', 'max')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -296,13 +346,17 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
                 {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
                 status.HTTP_400_BAD_REQUEST
             )
-
         if max_len < min_len:
             raise serializers.ValidationError(
                 {'max': 'مقدار حداقل طول پاسخ نمی تواند از حداکثر طول پاسخ بیشتر باشد'},
                 status.HTTP_400_BAD_REQUEST
             )
         return data
+
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        TextAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
 
 
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
@@ -312,6 +366,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'min', 'max')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -325,10 +380,15 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
             )
         if max_value < min_value:
             raise serializers.ValidationError(
-                {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باشد'},
+                {'max': 'مقدار حداقل مقدار نمی تواند از حداکثر مقدار بیشتر باشد'},
                 status.HTTP_400_BAD_REQUEST
             )
         return data
+
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        NumberAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
@@ -339,6 +399,7 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'shape', 'max'
         )
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -348,6 +409,12 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
                 {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
                 status.HTTP_400_BAD_REQUEST
             )
+        return data
+
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        IntegerSelectiveQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
@@ -358,6 +425,7 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'min', 'max', 'min_label', 'mid_label', 'max_label'
         )
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -376,6 +444,11 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
             )
         return data
 
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        IntegerRangeQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
+
 
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -384,6 +457,7 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -393,6 +467,12 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
                 {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
                 status.HTTP_400_BAD_REQUEST
             )
+        return data
+
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        PictureFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
@@ -402,6 +482,7 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -412,6 +493,11 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
                 status.HTTP_400_BAD_REQUEST
             )
         return data
+
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        EmailFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
@@ -421,6 +507,7 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -430,6 +517,11 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
                 {'questionnaire': 'شما صاحب این پرسشنامه نیستید'},
                 status.HTTP_400_BAD_REQUEST
             )
+
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        LinkQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
@@ -439,6 +531,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'max_volume')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -449,101 +542,22 @@ class FileQuestionSerializer(serializers.ModelSerializer):
                 status.HTTP_400_BAD_REQUEST
             )
 
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        FileQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
+
 
 class QuestionGroupSerializer(serializers.ModelSerializer):
-    optional_questions = serializers.SerializerMethodField(method_name='optional_question_queryset')
-    drop_down_questions = serializers.SerializerMethodField(method_name='drop_down_question_queryset')
-    text_answer_questions = serializers.SerializerMethodField(method_name='text_answer_question_queryset')
-    number_answer_questions = serializers.SerializerMethodField(method_name='number_answer_question_queryset')
-    integer_selective_questions = serializers.SerializerMethodField(method_name='integer_selective_question_queryset')
-    integer_range_questions = serializers.SerializerMethodField(method_name='integer_range_question_queryset')
-    picture_field_questions = serializers.SerializerMethodField(method_name='picture_field_question_queryset')
-    link_questions = serializers.SerializerMethodField(method_name='link_question_queryset')
-    file_questions = serializers.SerializerMethodField(method_name='file_question_queryset')
-    email_field_questions = serializers.SerializerMethodField(method_name='email_field_question_queryset')
+    child_questions = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = QuestionGroup
         fields = (
-            'id', 'questionnaire', 'title', 'question_text', 'placement', 'group',
-            'is_required',
-            'show_number', 'media', 'button_shape', 'button_text', 'optional_questions',
-            'drop_down_questions', 'text_answer_questions', 'number_answer_questions', 'integer_selective_questions',
-            'integer_range_questions', 'picture_field_questions', 'link_questions', 'file_questions',
-            'email_field_questions'
+            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
+            'show_number', 'media', 'button_shape', 'is_solid_button', 'button_text', 'child_questions'
         )
-
-    def optional_question_queryset(self, instance):
-        questions = instance.child_questions.filter(question_type='optional')
-        if len(questions) > 0:
-            optional_questions = OptionalQuestion.objects.filter(question_ptr__in=questions)
-            return OptionalQuestionSerializer(optional_questions, many=True).data
-        return None
-
-    def drop_down_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='drop_down')
-        if len(questions) > 0:
-            drop_down_questions = DropDownQuestion.objects.filter(question_ptr__in=questions)
-            return DropDownQuestionSerializer(drop_down_questions, many=True).data
-        return None
-
-    def text_answer_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='text_answer')
-        if len(questions) > 0:
-            text_answer_questions = TextAnswerQuestion.objects.filter(question_ptr__in=questions)
-            return TextAnswerQuestionSerializer(text_answer_questions, many=True).data
-        return None
-
-    def number_answer_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='number_answer')
-        if len(questions) > 0:
-            number_answer_questions = NumberAnswerQuestion.objects.filter(question_ptr__in=questions)
-            return NumberAnswerQuestionSerializer(number_answer_questions, many=True).data
-        return None
-
-    def integer_selective_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='integer_selective')
-        if len(questions) > 0:
-            integer_selective_questions = IntegerSelectiveQuestion.objects.filter(question_ptr__in=questions)
-            return IntegerSelectiveQuestionSerializer(integer_selective_questions, many=True).data
-        return None
-
-    def integer_range_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='integer_range')
-        if len(questions) > 0:
-            integer_range_questions = IntegerRangeQuestion.objects.filter(question_ptr__in=questions)
-            return IntegerRangeQuestionSerializer(integer_range_questions, many=True).data
-        return None
-
-    def picture_field_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='picture_field')
-        if len(questions) > 0:
-            picture_field_questions = PictureFieldQuestion.objects.filter(question_ptr__in=questions)
-            return PictureFieldQuestionSerializer(picture_field_questions, many=True).data
-        return None
-
-    def link_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='link')
-        if len(questions) > 0:
-            link_questions = LinkQuestion.objects.filter(question_ptr__in=questions)
-            return LinkQuestionSerializer(link_questions, many=True).data
-        return None
-
-    def file_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='file_field')
-        if len(questions) > 0:
-            file_field_questions = FileQuestion.objects.filter(question_ptr__in=questions)
-            return FileQuestionSerializer(file_field_questions, many=True).data
-        return None
-
-    def email_field_question_queryset(self, instance):
-        questions = instance.child_questions.all().filter(question_type='email_field')
-        if len(questions) > 0:
-            print(questions)
-            email_questions = EmailFieldQuestion.objects.filter(question_ptr__in=questions)
-            print(email_questions)
-            return EmailFieldQuestionSerializer(email_questions, many=True).data
-        return None
+        read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -554,3 +568,8 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
                 status.HTTP_400_BAD_REQUEST
             )
         return data
+
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        QuestionGroup.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data

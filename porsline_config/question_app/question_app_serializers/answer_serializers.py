@@ -238,11 +238,12 @@ class AnswerSerializer(serializers.ModelSerializer):
             max_size = file_question.max_volume
             if answer is not None:
                 if file is not None:
-                    if file.size > max_size:
-                        raise serializers.ValidationError(
-                            {'question': f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
-                            status.HTTP_400_BAD_REQUEST
-                        )
+                    if max_size:
+                        if file.size > max_size:
+                            raise serializers.ValidationError(
+                                {'question': f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
+                                status.HTTP_400_BAD_REQUEST
+                            )
                 else:
                     raise serializers.ValidationError(
                         {'file': 'پاسخ به این سوال (آپلود فایل) اجباری است'},

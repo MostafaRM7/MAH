@@ -6,27 +6,28 @@ from django.db import models
 
 
 class Folder(models.Model):
-    owner = models.ForeignKey(get_user_model(), default=None, null=True, on_delete=models.CASCADE,
-                              related_name='folders')
-    name = models.CharField(max_length=255)
+    owner = models.ForeignKey(get_user_model(), default=None, null=True, on_delete=models.SET_NULL,
+                              related_name='folders', verbose_name='صاحب')
+    name = models.CharField(max_length=255, verbose_name='نام')
 
     def __str__(self):
         return self.name
 
 
 class Questionnaire(models.Model):
-    name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
-    is_delete = models.BooleanField(default=False)
-    has_timer = models.BooleanField(default=False)
-    has_auto_start = models.BooleanField(default=False)
-    pub_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    timer = models.DurationField(null=True, blank=True)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='questionnaires')  # TODO set null
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,
-                              related_name='questionnaires')  # TODO set null
-    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
+    name = models.CharField(max_length=255, verbose_name='نام')
+    is_active = models.BooleanField(default=False, verbose_name='فعال/غیرفعال')
+    is_delete = models.BooleanField(default=False, verbose_name='حذف شده/نشده')
+    pub_date = models.DateField(null=True, blank=True, auto_now_add=True, verbose_name='تاریخ انتشار')
+    end_date = models.DateField(null=True, blank=True, verbose_name='تاریخ پایان')
+    timer = models.DurationField(null=True, blank=True, verbose_name='تایمر')
+    show_question_in_pages = models.BooleanField(default=True, verbose_name='نشان دادن سوال ها در صفحات مجزا')
+    progress_bar = models.BooleanField(default=True, verbose_name='نشان دادن نوار پیشرفت')
+    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, related_name='questionnaires', null=True, blank=True,
+                               verbose_name='پوشه')
+    owner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL,
+                              related_name='questionnaires', null=True, blank=True, verbose_name='صاحب')
+    uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
 
     def __str__(self):
         return self.name
@@ -38,7 +39,7 @@ class Questionnaire(models.Model):
 
 class Question(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']  # TODO formats?
+                                'mkv', 'webm']  # TODO - formats?
     QUESTION_TYPES = (
         ('optional', 'Optional'),
         ('drop_down', 'Drop Down'),
@@ -54,36 +55,44 @@ class Question(models.Model):
         ('group', 'Group'),
     )
 
-    placement = models.PositiveIntegerField(null=True, blank=True)
-    title = models.CharField(max_length=255)
-    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions')
-    question_text = models.TextField()
-    question_type = models.CharField(max_length=50, choices=QUESTION_TYPES)#TODO editable false
-    is_required = models.BooleanField(default=False)
+    placement = models.PositiveIntegerField(null=True, blank=True, verbose_name='جایگاه')
+    title = models.CharField(max_length=255, verbose_name='عنوان')
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions',
+                                      verbose_name='پرسشنامه')
+    question_text = models.TextField(verbose_name='متن سوال')
+    question_type = models.CharField(max_length=50, choices=QUESTION_TYPES, editable=False, verbose_name='نوع سوال')
+    is_required = models.BooleanField(default=False, verbose_name='اجباری/عیراجباری')
     media = models.FileField(upload_to='uploads/question_media', null=True, blank=True,
-                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)])
-    show_number = models.BooleanField(null=True, blank=True, default=True)#TODO remove null , blank
+                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)],
+                             verbose_name='تصویر یا فیلم')
+    show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
     group = models.ForeignKey('QuestionGroup', on_delete=models.SET_NULL, null=True, blank=True,
-                              related_name='child_questions')
+                              related_name='child_questions', verbose_name='گروه')
+
+    class Meta:
+        ordering = ('placement',)
 
     def clean(self):
         super().clean()
-        if self.media.size > 1024 * 1024 * 10:
-            raise ValidationError('حجم فایل آپلود شده باید کمتر از ۱۰ مگابایت باشد')
+        try:
+            if self.media.size > 1024 * 1024 * 10:
+                raise ValidationError('حجم فایل آپلود شده باید کمتر از ۱۰ مگابایت باشد')
+        except ValueError:
+            pass
 
     def __str__(self):
         return f'{self.questionnaire} - {self.question_type}'
 
 
 class OptionalQuestion(Question):
-    multiple_choice = models.BooleanField(default=False)
-    additional_options = models.BooleanField(default=False)
-    max_selected_options = models.IntegerField(null=True, blank=True)#TODO positve
-    min_selected_options = models.IntegerField(null=True, blank=True)#TODO positve
-    all_options = models.BooleanField(default=False, null=True, blank=True)
-    nothing_selected = models.BooleanField(default=False, null=True, blank=True)
-    is_vertical = models.BooleanField(default=False, null=True, blank=True)
-    is_random_options = models.BooleanField(default=False, null=True, blank=True)
+    multiple_choice = models.BooleanField(default=False, verbose_name='چند انتخابی')
+    additional_options = models.BooleanField(default=False, verbose_name='گزینه های اضافی')
+    max_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر گزینه انتخابی')
+    min_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداقل گزینه انتخابی')
+    all_options = models.BooleanField(default=False, null=True, blank=True, verbose_name='انتخاب همه گزینه ها')
+    nothing_selected = models.BooleanField(default=False, null=True, blank=True, verbose_name='هیچ کدام')
+    is_vertical = models.BooleanField(default=False, null=True, blank=True, verbose_name='نمایش عمودی گزینه ها')
+    is_random_options = models.BooleanField(default=False, null=True, blank=True, verbose_name='ترتیب تصادفی گزینه ها')
 
     def save(self, *args, **kwargs):
         self.question_type = 'optional'
@@ -94,19 +103,20 @@ class OptionalQuestion(Question):
 
 
 class Option(models.Model):
-    optional_question = models.ForeignKey(OptionalQuestion, on_delete=models.CASCADE, related_name='options')
-    text = models.CharField(max_length=250)
+    optional_question = models.ForeignKey(OptionalQuestion, on_delete=models.CASCADE, related_name='options',
+                                          verbose_name='سوال چند گزینه ای ')
+    text = models.CharField(max_length=250, verbose_name='متن گزینه')
 
     def __str__(self):
         return f'{self.optional_question} - {self.text}'
 
 
 class DropDownQuestion(Question):
-    multiple_choice = models.BooleanField(default=False)
-    max_selected_options = models.PositiveIntegerField(null=True, blank=True)
-    min_selected_options = models.PositiveIntegerField(null=True, blank=True)
-    is_alphabetic_order = models.BooleanField(default=False, null=True, blank=True)
-    is_random_options = models.BooleanField(default=False, null=True, blank=True)
+    multiple_choice = models.BooleanField(default=False, verbose_name='چند انتخابی')
+    max_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر گزینه انتخابی')
+    min_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداقل گزینه انتخابی')
+    is_alphabetic_order = models.BooleanField(default=False, verbose_name='مرتب سازی بر اساس حروف الفبا')
+    is_random_options = models.BooleanField(default=False, verbose_name='ترتیب تصادفی گزینه ها')
 
     def save(self, *args, **kwargs):
         self.question_type = 'drop_down'
@@ -117,15 +127,16 @@ class DropDownQuestion(Question):
 
 
 class DropDownOption(models.Model):
-    drop_down_question = models.ForeignKey(DropDownQuestion, on_delete=models.CASCADE, related_name='options')
-    text = models.CharField(max_length=250)
+    drop_down_question = models.ForeignKey(DropDownQuestion, on_delete=models.CASCADE, related_name='options',
+                                           verbose_name='سوال کشویی')
+    text = models.CharField(max_length=250, verbose_name='متن گزینه')
 
     def __str__(self):
         return f'{self.drop_down_question} - {self.text}'
 
 
 class SortQuestion(Question):
-    is_random_options = models.BooleanField(default=False, null=True, blank=True)
+    is_random_options = models.BooleanField(default=False, verbose_name='ترتیب تصادفی گزینه ها')
 
     def save(self, *args, **kwargs):
         self.question_type = 'sort'
@@ -136,9 +147,9 @@ class SortQuestion(Question):
 
 
 class SortOption(models.Model):
-    sort_question = models.ForeignKey('SortQuestion', on_delete=models.CASCADE, related_name='options')
-    text = models.CharField(max_length=250)
-    placement = models.PositiveIntegerField()
+    sort_question = models.ForeignKey('SortQuestion', on_delete=models.CASCADE, related_name='options', verbose_name='سوال اولویت دهی')
+    text = models.CharField(max_length=250, verbose_name='متن گزینه')
+    placement = models.PositiveIntegerField(verbose_name='اولویت')
 
 
 class TextAnswerQuestion(Question):
@@ -161,9 +172,9 @@ class TextAnswerQuestion(Question):
         (ENGLISH_LETTERS, 'English Letters')
 
     )
-    pattern = models.CharField(max_length=50, choices=PATTERNS, default=FREE)
-    min = models.PositiveIntegerField(default=10, null=True, blank=True)# TODO remove default
-    max = models.PositiveIntegerField(default=1000, null=True, blank=True)# TODO remove default
+    pattern = models.CharField(max_length=50, choices=PATTERNS, default=FREE, verbose_name='الگوی پاسخ')
+    min = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداقل طول جواب')
+    max = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر طول جواب')
 
     def save(self, *args, **kwargs):
         self.question_type = 'text_answer'
@@ -174,8 +185,8 @@ class TextAnswerQuestion(Question):
 
 
 class NumberAnswerQuestion(Question):
-    min = models.IntegerField(default=0, null=True, blank=True)# TODO remove default
-    max = models.IntegerField(default=1000, null=True, blank=True)# TODO remove default
+    min = models.IntegerField(null=True, blank=True, verbose_name='حداقل مقدار')
+    max = models.IntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
 
     def save(self, *args, **kwargs):
         self.question_type = 'number_answer'
@@ -192,11 +203,11 @@ class IntegerRangeQuestion(Question):
         (ZERO_CHOICE, '1'),
         (ONE_CHOICE, '0'),
     ]
-    min = models.PositiveIntegerField(choices=MIN_CHOICES, default=ONE_CHOICE, null=True, blank=True)#TODO remove , null=True, blank=True
-    max = models.PositiveIntegerField(default=5, null=True, blank=True)# TODO remove default
-    min_label = models.CharField(max_length=50, null=True, blank=True)
-    mid_label = models.CharField(max_length=50, null=True, blank=True)
-    max_label = models.CharField(max_length=50, null=True, blank=True)
+    min = models.PositiveIntegerField(choices=MIN_CHOICES, default=ONE_CHOICE, verbose_name='حداقل مقدار')
+    max = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
+    min_label = models.CharField(max_length=50, null=True, blank=True, verbose_name='برچسب چپ')
+    mid_label = models.CharField(max_length=50, null=True, blank=True, verbose_name='برچسب وسط')
+    max_label = models.CharField(max_length=50, null=True, blank=True, verbose_name='برچسب راست')
 
     def save(self, *args, **kwargs):
         self.question_type = 'integer_range'
@@ -217,9 +228,9 @@ class IntegerSelectiveQuestion(Question):
         (LIKE, 'Like'),
         (CHECK_MARK, 'Check Mark'),
     ]
-    #TODO asking from ui/ux
-    shape = models.CharField(choices=STYLE_CHOICES, default=STAR, max_length=2)
-    max = models.PositiveIntegerField(default=5, null=True, blank=True) # TODO default
+    # TODO asking from ui/ux for pic background
+    shape = models.CharField(choices=STYLE_CHOICES, default=STAR, max_length=2, verbose_name='شکل دکمه')
+    max = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
 
     def save(self, *args, **kwargs):
         self.question_type = 'integer_selective'
@@ -259,7 +270,7 @@ class LinkQuestion(Question):
 
 
 class FileQuestion(Question):
-    max_volume = models.PositiveIntegerField(default=5, null=True, blank=True)  # In MB # TODO remove default
+    max_volume = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر حجم')
 
     def save(self, *args, **kwargs):
         self.question_type = 'file'
@@ -270,17 +281,18 @@ class FileQuestion(Question):
 
 
 class AnswerSet(models.Model):
-    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='answer_set') # TODO Protect on_delete
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.PROTECT,
+                                      related_name='answer_set', verbose_name='پرسشنامه')
 
     def __str__(self):
         return f'{self.questionnaire} - AnswerSet'
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
-    answer_set = models.ForeignKey(AnswerSet, on_delete=models.CASCADE, related_name='answers')
-    answer = models.JSONField()
-    file = models.FileField(upload_to='files/', null=True, blank=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers', verbose_name='سوال')
+    answer_set = models.ForeignKey(AnswerSet, on_delete=models.CASCADE, related_name='answers', verbose_name='دسته جواب')
+    answer = models.JSONField(verbose_name='جواب')
+    file = models.FileField(upload_to='files/', null=True, blank=True, verbose_name='فایل')
 
     def __str__(self):
         return f'{self.answer_set} - {self.question}'
@@ -290,14 +302,14 @@ class QuestionGroup(Question):
     SHARP = 'sharp'
     ROUND = 'round'
     OVAL = 'oval'
-    #TODO Button colors
     BUTTON_SHAPES = (
         (SHARP, 'Sharp corners'),
         (ROUND, 'Round corners'),
         (OVAL, 'Oval')
     )
-    button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND)
-    button_text = models.CharField(max_length=100)
+    button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND, verbose_name='شکل دکمه')
+    is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')
+    button_text = models.CharField(max_length=100, verbose_name='متن دکمه')
 
     def save(self, *args, **kwargs):
         self.is_required = False
@@ -307,7 +319,7 @@ class QuestionGroup(Question):
 
 class WelcomePage(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']  #TODO asking from ui/ux
+                                'mkv', 'webm']  # TODO asking from ui/ux
     SHARP = 'sharp'
     ROUND = 'round'
     OVAL = 'oval'
@@ -315,28 +327,27 @@ class WelcomePage(models.Model):
         (SHARP, 'Sharp corners'),
         (ROUND, 'Round corners'),
         (OVAL, 'Oval')
-    )#TODO Button colors
-    title = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
+    )
+    title = models.CharField(max_length=255, verbose_name='عنوان')
+    description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
     media = models.FileField(upload_to='welcome_page/medias', null=True, blank=True,
-                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)])
-    button_text = models.CharField(max_length=100)
-    button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND)
-    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='welcome_page')
-
+                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)], verbose_name='تصویر یا فیلم')
+    is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')
+    button_text = models.CharField(max_length=100, verbose_name='متن دکمه')
+    button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND, verbose_name='شکل دکمه')
+    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='welcome_page', verbose_name='پرسشنامه')
 
 class ThanksPage(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']#TODO asking from ui/ux
-    title = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
+                                'mkv', 'webm']  # TODO asking from ui/ux
+    title = models.CharField(max_length=255, verbose_name='عنوان')
+    description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
     media = models.FileField(upload_to='thanks_page/medias', null=True, blank=True,
-                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)])
-    # TODO boolean fields
-    share_link = models.URLField(null=True, blank=True)
-    instagram = models.URLField(null=True, blank=True)
-    telegram = models.URLField(null=True, blank=True)
-    whatsapp = models.URLField(null=True, blank=True)
-    eitaa = models.URLField(null=True, blank=True)
-    sorush = models.URLField(null=True, blank=True)
-    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='thanks_page')
+                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)], verbose_name='تصویر یا فیلم')
+    share_link = models.BooleanField(default=False, verbose_name='اشتراک گذاری لینک')
+    instagram = models.BooleanField(default=False, verbose_name='اشتراک در اینستاگرام')
+    telegram = models.BooleanField(default=False, verbose_name='اشتراک در تلگرام')
+    whatsapp = models.BooleanField(default=False, verbose_name='اشتراک در واتساپ')
+    eitaa = models.BooleanField(default=False, verbose_name='اشتراک در ایتا')
+    sorush = models.BooleanField(default=False, verbose_name='اشتراک در سروش')
+    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='thanks_page', verbose_name='پرسشنامه')

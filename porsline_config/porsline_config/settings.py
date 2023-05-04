@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'question_app',
     'user_app',
     'debug_toolbar',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
@@ -83,8 +84,12 @@ WSGI_APPLICATION = 'porsline_config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': dotenv.get_key('.env', 'DB_NAME'),
+        'USER': dotenv.get_key('.env', 'DB_USERNAME'),
+        'PASSWORD': dotenv.get_key('.env', 'DB_PASSWORD'),
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
@@ -111,9 +116,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fa-ir'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Iran'
 
 USE_I18N = True
 
@@ -132,8 +137,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
