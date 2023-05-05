@@ -118,6 +118,8 @@ class AnswerSerializer(serializers.ModelSerializer):
                         {'question': 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
+        # elif question.question_type == "sort":
+        #     pass
         elif question.question_type == "text_answer":
             text_answer_question: TextAnswerQuestion = question.textanswerquestion
             max_length = text_answer_question.max
@@ -258,6 +260,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerSet
         fields = ('id', 'questionnaire', 'answers')
+        read_only_fields = ('questionnaire',)
 
     def validate(self, data):
         questionnaire = data.get('questionnaire')
@@ -283,7 +286,8 @@ class AnswerSetSerializer(serializers.ModelSerializer):
     @transaction.atomic()
     def create(self, validated_data):
         answers_data = validated_data.pop('answers')
-        answer_set = AnswerSet.objects.create(**validated_data)
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire)
         answers = [Answer(answer_set=answer_set, **answer_data) for answer_data in answers_data]
         Answer.objects.bulk_create(answers)
         return answer_set

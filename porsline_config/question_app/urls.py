@@ -22,8 +22,8 @@ questionnaire_router.register('integerrange-questions', views.IntegerRangeQuesti
                               basename='integerrange_questions')
 questionnaire_router.register('integerselective-questions', views.IntegerSelectiveQuestionViewSet,
                               basename='integerselective_qustions')
-questionnaire_router.register('picture-questions', views.IntegerSelectiveQuestionViewSet,
-                              basename='integerselective_qustions')
+questionnaire_router.register('picture-questions', views.PictureFieldQuestionViewSet,
+                              basename='picture_qustions')
 questionnaire_router.register('email-questions', views.EmailFieldQuestionViewSet, basename='email_questions')
 questionnaire_router.register('link-questions', views.LinkQuestionViewSet, basename='link_questions')
 questionnaire_router.register('file-questions', views.FileQuestionViewSet, basename='file_questions')

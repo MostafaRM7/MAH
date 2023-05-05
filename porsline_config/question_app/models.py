@@ -149,7 +149,6 @@ class SortQuestion(Question):
 class SortOption(models.Model):
     sort_question = models.ForeignKey('SortQuestion', on_delete=models.CASCADE, related_name='options', verbose_name='سوال اولویت دهی')
     text = models.CharField(max_length=250, verbose_name='متن گزینه')
-    placement = models.PositiveIntegerField(verbose_name='اولویت')
 
 
 class TextAnswerQuestion(Question):

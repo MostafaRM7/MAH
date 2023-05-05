@@ -22,11 +22,7 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     permission_classes = (AllowAny,)
 
 
-class QuestionnaireViewSet(viewsets.mixins.CreateModelMixin,
-                           viewsets.mixins.RetrieveModelMixin,
-                           viewsets.mixins.DestroyModelMixin,
-                           viewsets.mixins.ListModelMixin,
-                           viewsets.GenericViewSet):
+class QuestionnaireViewSet(viewsets.ModelViewSet):
     """
         This view is for creating, retrieving, deleting and listing questionnaires
     """
@@ -46,7 +42,7 @@ class QuestionnaireViewSet(viewsets.mixins.CreateModelMixin,
         instance.is_delete = True
         instance.save()
         serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
 class OptionalQuestionViewSet(viewsets.ModelViewSet):
@@ -260,6 +256,10 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
             questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'questionnaire_uuid': self.kwargs.get('questionnaire_uuid')})
+
 
 class WelcomePageViewSet(viewsets.ModelViewSet):
     queryset = WelcomePage.objects.all()
@@ -304,7 +304,12 @@ class SearchQuestionnaire(APIView):
     def get(self, request):
         search_string = request.query_params.get('search')
         if search_string:
-            questionnaires = request.user.questionnaires.filter(name__icontains=search_string)
-            serializer = QuestionnaireSerializer(questionnaires, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            if not request.user.is_staff:
+                questionnaires = request.user.questionnaires.filter(name__icontains=search_string)
+                serializer = QuestionnaireSerializer(questionnaires, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                questionnaires = Questionnaire.objects.filter(name__icontains=search_string)
+                serializer = QuestionnaireSerializer(questionnaires, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)

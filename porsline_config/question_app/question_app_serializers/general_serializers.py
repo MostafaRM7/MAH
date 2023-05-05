@@ -13,6 +13,7 @@ class WelcomePageSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         WelcomePage.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
 
 
 class ThanksPageSerializer(serializers.ModelSerializer):
@@ -26,6 +27,7 @@ class ThanksPageSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         ThanksPage.objects.create(**validated_data, questionnaire=questionnaire)
+        return validated_data
 
 
 class PublicQuestionnaireSerializer(serializers.ModelSerializer):
@@ -45,18 +47,20 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('id', 'name', 'is_active', 'pub_date', 'end_date', 'timer', 'folder',
-                  'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page')
-        read_only_fields = ('owner', 'questions')
+        fields = (
+            'id', 'name', 'is_active', 'pub_date', 'end_date', 'timer', 'show_question_in_pages', 'progress_bar',
+            'folder', 'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page')
+        read_only_fields = ('owner', 'questions', 'welcome_page', 'thanks_page')
 
     def validate(self, data):
         folder = data.get('folder')
         request = self.context.get('request')
-        if request.user != folder.owner:
-            raise serializers.ValidationError(
-                {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
-                status.HTTP_400_BAD_REQUEST
-            )
+        if folder:
+            if request.user != folder.owner:
+                raise serializers.ValidationError(
+                    {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         return data
 
     def create(self, validated_data):
