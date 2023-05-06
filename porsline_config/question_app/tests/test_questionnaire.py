@@ -2,7 +2,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from model_bakery import baker
 from rest_framework import status
-
+from rest_framework.response import Response
 from question_app.models import Questionnaire, OptionalQuestion, Folder
 
 VALID_DATA = {
@@ -186,7 +186,7 @@ class TestRetrievingPublicQuestionnaire:
 
 
 @pytest.mark.django_db
-class TestSearching:
+class TestSearchingQuestionnaire:
 
     def test_if_user_is_owner_return_200(self, api_client, authenticate):
         uo = baker.make(get_user_model())

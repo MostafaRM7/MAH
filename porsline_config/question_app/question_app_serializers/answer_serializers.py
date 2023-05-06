@@ -270,14 +270,14 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         for question in questions:
             if question.questionnaire != questionnaire:
                 raise serializers.ValidationError(
-                    {'questionnaire': f'پرسشنامه سوالی با آی دی {question.id}ندارد'},
+                    {'questionnaire': f'پرسشنامه سوالی با عنوان {question.title}ندارد'},
                     status.HTTP_400_BAD_REQUEST
                 )
             else:
                 is_required = question.is_required
                 if is_required and question not in answered_questions:
                     raise serializers.ValidationError(
-                        {'question': f'پاسخ به سوال با آی دی {question.id}اجباری است'},
+                        {'question': f'پاسخ به سوال با عنوان {question.title}اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
 
