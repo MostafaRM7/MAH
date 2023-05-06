@@ -1,4 +1,3 @@
-from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
@@ -242,12 +241,9 @@ class QuestionGroupViewSet(viewsets.ModelViewSet):
 
 
 class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
-                       viewsets.mixins.RetrieveModelMixin,
-                       viewsets.mixins.DestroyModelMixin,
                        viewsets.mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = AnswerSetSerializer
-    lookup_field = 'id'
 
     permission_classes = (AnonPOSTOrOwner,)
 
@@ -259,6 +255,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'questionnaire_uuid': self.kwargs.get('questionnaire_uuid')})
+        return context
 
 
 class WelcomePageViewSet(viewsets.ModelViewSet):

@@ -147,7 +147,8 @@ class SortQuestion(Question):
 
 
 class SortOption(models.Model):
-    sort_question = models.ForeignKey('SortQuestion', on_delete=models.CASCADE, related_name='options', verbose_name='سوال اولویت دهی')
+    sort_question = models.ForeignKey('SortQuestion', on_delete=models.CASCADE, related_name='options',
+                                      verbose_name='سوال اولویت دهی')
     text = models.CharField(max_length=250, verbose_name='متن گزینه')
 
 
@@ -289,7 +290,8 @@ class AnswerSet(models.Model):
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers', verbose_name='سوال')
-    answer_set = models.ForeignKey(AnswerSet, on_delete=models.CASCADE, related_name='answers', verbose_name='دسته جواب')
+    answer_set = models.ForeignKey(AnswerSet, on_delete=models.CASCADE, related_name='answers',
+                                   verbose_name='دسته جواب')
     answer = models.JSONField(verbose_name='جواب')
     file = models.FileField(upload_to='files/', null=True, blank=True, verbose_name='فایل')
 
@@ -330,11 +332,14 @@ class WelcomePage(models.Model):
     title = models.CharField(max_length=255, verbose_name='عنوان')
     description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
     media = models.FileField(upload_to='welcome_page/medias', null=True, blank=True,
-                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)], verbose_name='تصویر یا فیلم')
+                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)],
+                             verbose_name='تصویر یا فیلم')
     is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')
     button_text = models.CharField(max_length=100, verbose_name='متن دکمه')
     button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND, verbose_name='شکل دکمه')
-    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='welcome_page', verbose_name='پرسشنامه')
+    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='welcome_page',
+                                         verbose_name='پرسشنامه')
+
 
 class ThanksPage(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
@@ -342,11 +347,13 @@ class ThanksPage(models.Model):
     title = models.CharField(max_length=255, verbose_name='عنوان')
     description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
     media = models.FileField(upload_to='thanks_page/medias', null=True, blank=True,
-                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)], verbose_name='تصویر یا فیلم')
+                             validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)],
+                             verbose_name='تصویر یا فیلم')
     share_link = models.BooleanField(default=False, verbose_name='اشتراک گذاری لینک')
     instagram = models.BooleanField(default=False, verbose_name='اشتراک در اینستاگرام')
     telegram = models.BooleanField(default=False, verbose_name='اشتراک در تلگرام')
     whatsapp = models.BooleanField(default=False, verbose_name='اشتراک در واتساپ')
     eitaa = models.BooleanField(default=False, verbose_name='اشتراک در ایتا')
     sorush = models.BooleanField(default=False, verbose_name='اشتراک در سروش')
-    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='thanks_page', verbose_name='پرسشنامه')
+    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='thanks_page',
+                                         verbose_name='پرسشنامه')

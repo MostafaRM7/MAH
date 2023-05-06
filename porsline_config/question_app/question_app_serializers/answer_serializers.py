@@ -263,7 +263,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         read_only_fields = ('questionnaire',)
 
     def validate(self, data):
-        questionnaire = data.get('questionnaire')
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         answers = data.get('answers')
         questions = questionnaire.questions.all()
         answered_questions = [answer.get('question') for answer in answers]

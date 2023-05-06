@@ -16,7 +16,6 @@ class QuestionSerializer(serializers.ModelSerializer):
             Using serializers dynamically for each question type
         """
         question_type = instance.question_type
-        print(f'Called from Group {question_type}')
         if question_type == 'optional':
             return OptionalQuestionSerializer(instance.optionalquestion).data
         elif question_type == 'drop_down':
@@ -102,8 +101,6 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
-        request = self.context.get('request')
-        questionnaire = data.get('questionnaire')
         additional_options = data.get('additional_options')
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
@@ -196,8 +193,6 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
-        request = self.context.get('request')
-        questionnaire = data.get('questionnaire')
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
         multiple_choice = data.get('multiple_choice')
@@ -318,8 +313,6 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
         read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
-        request = self.context.get('request')
-        questionnaire = data.get('questionnaire')
         max_len = data.get('max')
         min_len = data.get('min')
         if max_len < min_len:
@@ -345,8 +338,6 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
-        request = self.context.get('request')
-        questionnaire = data.get('questionnaire')
         max_value = data.get('max')
         min_value = data.get('min')
         if max_value < min_value:
@@ -389,8 +380,6 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
-        request = self.context.get('request')
-        questionnaire = data.get('questionnaire')
         max_value = data.get('max')
         min_value = data.get('min')
         if max_value < min_value:
