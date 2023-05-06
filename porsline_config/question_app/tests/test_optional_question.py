@@ -8,10 +8,10 @@ VALID_DATA = {
     "title": "Optional question",
     "question_text": "This is optional question",
     "placement": 8,
-    "group": "",
+    "group": None,
     "is_required": True,
     "show_number": True,
-    "media": "",
+    "media": None,
     "multiple_choice": True,
     "is_vertical": True,
     "is_random_options": False,
@@ -134,14 +134,12 @@ class TestCreatingQuestion:
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
-    # TODO - dummy data
-    @pytest.mark.skip
     def test_if_user_is_allowed_and_data_valid_returns_201(self, api_client, authenticate):
         u = baker.make(get_user_model(), is_staff=True)
         authenticate(u)
         qn = baker.make(Questionnaire)
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/optional-questions/', VALID_DATA)
+        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/optional-questions/', VALID_DATA, format='json')
 
         assert res.status_code == status.HTTP_201_CREATED
 

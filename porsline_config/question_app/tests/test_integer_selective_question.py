@@ -1,39 +1,20 @@
 import pytest
 from django.contrib.auth import get_user_model
-from rest_framework import status
 from model_bakery import baker
+from rest_framework import status
+
 from question_app.models import Questionnaire, IntegerSelectiveQuestion
 
 VALID_DATA = {
-    "title": "Optional question",
-    "question_text": "This is optional question",
-    "placement": 8,
-    "group": "",
-    "is_required": True,
+    "title": "Integer selective",
+    "question_text": "This is integer selective question",
+    "placement": 5,
+    "group": None,
+    "is_required": False,
     "show_number": True,
-    "media": "",
-    "multiple_choice": True,
-    "is_vertical": True,
-    "is_random_options": False,
-    "max_selected_options": 5,
-    "min_selected_options": 2,
-    "additional_options": True,
-    "all_options": True,
-    "nothing_selected": True,
-    "options": [
-        {
-            "text": "option 1"
-        },
-        {
-            "text": "option 2"
-        },
-        {
-            "text": "همه گزینه ها"
-        },
-        {
-            "text": "هیج کدام"
-        }
-    ]
+    "media": None,
+    "shape": "H",
+    "max": 5
 }
 
 
@@ -134,14 +115,12 @@ class TestCreatingQuestion:
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
-    # TODO - dummy data
-    @pytest.mark.skip
     def test_if_user_is_allowed_and_data_valid_returns_201(self, api_client, authenticate):
         u = baker.make(get_user_model(), is_staff=True)
         authenticate(u)
         qn = baker.make(Questionnaire)
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/integerselective-questions/', VALID_DATA)
+        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/integerselective-questions/', VALID_DATA, format='json')
 
         assert res.status_code == status.HTTP_201_CREATED
 

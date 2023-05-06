@@ -1,14 +1,15 @@
-from django.contrib.auth import get_user_model
-from rest_framework import status
 import pytest
+from django.contrib.auth import get_user_model
 from model_bakery import baker
+from rest_framework import status
+
 from question_app.models import Questionnaire, OptionalQuestion, Folder
 
 VALID_DATA = {
     "name": "Hello",
     "is_active": True,
     "end_date": "2023-05-05",
-    "timer": "string",
+    "timer": "22:10",
     "show_question_in_pages": True,
     "progress_bar": True,
 }
@@ -113,8 +114,6 @@ class TestCreatingQuestionnaire:
 
         assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
-    # TODO
-    @pytest.mark.skip
     def test_if_user_is_authenticated_and_data_is_valid_returns_201(self, api_client, authenticate):
         u = baker.make(get_user_model())
         authenticate(u)
@@ -122,10 +121,11 @@ class TestCreatingQuestionnaire:
         valid_data = VALID_DATA.copy()
         valid_data.update({'folder': f.id})
         print(valid_data)
-        res = api_client.post('/question-api/questionnaires/', valid_data)
+        res = api_client.post('/question-api/questionnaires/', valid_data, format='json')
 
+        print(res.data)
         assert res.status_code == status.HTTP_201_CREATED
-        assert res.data.get('id') > 0
+        assert res.data.get('name') == VALID_DATA.get('name')
 
     def test_if_user_is_authenticated_and_data_is_not_valid_returns_400(self, api_client, authenticate):
         authenticate()
@@ -237,7 +237,6 @@ class TestChangeQuestionsPlacements:
 
         assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
-    @pytest.mark.skip
     def test_if_user_is_owner_returns_200(self, api_client, authenticate):
         uo = baker.make(get_user_model())
         authenticate(uo)
@@ -248,5 +247,5 @@ class TestChangeQuestionsPlacements:
             placements.append({'question_id': q.id, 'new_placement': q.id})
         data = {"placements": placements}
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/change-questions-placements/', data)
+        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/change-questions-placements/', data, format='json')
         assert res.status_code == status.HTTP_200_OK

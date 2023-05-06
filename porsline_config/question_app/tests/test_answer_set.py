@@ -1,9 +1,7 @@
 import pytest
-import json
-from rest_framework import status
 from model_bakery import baker
+from rest_framework import status
 from question_app.models import *
-from django.contrib.auth import get_user_model
 
 
 @pytest.mark.django_db
@@ -46,7 +44,6 @@ class TestListingAnswerSet:
 @pytest.mark.django_db
 class TestCreatingAnswerSet:
     def test_if_question_type_is_optional_and_data_is_invalid_returns_400(self, api_client, authenticate):
-        u = baker.make(get_user_model())
         qn = baker.make(Questionnaire)
         q = baker.make(OptionalQuestion, questionnaire=qn, is_required=True, multiple_choice=False)
         opt_1 = baker.make(Option, optional_question=q)
@@ -61,9 +58,9 @@ class TestCreatingAnswerSet:
                 }
             ]
         }
-        authenticate(u)
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data)
+        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+        print(res.data)
 
         assert res.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -78,14 +75,35 @@ class TestCreatingAnswerSet:
                 {
                     "question": q.id,
                     "answer": {
-                        "selected_options": [opt_1.id, opt_2.id]
+                        "selected_options": [opt_1.id, opt_2.id],
+                        "file": None
                     }
                 }
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data=json.dumps(data),
-                              content_type='application/json')
+        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
 
         print(res.data)
         assert res.status_code == status.HTTP_201_CREATED
+
+    def test_if_question_type_is_drop_down_and_data_is_invalid_returns_400(self, api_client, authenticate):
+        qn = baker.make(Questionnaire)
+        q = baker.make(DropDownQuestion, questionnaire=qn, is_required=True, multiple_choice=False)
+        opt_1 = baker.make(DropDownOption, drop_down_question=q)
+        opt_2 = baker.make(DropDownOption, drop_down_question=q)
+        data = {
+            "answers": [
+                {
+                    "question": q.id,
+                    "answer": {
+                        "selected_options": [opt_1.id, opt_2.id],
+                        "file": None
+                    }
+                }
+            ]
+        }
+
+        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+
+        assert res.status_code == status.HTTP_400_BAD_REQUEST

@@ -1,37 +1,28 @@
 import pytest
 from django.contrib.auth import get_user_model
-from rest_framework import status
 from model_bakery import baker
+from rest_framework import status
 from question_app.models import Questionnaire, DropDownQuestion
 
 VALID_DATA = {
-    "title": "Optional question",
-    "question_text": "This is optional question",
-    "placement": 8,
-    "group": "",
+    "title": "Drop down",
+    "question_text": "This is drop down question",
+    "placement": 1,
+    "group": None,
     "is_required": True,
     "show_number": True,
-    "media": "",
-    "multiple_choice": True,
-    "is_vertical": True,
+    "media": None,
+    "multiple_choice": False,
+    "is_alphabetic_order": True,
     "is_random_options": False,
-    "max_selected_options": 5,
-    "min_selected_options": 2,
-    "additional_options": True,
-    "all_options": True,
-    "nothing_selected": True,
+    "max_selected_options": None,
+    "min_selected_options": None,
     "options": [
         {
             "text": "option 1"
         },
         {
             "text": "option 2"
-        },
-        {
-            "text": "همه گزینه ها"
-        },
-        {
-            "text": "هیج کدام"
         }
     ]
 }
@@ -133,16 +124,15 @@ class TestCreatingQuestion:
         res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/dropdown-questions/', {})
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
-
-    # TODO - dummy data
-    @pytest.mark.skip
     def test_if_user_is_allowed_and_data_valid_returns_201(self, api_client, authenticate):
         u = baker.make(get_user_model(), is_staff=True)
         authenticate(u)
         qn = baker.make(Questionnaire)
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/dropdown-questions/', VALID_DATA)
+        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/dropdown-questions/', data=VALID_DATA,
+                              format='json')
 
+        print(res.data)
         assert res.status_code == status.HTTP_201_CREATED
 
     def test_if_user_allowed_and_invalid_data_returns_400(self, api_client, authenticate):

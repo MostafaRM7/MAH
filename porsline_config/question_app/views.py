@@ -40,8 +40,7 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         instance.is_delete = True
         instance.save()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OptionalQuestionViewSet(viewsets.ModelViewSet):
