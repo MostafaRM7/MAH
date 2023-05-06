@@ -7,6 +7,10 @@ from question_app.models import *
 
 @pytest.mark.django_db
 class TestListingAnswerSet:
+    """
+        In this test-set we are gonna test all questions that has validation
+        and a big answer-set for a questionnaire with all question types
+    """
     def test_if_user_is_anonymous_returns_401(self, api_client):
         qn = baker.make(Questionnaire)
 
