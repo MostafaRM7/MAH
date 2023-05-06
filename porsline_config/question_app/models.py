@@ -62,7 +62,7 @@ class Question(models.Model):
     question_text = models.TextField(verbose_name='متن سوال')
     question_type = models.CharField(max_length=50, choices=QUESTION_TYPES, editable=False, verbose_name='نوع سوال')
     is_required = models.BooleanField(default=False, verbose_name='اجباری/عیراجباری')
-    media = models.FileField(upload_to='/question_media/%Y/%m/%d', null=True, blank=True,
+    media = models.FileField(upload_to='question_media/%Y/%m/%d', null=True, blank=True,
                              validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)],
                              verbose_name='تصویر یا فیلم')
     show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
@@ -293,7 +293,7 @@ class Answer(models.Model):
     answer_set = models.ForeignKey(AnswerSet, on_delete=models.CASCADE, related_name='answers',
                                    verbose_name='دسته جواب')
     answer = models.JSONField(verbose_name='جواب')
-    file = models.FileField(upload_to='/answer_file/%Y/%m/%d', null=True, blank=True, verbose_name='فایل')
+    file = models.FileField(upload_to='answer_file/%Y/%m/%d', null=True, blank=True, verbose_name='فایل')
 
     def __str__(self):
         return f'{self.answer_set} - {self.question}'
@@ -331,7 +331,7 @@ class WelcomePage(models.Model):
     )
     title = models.CharField(max_length=255, verbose_name='عنوان')
     description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
-    media = models.FileField(upload_to='/welcome_page/%Y/%m/%d', null=True, blank=True,
+    media = models.FileField(upload_to='welcome_page/%Y/%m/%d', null=True, blank=True,
                              validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)],
                              verbose_name='تصویر یا فیلم')
     is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')

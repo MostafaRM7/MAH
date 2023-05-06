@@ -7,10 +7,6 @@ from question_app.models import *
 
 @pytest.mark.django_db
 class TestListingAnswerSet:
-    """
-        In this test-set we are gonna test all questions that has validation
-        and a big answer-set for a questionnaire with all question types
-    """
     def test_if_user_is_anonymous_returns_401(self, api_client):
         qn = baker.make(Questionnaire)
 
@@ -48,6 +44,11 @@ class TestListingAnswerSet:
 
 @pytest.mark.django_db
 class TestCreatingAnswerSet:
+    """
+        In this test-set we are gonna test all questions that has validation
+        and a big answer-set for a questionnaire with all question types
+    """
+
     def test_if_question_is_required_and_not_answered_returns_400(self, api_client, authenticate):
         """
             This validation is in AnswerSetSerializer so if we apply it
@@ -72,8 +73,7 @@ class TestCreatingAnswerSet:
 
         res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
 
-        print(res.data)
-        assert res.status_code == status.HTTP_200_OK
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_if_question_type_is_optional_and_data_is_invalid_returns_400(self, api_client, authenticate):
         qn = baker.make(Questionnaire)
