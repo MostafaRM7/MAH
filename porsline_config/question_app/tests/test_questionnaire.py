@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from model_bakery import baker
 from rest_framework import status
 from rest_framework.response import Response
-from question_app.models import Questionnaire, OptionalQuestion, Folder
+from question_app.models import Questionnaire, OptionalQuestion, Folder, ThanksPage
 
 VALID_DATA = {
     "name": "Hello",
@@ -150,8 +150,9 @@ class TestDeletingQuestionnaire:
         authenticate(uo)
 
         res = api_client.delete(f'/question-api/questionnaires/{qn.uuid}/')
-
+        qn.refresh_from_db()
         assert res.status_code == status.HTTP_204_NO_CONTENT
+        assert qn.is_delete
 
     def test_if_user_is_not_owner_returns_403(self, api_client, authenticate):
         u = baker.make(get_user_model())
@@ -168,20 +169,20 @@ class TestDeletingQuestionnaire:
         authenticate(is_staff=True)
 
         res = api_client.delete(f'/question-api/questionnaires/{qn.uuid}/')
-
+        qn.refresh_from_db()
         assert res.status_code == status.HTTP_204_NO_CONTENT
+        assert qn.is_delete
 
 
 @pytest.mark.django_db
 class TestRetrievingPublicQuestionnaire:
 
-    # TODO - 404
-    @pytest.mark.skip
     def test_allow_any_returns_200(self, api_client):
-        q = baker.make(Questionnaire)
+        q = baker.make(Questionnaire, is_active=True, is_delete=False)
 
         res = api_client.get(f'/question-api/{q.uuid}/')
-
+        print(q.__dict__)
+        print(res.data)
         assert res.status_code == status.HTTP_200_OK
 
 
@@ -247,5 +248,6 @@ class TestChangeQuestionsPlacements:
             placements.append({'question_id': q.id, 'new_placement': q.id})
         data = {"placements": placements}
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/change-questions-placements/', data, format='json')
+        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/change-questions-placements/', data,
+                              format='json')
         assert res.status_code == status.HTTP_200_OK

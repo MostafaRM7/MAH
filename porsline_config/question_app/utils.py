@@ -1,28 +1,13 @@
 import re
 import jdatetime
+from datetime import datetime
 
 
 def is_georgian_date(date):
-    pattern = r'^\d{1,2}/\d{1,2}/\d{4}$'
-
-    if not re.match(pattern, date):
+    try:
+        return bool(datetime.strptime(date, "%Y/%m/%d"))
+    except ValueError:
         return False
-
-    day, month, year = map(int, date.split('/'))
-
-    if year < 1000 or year > 9999:
-        return False
-
-    if month < 1 or month > 12:
-        return False
-
-    month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    if month == 2 and year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
-        month_days[1] += 1
-    if day < 1 or day > month_days[month - 1]:
-        return False
-
-    return True
 
 
 def validate_mobile_number(number):

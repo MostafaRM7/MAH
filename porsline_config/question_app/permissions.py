@@ -61,4 +61,5 @@ class IsPageOwnerOrReadOnly(BasePermission):
             if request.method == 'POST':
                 return request.user.is_authenticated
             else:
-                return questionnaire in request.user.questionnaires.all() or request.user.is_staff
+                if request.user.is_authenticated:
+                    return questionnaire in request.user.questionnaires.all() or request.user.is_staff

@@ -118,8 +118,6 @@ class AnswerSerializer(serializers.ModelSerializer):
                         {'question': 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
-        # elif question.question_type == "sort":
-        #     pass
         elif question.question_type == "text_answer":
             text_answer_question: TextAnswerQuestion = question.textanswerquestion
             max_length = text_answer_question.max
