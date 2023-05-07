@@ -295,17 +295,35 @@ class ChangeQuestionsPlacements(APIView):
 
 
 class SearchQuestionnaire(APIView):
+    """
+        if user is in a folder:
+            {host}/.../search_questionnaire/?search=questionnaire_name&folder_id=folder_id
+        else:
+            {host}/.../search_questionnaire/?search=questionnaire_name
+    """
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        search_string = request.query_params.get('search')
-        if search_string:
+        questionnaire_name = request.query_params.get('search')
+        folder_id = request.query_params.get('folder_id')
+        if questionnaire_name and folder_id:
             if not request.user.is_staff:
-                questionnaires = request.user.questionnaires.filter(name__icontains=search_string)
+                questionnaires = request.user.questionnaires.filter(folder__id=folder_id, is_delete=False,
+                                                                    name__icontains=questionnaire_name)
                 serializer = QuestionnaireSerializer(questionnaires, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                questionnaires = Questionnaire.objects.filter(name__icontains=search_string)
+                questionnaires = Questionnaire.objects.filter(name__icontains=questionnaire_name)
+                serializer = QuestionnaireSerializer(questionnaires, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        elif questionnaire_name:
+            if not request.user.is_staff:
+                questionnaires = request.user.questionnaires.filter(is_delete=False,
+                                                                    name__icontains=questionnaire_name)
+                serializer = QuestionnaireSerializer(questionnaires, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                questionnaires = Questionnaire.objects.filter(name__icontains=questionnaire_name)
                 serializer = QuestionnaireSerializer(questionnaires, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
