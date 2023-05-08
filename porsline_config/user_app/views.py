@@ -11,7 +11,7 @@ class UserViewSet(viewsets.ViewSet):
     """
     permission_classes = (permissions.IsAuthenticated,)
 
-    @action(detail=False, methods=['get', 'put', 'patch'])
+    @action(detail=False, methods=['get', 'patch'])
     def me(self, request):
         if request.method == 'GET':
             serializer = UserSerializer(request.user)

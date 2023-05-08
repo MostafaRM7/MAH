@@ -86,6 +86,7 @@ class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
         fields = ('id', 'text')
+        read_only_fields = ('id',)
 
 
 class OptionalQuestionSerializer(serializers.ModelSerializer):
@@ -98,15 +99,19 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             'is_required', 'show_number', 'media', 'multiple_choice', 'is_vertical', 'is_random_options',
             'max_selected_options',
             'min_selected_options', 'show_number', 'additional_options', 'all_options', 'nothing_selected', 'options')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
+    #TODO
     def validate(self, data):
         additional_options = data.get('additional_options')
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
+        options = data.get('options')
         multiple_choice = data.get('multiple_choice')
         all_options = data.get('all_options')
         nothing_selected = data.get('nothing_selected')
+        print(options)
+        option_names = [option.get('text') for option in options if options is not None]
         if multiple_choice:
             if max_selected_options is None or min_selected_options is None:
                 raise serializers.ValidationError(
@@ -138,6 +143,22 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                 },
                 status.HTTP_400_BAD_REQUEST
             )
+        elif additional_options:
+            if nothing_selected:
+                if 'هیچ کدام' not in option_names:
+                    raise serializers.ValidationError(
+                        {
+                            'additional_options':
+                                'گزینه با نام هیچ کدام را اضافه کنید'
+                        }
+                    )
+                elif 'همه گزینه ها' not in option_names:
+                    raise serializers.ValidationError(
+                        {
+                            'nothing_selected':
+                                'گزینه با نام همه گزینه ها را اضافه کنید'
+                        }
+                    )
         return data
 
     @transaction.atomic()
@@ -178,6 +199,7 @@ class DropDownOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DropDownOption
         fields = ('id', 'text')
+        read_only_fields = ('id',)
 
 
 class DropDownQuestionSerializer(serializers.ModelSerializer):
@@ -190,7 +212,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'multiple_choice', 'is_alphabetic_order', 'is_random_options',
             'max_selected_options', 'min_selected_options', 'options')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def validate(self, data):
         max_selected_options = data.get('max_selected_options')
@@ -259,6 +281,7 @@ class SortOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SortOption
         fields = ('id', 'text')
+        read_only_fields = ('id',)
 
 
 class SortQuestionSerializer(serializers.ModelSerializer):
@@ -270,7 +293,7 @@ class SortQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'is_random_options', 'options')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def create(self, validated_data):
         options_data = validated_data.pop('options')
@@ -310,7 +333,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'show_number', 'pattern', 'min', 'max')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def validate(self, data):
         max_len = data.get('max')
@@ -335,16 +358,17 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'min', 'max')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def validate(self, data):
         max_value = data.get('max')
         min_value = data.get('min')
-        if max_value < min_value:
-            raise serializers.ValidationError(
-                {'max': 'مقدار حداقل مقدار نمی تواند از حداکثر مقدار بیشتر باشد'},
-                status.HTTP_400_BAD_REQUEST
-            )
+        if max_value is not None and min_value is not None:
+            if max_value < min_value:
+                raise serializers.ValidationError(
+                    {'max': 'مقدار حداقل مقدار نمی تواند از حداکثر مقدار بیشتر باشد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         return data
 
     def create(self, validated_data):
@@ -361,7 +385,7 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'shape', 'max'
         )
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
@@ -377,16 +401,17 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'min', 'max', 'min_label', 'mid_label', 'max_label'
         )
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def validate(self, data):
         max_value = data.get('max')
         min_value = data.get('min')
-        if max_value < min_value:
-            raise serializers.ValidationError(
-                {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باشد'},
-                status.HTTP_400_BAD_REQUEST
-            )
+        if max_value is not None and min_value is not None:
+            if max_value < min_value:
+                raise serializers.ValidationError(
+                    {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باشد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         return data
 
     def create(self, validated_data):
@@ -402,7 +427,7 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
@@ -417,7 +442,7 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
@@ -432,7 +457,7 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
@@ -447,7 +472,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'max_volume')
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
@@ -464,7 +489,7 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
             'show_number', 'media', 'button_shape', 'is_solid_button', 'button_text', 'child_questions'
         )
-        read_only_fields = ('question_type', 'questionnaire')
+        read_only_fields = ('id', 'question_type', 'questionnaire')
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))

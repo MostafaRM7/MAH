@@ -18,197 +18,197 @@ VALID_DATA = {
 @pytest.mark.django_db
 class TestListingPage:
     def test_if_user_is_anonymous_returns_401(self, api_client):
-        qn = baker.make(Questionnaire)
+        questionnaire = baker.make(Questionnaire)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/')
 
-        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_user_is_owner_returns_200(self, api_client, authenticate):
-        uo = baker.make(get_user_model())
-        authenticate(uo)
-        qn = baker.make(Questionnaire, owner=uo)
+        owner = baker.make(get_user_model())
+        authenticate(owner)
+        questionnaire = baker.make(Questionnaire, owner=owner)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/')
 
-        assert res.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK
 
     def test_if_user_is_not_allowed_returns_403(self, api_client, authenticate):
-        u = baker.make(get_user_model())
-        authenticate(u)
-        uo = baker.make(get_user_model())
-        qn = baker.make(Questionnaire, owner=uo)
+        user = baker.make(get_user_model())
+        authenticate(user)
+        owner = baker.make(get_user_model())
+        questionnaire = baker.make(Questionnaire, owner=owner)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/')
 
-        assert res.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_if_user_is_admin_returns_200(self, api_client, authenticate):
-        ua = baker.make(get_user_model(), is_staff=True)
-        qn = baker.make(Questionnaire)
-        authenticate(ua)
+        admin = baker.make(get_user_model(), is_staff=True)
+        questionnaire = baker.make(Questionnaire)
+        authenticate(admin)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/')
 
-        assert res.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
 class TestRetrievingPage:
     def test_if_user_is_anonymous_returns_401(self, api_client):
-        qn = baker.make(Questionnaire)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        questionnaire = baker.make(Questionnaire)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/')
 
-        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_user_is_owner_returns_200(self, api_client, authenticate):
-        uo = baker.make(get_user_model())
-        authenticate(uo)
-        qn = baker.make(Questionnaire, owner=uo)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        owner = baker.make(get_user_model())
+        authenticate(owner)
+        questionnaire = baker.make(Questionnaire, owner=owner)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/')
 
-        assert res.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK
 
     def test_if_user_is_not_allowed_returns_403(self, api_client, authenticate):
-        u = baker.make(get_user_model())
-        authenticate(u)
-        uo = baker.make(get_user_model())
-        qn = baker.make(Questionnaire, owner=uo)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        user = baker.make(get_user_model())
+        authenticate(user)
+        owner = baker.make(get_user_model())
+        questionnaire = baker.make(Questionnaire, owner=owner)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/')
 
-        assert res.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_if_user_is_admin_returns_200(self, api_client, authenticate):
-        ua = baker.make(get_user_model(), is_staff=True)
-        qn = baker.make(Questionnaire)
-        tp = baker.make(WelcomePage, questionnaire=qn)
-        authenticate(ua)
+        admin = baker.make(get_user_model(), is_staff=True)
+        questionnaire = baker.make(Questionnaire)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
+        authenticate(admin)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/')
 
-        assert res.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
 class TestCreatingPage:
     def test_if_user_is_anonymous_returns_401(self, api_client):
-        qn = baker.make(Questionnaire)
+        questionnaire = baker.make(Questionnaire)
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/', VALID_DATA, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/', VALID_DATA, format='json')
 
-        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_user_is_authenticated_returns_201(self, api_client, authenticate):
-        uo = baker.make(get_user_model())
-        authenticate(uo)
-        qn = baker.make(Questionnaire, owner=uo)
+        owner = baker.make(get_user_model())
+        authenticate(owner)
+        questionnaire = baker.make(Questionnaire, owner=owner)
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/', VALID_DATA, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/', VALID_DATA, format='json')
 
-        assert res.status_code == status.HTTP_201_CREATED
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_if_user_allowed_and_data_is_invalid_returns_400(self, api_client, authenticate):
-        u = baker.make(get_user_model())
-        authenticate(u)
-        uo = baker.make(get_user_model())
-        qn = baker.make(Questionnaire, owner=uo)
+        user = baker.make(get_user_model())
+        authenticate(user)
+        owner = baker.make(get_user_model())
+        questionnaire = baker.make(Questionnaire, owner=owner)
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/', {}, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/', {}, format='json')
 
-        assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.django_db
 class TestUpdatingPage:
     def test_if_user_is_anonymous_returns_401(self, api_client):
-        qn = baker.make(Questionnaire)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        questionnaire = baker.make(Questionnaire)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
         data = {"title": "new title"}
 
-        res = api_client.patch(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/', data, format='json')
+        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/', data, format='json')
 
-        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_user_is_owner_returns_200(self, api_client, authenticate):
-        uo = baker.make(get_user_model())
-        authenticate(uo)
-        qn = baker.make(Questionnaire, owner=uo)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        owner = baker.make(get_user_model())
+        authenticate(owner)
+        questionnaire = baker.make(Questionnaire, owner=owner)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
         data = {"title": "new title"}
 
-        res = api_client.patch(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/', data)
+        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/', data)
 
-        assert res.status_code == status.HTTP_200_OK
-        assert res.data.get('title') == data.get('title')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data.get('title') == data.get('title')
 
     def test_if_user_is_not_allowed_returns_403(self, api_client, authenticate):
-        u = baker.make(get_user_model())
-        authenticate(u)
-        uo = baker.make(get_user_model())
-        qn = baker.make(Questionnaire, owner=uo)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        user = baker.make(get_user_model())
+        authenticate(user)
+        owner = baker.make(get_user_model())
+        questionnaire = baker.make(Questionnaire, owner=owner)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
         data = {"title": "test"}
 
-        res = api_client.patch(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/', data)
+        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/', data)
 
-        assert res.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_if_user_is_admin_returns_200(self, api_client, authenticate):
-        ua = baker.make(get_user_model(), is_staff=True)
-        qn = baker.make(Questionnaire)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        admin = baker.make(get_user_model(), is_staff=True)
+        questionnaire = baker.make(Questionnaire)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
         data = {"title": "new title"}
-        authenticate(ua)
+        authenticate(admin)
 
-        res = api_client.patch(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/', data)
+        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/', data)
 
-        assert res.status_code == status.HTTP_200_OK
-        assert res.data.get('title') == data.get('title')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data.get('title') == data.get('title')
 
 
 @pytest.mark.django_db
 class TestDeletingPage:
     def test_if_user_is_anonymous_returns_401(self, api_client):
-        qn = baker.make(Questionnaire)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        questionnaire = baker.make(Questionnaire)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
 
-        res = api_client.delete(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/')
+        response = api_client.delete(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/')
 
-        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_user_is_owner_returns_204(self, api_client, authenticate):
-        uo = baker.make(get_user_model())
-        authenticate(uo)
-        qn = baker.make(Questionnaire, owner=uo)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        owner = baker.make(get_user_model())
+        authenticate(owner)
+        questionnaire = baker.make(Questionnaire, owner=owner)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
 
-        res = api_client.delete(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/')
+        response = api_client.delete(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/')
 
-        assert res.status_code == status.HTTP_204_NO_CONTENT
+        assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_if_user_is_not_allowed_returns_403(self, api_client, authenticate):
-        u = baker.make(get_user_model())
-        authenticate(u)
-        uo = baker.make(get_user_model())
-        qn = baker.make(Questionnaire, owner=uo)
-        tp = baker.make(WelcomePage, questionnaire=qn)
+        user = baker.make(get_user_model())
+        authenticate(user)
+        owner = baker.make(get_user_model())
+        questionnaire = baker.make(Questionnaire, owner=owner)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
 
-        res = api_client.delete(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/')
+        response = api_client.delete(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/')
 
-        assert res.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_if_user_is_admin_returns_204(self, api_client, authenticate):
-        ua = baker.make(get_user_model(), is_staff=True)
-        qn = baker.make(Questionnaire)
-        tp = baker.make(WelcomePage, questionnaire=qn)
-        authenticate(ua)
+        admin = baker.make(get_user_model(), is_staff=True)
+        questionnaire = baker.make(Questionnaire)
+        welcome_page = baker.make(WelcomePage, questionnaire=questionnaire)
+        authenticate(admin)
 
-        res = api_client.delete(f'/question-api/questionnaires/{qn.uuid}/welcome-pages/{tp.id}/')
+        response = api_client.delete(f'/question-api/questionnaires/{questionnaire.uuid}/welcome-pages/{welcome_page.id}/')
 
-        assert res.status_code == status.HTTP_204_NO_CONTENT
+        assert response.status_code == status.HTTP_204_NO_CONTENT

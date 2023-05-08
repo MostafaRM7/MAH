@@ -1,45 +1,44 @@
 import pytest
 from model_bakery import baker
 from rest_framework import status
-
 from question_app.models import *
 
 
 @pytest.mark.django_db
 class TestListingAnswerSet:
     def test_if_user_is_anonymous_returns_401(self, api_client):
-        qn = baker.make(Questionnaire)
+        questionnaire = baker.make(Questionnaire)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/answer-sets/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/')
 
-        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_user_is_owner_returns_200(self, api_client, authenticate):
-        uo = baker.make(get_user_model())
-        qn = baker.make(Questionnaire, owner=uo)
-        authenticate(uo)
+        owner = baker.make(get_user_model())
+        questionnaire = baker.make(Questionnaire, owner=owner)
+        authenticate(owner)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/answer-sets/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/')
 
-        assert res.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK
 
     def test_if_user_is_admin_returns_200(self, api_client, authenticate):
-        u = baker.make(get_user_model(), is_staff=True)
-        qn = baker.make(Questionnaire)
-        authenticate(u)
+        user = baker.make(get_user_model(), is_staff=True)
+        questionnaire = baker.make(Questionnaire)
+        authenticate(user)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/answer-sets/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/')
 
-        assert res.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK
 
     def test_if_user_is_not_owner_or_admin_returns_403(self, api_client, authenticate):
-        u = baker.make(get_user_model())
-        qn = baker.make(Questionnaire)
-        authenticate(u)
+        user = baker.make(get_user_model())
+        questionnaire = baker.make(Questionnaire)
+        authenticate(user)
 
-        res = api_client.get(f'/question-api/questionnaires/{qn.uuid}/answer-sets/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/')
 
-        assert res.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.django_db
@@ -54,9 +53,9 @@ class TestCreatingAnswerSet:
             This validation is in AnswerSetSerializer so if we apply it
             in a question type it will checked for all types all questions
         """
-        qn = baker.make(Questionnaire)
-        q1 = baker.make(OptionalQuestion, questionnaire=qn, is_required=True, multiple_choice=False)
-        q2 = baker.make(OptionalQuestion, questionnaire=qn, is_required=True, multiple_choice=False)
+        questionnaire = baker.make(Questionnaire)
+        q1 = baker.make(OptionalQuestion, questionnaire=questionnaire, is_required=True, multiple_choice=False)
+        q2 = baker.make(OptionalQuestion, questionnaire=questionnaire, is_required=True, multiple_choice=False)
         opt_1 = baker.make(Option, optional_question=q1)
         opt_2 = baker.make(Option, optional_question=q1)
         data = {
@@ -71,19 +70,20 @@ class TestCreatingAnswerSet:
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
 
-        assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_if_question_type_is_optional_and_data_is_invalid_returns_400(self, api_client, authenticate):
-        qn = baker.make(Questionnaire)
-        q = baker.make(OptionalQuestion, questionnaire=qn, is_required=True, multiple_choice=False)
-        opt_1 = baker.make(Option, optional_question=q)
-        opt_2 = baker.make(Option, optional_question=q)
+        questionnaire = baker.make(Questionnaire)
+        question = baker.make(OptionalQuestion, questionnaire=questionnaire, is_required=True, multiple_choice=False)
+        opt_1 = baker.make(Option, optional_question=question)
+        opt_2 = baker.make(Option, optional_question=question)
         data = {
             "answers": [
                 {
-                    "question": q.id,
+                    "question": question.id,
                     "answer": {
                         "selected_options": [opt_1.id, opt_2.id]
                     },
@@ -92,21 +92,22 @@ class TestCreatingAnswerSet:
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
-        print(res.data)
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
+        print(response.data)
 
-        assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_if_question_type_is_optional_and_data_is_valid_returns_200(self, api_client, authenticate):
-        qn = baker.make(Questionnaire)
-        q = baker.make(OptionalQuestion, questionnaire=qn, is_required=True, multiple_choice=True,
-                       max_selected_options=4, min_selected_options=2)
-        opt_1 = baker.make(Option, optional_question=q)
-        opt_2 = baker.make(Option, optional_question=q)
+        questionnaire = baker.make(Questionnaire)
+        question = baker.make(OptionalQuestion, questionnaire=questionnaire, is_required=True, multiple_choice=True,
+                              max_selected_options=4, min_selected_options=2)
+        opt_1 = baker.make(Option, optional_question=question)
+        opt_2 = baker.make(Option, optional_question=question)
         data = {
             "answers": [
                 {
-                    "question": q.id,
+                    "question": question.id,
                     "answer": {
                         "selected_options": [opt_1.id, opt_2.id]
                     },
@@ -115,20 +116,21 @@ class TestCreatingAnswerSet:
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
 
-        print(res.data)
-        assert res.status_code == status.HTTP_201_CREATED
+        print(response.data)
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_if_question_type_is_drop_down_and_data_is_invalid_returns_400(self, api_client, authenticate):
-        qn = baker.make(Questionnaire)
-        q = baker.make(DropDownQuestion, questionnaire=qn, is_required=True, multiple_choice=False)
-        opt_1 = baker.make(DropDownOption, drop_down_question=q)
-        opt_2 = baker.make(DropDownOption, drop_down_question=q)
+        questionnaire = baker.make(Questionnaire)
+        question = baker.make(DropDownQuestion, questionnaire=questionnaire, is_required=True, multiple_choice=False)
+        opt_1 = baker.make(DropDownOption, drop_down_question=question)
+        opt_2 = baker.make(DropDownOption, drop_down_question=question)
         data = {
             "answers": [
                 {
-                    "question": q.id,
+                    "question": question.id,
                     "answer": {
                         "selected_options": [opt_1.id, opt_2.id]
                     },
@@ -137,20 +139,21 @@ class TestCreatingAnswerSet:
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
 
-        assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_if_question_type_is_drop_down_and_data_is_valid_returns_200(self, api_client, authenticate):
-        qn = baker.make(Questionnaire)
-        q = baker.make(DropDownQuestion, questionnaire=qn, is_required=True, multiple_choice=True,
-                       max_selected_options=4, min_selected_options=2)
-        opt_1 = baker.make(DropDownOption, drop_down_question=q)
-        opt_2 = baker.make(DropDownOption, drop_down_question=q)
+        questionnaire = baker.make(Questionnaire)
+        question = baker.make(DropDownQuestion, questionnaire=questionnaire, is_required=True, multiple_choice=True,
+                              max_selected_options=4, min_selected_options=2)
+        opt_1 = baker.make(DropDownOption, drop_down_question=question)
+        opt_2 = baker.make(DropDownOption, drop_down_question=question)
         data = {
             "answers": [
                 {
-                    "question": q.id,
+                    "question": question.id,
                     "answer": {
                         "selected_options": [opt_1.id, opt_2.id]
                     },
@@ -159,23 +162,24 @@ class TestCreatingAnswerSet:
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
 
-        assert res.status_code == status.HTTP_201_CREATED
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_if_question_type_is_sort_and_data_is_valid_returns_201(self, api_client):
         """
             There is no validation for this question but because its
             a nested serializer we need to test it
         """
-        qn = baker.make(Questionnaire)
-        q = baker.make(SortQuestion, questionnaire=qn, is_required=True)
-        opt_1 = baker.make(SortOption, sort_question=q)
-        opt_2 = baker.make(SortOption, sort_question=q)
+        questionnaire = baker.make(Questionnaire)
+        question = baker.make(SortQuestion, questionnaire=questionnaire, is_required=True)
+        opt_1 = baker.make(SortOption, sort_question=question)
+        opt_2 = baker.make(SortOption, sort_question=question)
         data = {
             "answers": [
                 {
-                    "question": q.id,
+                    "question": question.id,
                     "answer": {
                         "sorted_options": [
                             {
@@ -193,19 +197,20 @@ class TestCreatingAnswerSet:
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
 
-        assert res.status_code == status.HTTP_201_CREATED
+        assert response.status_code == status.HTTP_201_CREATED
 
     # TODO: fix this test
     @pytest.mark.skip(reason="IDK why it's failing")
     def test_if_text_answer_and_invalid_pattern_data_returns_400(self, api_client):
-        qn = baker.make(Questionnaire)
-        tq = baker.make(TextAnswerQuestion, pattern='persian_letters', questionnaire=qn)
+        questionnaire = baker.make(Questionnaire)
+        question = baker.make(TextAnswerQuestion, pattern='persian_letters', questionnaire=questionnaire)
         data = {
             "answers": [
                 {
-                    "question": tq.id,
+                    "question": question.id,
                     "answer": {
                         "text_answer": "hello"
                     },
@@ -213,19 +218,20 @@ class TestCreatingAnswerSet:
                 }
             ]
         }
-        print(tq.__dict__)
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
-        print(res.data)
+        print(question.__dict__)
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
+        print(response.data)
 
-        assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_if_number_answer_and_data_is_invalid_returns_400(self, api_client):
-        qn = baker.make(Questionnaire)
-        naq = baker.make(NumberAnswerQuestion, questionnaire=qn, min=10, max=20)
+        questionnaire = baker.make(Questionnaire)
+        question = baker.make(NumberAnswerQuestion, questionnaire=questionnaire, min=10, max=20)
         data = {
             "answers": [
                 {
-                    "question": naq.id,
+                    "question": question.id,
                     "answer": {
                         "number_answer": 5
                     },
@@ -234,21 +240,22 @@ class TestCreatingAnswerSet:
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
 
-        assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_if_integer_range_question_and_data_is_invalid_returns_400(self, api_client):
         """
             This test is not gonna happen because user seeing a range and
             not entering the number directly
         """
-        qn = baker.make(Questionnaire)
-        naq = baker.make(IntegerRangeQuestion, questionnaire=qn, min=1, max=20)
+        questionnaire = baker.make(Questionnaire)
+        question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire, min=1, max=20)
         data = {
             "answers": [
                 {
-                    "question": naq.id,
+                    "question": question.id,
                     "answer": {
                         "integer_range": 21
                     },
@@ -257,8 +264,7 @@ class TestCreatingAnswerSet:
             ]
         }
 
-        res = api_client.post(f'/question-api/questionnaires/{qn.uuid}/answer-sets/', data, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
+                                   format='json')
 
-        assert res.status_code == status.HTTP_400_BAD_REQUEST
-
-
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
