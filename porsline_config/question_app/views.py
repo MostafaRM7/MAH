@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
@@ -20,6 +22,14 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     lookup_field = 'uuid'
     permission_classes = (AllowAny,)
 
+    def initial(self, request, *args, **kwargs):
+        try:
+            UUID(kwargs.get('uuid'))
+        except ValueError:
+            return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
+
+        super(PublicQuestionnaireViewSet, self).initial(request, *args, **kwargs)
+
 
 class QuestionnaireViewSet(viewsets.ModelViewSet):
     """
@@ -30,6 +40,14 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
+
+    def initial(self, request, *args, **kwargs):
+        if kwargs.get('uuid'):
+            try:
+                UUID(kwargs.get('uuid'))
+            except ValueError:
+                return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
+        return super(QuestionnaireViewSet, self).initial(request, *args, **kwargs)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

@@ -44,7 +44,7 @@ class TestListingQuestion:
         authenticate(owner)
         questionnaire = baker.make(Questionnaire, owner=owner)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire .uuid}/integerrange-questions/')
+        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/')
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -64,7 +64,8 @@ class TestGettingQuestion:
         questionnaire = baker.make(Questionnaire)
         question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/')
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/')
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -74,7 +75,8 @@ class TestGettingQuestion:
         question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire)
         authenticate(user)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/')
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/')
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -84,9 +86,20 @@ class TestGettingQuestion:
         questionnaire = baker.make(Questionnaire, )
         question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/')
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/')
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_allowed_and_object_does_not_exists_returns_404(self, api_client, authenticate):
+        user = baker.make(get_user_model(), is_staff=True)
+        authenticate(user)
+        questionnaire = baker.make(Questionnaire)
+
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/dropdown-questions/20/')
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_if_user_is_admin_returns_200(self, api_client, authenticate):
         user = baker.make(get_user_model(), is_staff=True)
@@ -94,7 +107,8 @@ class TestGettingQuestion:
         questionnaire = baker.make(Questionnaire)
         question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/')
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/')
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -123,8 +137,9 @@ class TestCreatingQuestion:
         authenticate(user)
         questionnaire = baker.make(Questionnaire)
 
-        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/', VALID_DATA,
-                              format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/',
+                                   VALID_DATA,
+                                   format='json')
 
         assert response.status_code == status.HTTP_201_CREATED
 
@@ -133,7 +148,8 @@ class TestCreatingQuestion:
         authenticate(owner)
         questionnaire = baker.make(Questionnaire, owner=owner)
 
-        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/', {"a": "a"})
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/',
+                                   {"a": "a"})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -144,7 +160,8 @@ class TestUpdatingQuestion:
         questionnaire = baker.make(Questionnaire)
         question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire)
 
-        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/', {})
+        response = api_client.patch(
+            f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/', {})
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -155,7 +172,8 @@ class TestUpdatingQuestion:
         questionnaire = baker.make(Questionnaire, owner=owner)
         question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire)
 
-        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/', {})
+        response = api_client.patch(
+            f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/', {})
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -166,8 +184,9 @@ class TestUpdatingQuestion:
         question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire, max=10, min=5)
         print(question.max)
         print(question.min)
-        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/',
-                               {'question_text': 'new text'})
+        response = api_client.patch(
+            f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/',
+            {'question_text': 'new text'})
 
         question.refresh_from_db()
         print(response.data)
@@ -180,7 +199,8 @@ class TestUpdatingQuestion:
         questionnaire = baker.make(Questionnaire, owner=owner)
         question = baker.make(IntegerRangeQuestion, questionnaire=questionnaire)
 
-        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/',
-                               {"question_text": ""})
+        response = api_client.patch(
+            f'/question-api/questionnaires/{questionnaire.uuid}/integerrange-questions/{question.id}/',
+            {"question_text": ""})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST

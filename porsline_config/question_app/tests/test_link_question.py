@@ -83,6 +83,16 @@ class TestGettingQuestion:
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_if_user_is_allowed_and_object_does_not_exists_returns_404(self, api_client, authenticate):
+        user = baker.make(get_user_model(), is_staff=True)
+        authenticate(user)
+        questionnaire = baker.make(Questionnaire)
+
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/dropdown-questions/20/')
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
     def test_if_user_is_admin_returns_200(self, api_client, authenticate):
         user = baker.make(get_user_model(), is_staff=True)
         authenticate(user)

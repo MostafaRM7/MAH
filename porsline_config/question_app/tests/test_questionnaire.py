@@ -19,7 +19,6 @@ VALID_DATA = {
 class TestListingQuestionnaire:
     def test_if_user_anonymous_returns_401(self, api_client):
         response = api_client.get('/question-api/questionnaires/')
-        print(response.data)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_user_not_admin_returns_403(self, api_client, authenticate):
@@ -62,7 +61,7 @@ class TestRetrievingQuestionnaire:
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    @pytest.mark.skip
+    # @pytest.mark.skip
     def test_if_user_allowed_and_questionnaire_does_not_exist_returns_404(self, api_client, authenticate):
         user = baker.make(get_user_model())
         authenticate(user)
@@ -94,14 +93,17 @@ class TestUpdatingQuestionnaire:
 
     def test_if_user_is_owner_returns_200(self, api_client, authenticate):
         user = baker.make(get_user_model())
-        questionnaire = baker.make(Questionnaire, owner=user)
+        folder = baker.make(Folder, owner=user)
+        questionnaire = baker.make(Questionnaire, owner=user, folder=folder)
         authenticate(user)
 
         response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/', {"name": "new name"})
         questionnaire.refresh_from_db()
-
-        assert questionnaire.name == "new name"
+        print(folder.__dict__)
+        print(questionnaire.__dict__)
+        print(response.data)
         assert response.status_code == status.HTTP_200_OK
+        assert questionnaire.name == "new name"
 
     def test_if_user_is_not_owner_returns_403(self, api_client, authenticate):
         user = baker.make(get_user_model())

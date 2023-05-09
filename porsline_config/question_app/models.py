@@ -26,7 +26,7 @@ class Questionnaire(models.Model):
     folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, related_name='questionnaires', null=True, blank=True,
                                verbose_name='پوشه')
     owner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL,
-                              related_name='questionnaires', null=True, blank=True, verbose_name='صاحب')
+                              related_name='questionnaires', null=True, verbose_name='صاحب')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
 
     def __str__(self):

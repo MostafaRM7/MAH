@@ -111,7 +111,10 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         all_options = data.get('all_options')
         nothing_selected = data.get('nothing_selected')
         print(options)
-        option_names = [option.get('text') for option in options if options is not None]
+        if options:
+            option_names = [option.get('text') for option in options]
+        else:
+            option_names = []
         if multiple_choice:
             if max_selected_options is None or min_selected_options is None:
                 raise serializers.ValidationError(
@@ -338,11 +341,12 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         max_len = data.get('max')
         min_len = data.get('min')
-        if max_len < min_len:
-            raise serializers.ValidationError(
-                {'max': 'مقدار حداقل طول پاسخ نمی تواند از حداکثر طول پاسخ بیشتر باشد'},
-                status.HTTP_400_BAD_REQUEST
-            )
+        if max_len is not None and min_len is not None:
+            if max_len < min_len:
+                raise serializers.ValidationError(
+                    {'max': 'مقدار حداقل طول پاسخ نمی تواند از حداکثر طول پاسخ بیشتر باشد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         return data
 
     def create(self, validated_data):

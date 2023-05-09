@@ -55,12 +55,20 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
     def validate(self, data):
         folder = data.get('folder')
         request = self.context.get('request')
-        if folder:
+        if folder is not None:
+            print(folder)
+            print("Not None")
             if request.user != folder.owner:
                 raise serializers.ValidationError(
                     {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
                     status.HTTP_400_BAD_REQUEST
                 )
+        else:
+            if request.method != 'PATCH':
+                raise serializers.ValidationError(
+                    {'folder': 'یک پوشه انتخاب کنید'}
+                )
+
         return data
 
     def create(self, validated_data):

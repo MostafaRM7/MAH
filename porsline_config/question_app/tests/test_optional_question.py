@@ -80,7 +80,8 @@ class TestGettingQuestion:
         questionnaire = baker.make(Questionnaire)
         question = baker.make(OptionalQuestion, questionnaire=questionnaire)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/')
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/')
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -90,7 +91,8 @@ class TestGettingQuestion:
         question = baker.make(OptionalQuestion, questionnaire=questionnaire)
         authenticate(user)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/')
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/')
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -100,9 +102,20 @@ class TestGettingQuestion:
         questionnaire = baker.make(Questionnaire, )
         question = baker.make(OptionalQuestion, questionnaire=questionnaire)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/')
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/')
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_allowed_and_object_does_not_exists_returns_404(self, api_client, authenticate):
+        user = baker.make(get_user_model(), is_staff=True)
+        authenticate(user)
+        questionnaire = baker.make(Questionnaire)
+
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/dropdown-questions/20/')
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_if_user_is_admin_returns_200(self, api_client, authenticate):
         user = baker.make(get_user_model(), is_staff=True)
@@ -110,7 +123,8 @@ class TestGettingQuestion:
         questionnaire = baker.make(Questionnaire)
         question = baker.make(OptionalQuestion, questionnaire=questionnaire)
 
-        response = api_client.get(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/')
+        response = api_client.get(
+            f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/')
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -139,7 +153,8 @@ class TestCreatingQuestion:
         authenticate(user)
         questionnaire = baker.make(Questionnaire)
 
-        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/', VALID_DATA, format='json')
+        response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/', VALID_DATA,
+                                   format='json')
         print(response.data)
         assert response.status_code == status.HTTP_201_CREATED
 
@@ -159,7 +174,8 @@ class TestUpdatingQuestion:
         questionnaire = baker.make(Questionnaire)
         question = baker.make(OptionalQuestion, questionnaire=questionnaire)
 
-        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/', {})
+        response = api_client.patch(
+            f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/', {})
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -170,19 +186,22 @@ class TestUpdatingQuestion:
         questionnaire = baker.make(Questionnaire, owner=owner)
         question = baker.make(OptionalQuestion, questionnaire=questionnaire)
 
-        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/', {})
+        response = api_client.patch(
+            f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/', {})
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     # TODO
+    # @pytest.mark.skip
     def test_if_user_is_allowed_and_data_valid_returns_200(self, api_client, authenticate):
         user = baker.make(get_user_model(), is_staff=True)
         authenticate(user)
         questionnaire = baker.make(Questionnaire)
         question = baker.make(OptionalQuestion, questionnaire=questionnaire)
 
-        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/',
-                               {'question_text': 'new text'})
+        response = api_client.patch(
+            f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/',
+            {'question_text': 'new text'})
 
         question.refresh_from_db()
         assert response.status_code == status.HTTP_200_OK
@@ -194,7 +213,8 @@ class TestUpdatingQuestion:
         questionnaire = baker.make(Questionnaire, owner=owner)
         question = baker.make(OptionalQuestion, questionnaire=questionnaire)
 
-        response = api_client.patch(f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/',
-                               {"question_text": ""})
+        response = api_client.patch(
+            f'/question-api/questionnaires/{questionnaire.uuid}/optional-questions/{question.id}/',
+            {"question_text": ""})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST

@@ -202,11 +202,9 @@ class TestCreatingAnswerSet:
 
         assert response.status_code == status.HTTP_201_CREATED
 
-    # TODO: fix this test
-    @pytest.mark.skip(reason="IDK why it's failing")
     def test_if_text_answer_and_invalid_pattern_data_returns_400(self, api_client):
         questionnaire = baker.make(Questionnaire)
-        question = baker.make(TextAnswerQuestion, pattern='persian_letters', questionnaire=questionnaire)
+        question = baker.make(TextAnswerQuestion, pattern='persian_letters', questionnaire=questionnaire, min=0, max=100)
         data = {
             "answers": [
                 {
@@ -218,10 +216,8 @@ class TestCreatingAnswerSet:
                 }
             ]
         }
-        print(question.__dict__)
         response = api_client.post(f'/question-api/questionnaires/{questionnaire.uuid}/answer-sets/', data,
                                    format='json')
-        print(response.data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
