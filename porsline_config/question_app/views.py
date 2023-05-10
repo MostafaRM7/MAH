@@ -1,11 +1,11 @@
 from uuid import UUID
-
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer
 from .question_app_serializers.general_serializers import *
@@ -17,7 +17,11 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
         This a retrieve only viewset for showing a questionnaire to everyone
     """
     queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions').filter(
-        is_delete=False, is_active=True)
+        is_delete=False,
+        is_active=True,
+        pub_date__lte=timezone.now(),
+        end_date__gte=timezone.now(),
+    )
     serializer_class = PublicQuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (AllowAny,)
