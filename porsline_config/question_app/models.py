@@ -155,7 +155,7 @@ class SortOption(models.Model):
 class TextAnswerQuestion(Question):
     FREE = 'free'
     JALALI_DATE = 'jalali_date'
-    GEORGIAN_DATE = 'gregorian_date'
+    GEORGIAN_DATE = 'georgian_date'
     MOBILE_NUMBER = 'mobile_number'
     PHONE_NUMBER = 'phone_number'
     NUMBER_CHARACTERS = 'number_character'

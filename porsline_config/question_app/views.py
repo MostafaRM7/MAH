@@ -302,6 +302,7 @@ class ThanksPageViewSet(viewsets.ModelViewSet):
 class ChangeQuestionsPlacements(APIView):
     permission_classes = (ChangePlacementForOwnerOrStaff,)
 
+    @transaction.atomic()
     def post(self, request, questionnaire_uuid):
         placements = request.data.get('placements')
         for placement in placements:

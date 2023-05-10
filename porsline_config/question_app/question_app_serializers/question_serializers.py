@@ -99,6 +99,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             'max_selected_options',
             'min_selected_options', 'show_number', 'additional_options', 'all_options', 'nothing_selected', 'options')
         read_only_fields = ('question_type', 'questionnaire')
+
     def validate(self, data):
         additional_options = data.get('additional_options')
         max_selected_options = data.get('max_selected_options')
@@ -152,13 +153,30 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                                 'گزینه با نام هیچ کدام را اضافه کنید'
                         }
                     )
-                elif 'همه گزینه ها' not in option_names:
+                else:
+                    if min_selected_options > 1:
+                        raise serializers.ValidationError(
+                            {
+                                'min_selected_options':
+                                    'هنگامی که گزینه هیچ کدام فعال است کمترین تعداد انتخاب شده باید ۱ یا ۰ باشد '
+                            }
+                        )
+            if all_options:
+                if 'همه گزینه ها' not in option_names:
                     raise serializers.ValidationError(
                         {
                             'nothing_selected':
                                 'گزینه با نام همه گزینه ها را اضافه کنید'
                         }
                     )
+                else:
+                    if min_selected_options > 1:
+                        raise serializers.ValidationError(
+                            {
+                                'min_selected_options':
+                                    'هنگامی که گزینه همه گزینه ها فعال است کمترین تعداد انتخاب شده باید ۱ یا ۰ باشد '
+                            }
+                        )
         return data
 
     @transaction.atomic()
