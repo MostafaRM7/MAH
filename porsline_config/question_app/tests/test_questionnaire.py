@@ -197,7 +197,7 @@ class TestDeletingQuestionnaire:
 class TestRetrievingPublicQuestionnaire:
 
     def test_allow_any_returns_200(self, api_client):
-        questionnaire = baker.make(Questionnaire, is_active=True, is_delete=False)
+        questionnaire = baker.make(Questionnaire, is_active=True, is_delete=False, pub_date='2023-05-11', end_date='2023-05-12')
 
         response = api_client.get(f'/question-api/{questionnaire.uuid}/')
 

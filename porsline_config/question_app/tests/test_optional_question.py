@@ -16,7 +16,7 @@ VALID_DATA = {
     "is_vertical": True,
     "is_random_options": False,
     "max_selected_options": 5,
-    "min_selected_options": 2,
+    "min_selected_options": 1,
     "additional_options": True,
     "all_options": True,
     "nothing_selected": True,
