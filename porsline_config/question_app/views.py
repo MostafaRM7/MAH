@@ -10,7 +10,6 @@ from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer
 from .question_app_serializers.general_serializers import *
 from .question_app_serializers.question_serializers import *
-from .tasks import do_task
 
 
 class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -47,7 +46,6 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
 
     def initial(self, request, *args, **kwargs):
-        do_task.delay()
         if kwargs.get('uuid'):
             try:
                 UUID(kwargs.get('uuid'))
