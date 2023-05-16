@@ -348,7 +348,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
-            'show_number', 'media', 'show_number', 'pattern', 'min', 'max')
+            'show_number', 'media', 'show_number', 'answer_template', 'pattern', 'min', 'max')
         read_only_fields = ('question_type', 'questionnaire')
 
     def validate(self, data):
@@ -427,6 +427,11 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
             if max_value < min_value:
                 raise serializers.ValidationError(
                     {'max': 'مقدار حداقل اندازه نمی تواند از حداکثر اندازه بیشتر باشد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            if max_value > 11 or max_value < 3:
+                raise serializers.ValidationError(
+                    {'max': 'مقدار حداکثر اندازه باید بین 3 تا 11 باشد'},
                     status.HTTP_400_BAD_REQUEST
                 )
         return data

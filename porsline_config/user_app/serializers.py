@@ -4,7 +4,6 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-
 from question_app.models import Folder
 from question_app.question_app_serializers import general_serializers
 from .tasks import send_otp
@@ -38,6 +37,7 @@ class GateWaySerializer(serializers.Serializer):
         else:
             user = get_user_model().objects.get_or_create(phone_number=validated_data.get('phone_number'))
             otp = OTPToken.objects.create(user=user[0])
+            send_otp.delay(otp.token, validated_data.get('phone_number'))
             print(otp.token)
         return validated_data
 

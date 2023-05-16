@@ -19,9 +19,9 @@ class TestUser:
         user = baker.make(get_user_model())
         authenticate(user)
 
-        response = api_client.patch('/user-api/users/me/', data={'username': 'new_username'}, format='json')
+        response = api_client.patch('/user-api/users/me/', data={'phone_number': '09166361071'}, format='json')
 
         user.refresh_from_db()
         assert response.status_code == status.HTTP_200_OK
-        assert user.username == 'new_username'
+        assert user.phone_number == '09166361071'
 

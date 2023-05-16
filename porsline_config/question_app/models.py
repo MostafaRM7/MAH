@@ -172,6 +172,7 @@ class TextAnswerQuestion(Question):
         (ENGLISH_LETTERS, 'English Letters')
 
     )
+    answer_template = models.CharField(max_length=250, null=True, blank=True, verbose_name='قالب پاسخ')
     pattern = models.CharField(max_length=50, choices=PATTERNS, default=FREE, verbose_name='الگوی پاسخ')
     min = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداقل طول جواب')
     max = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر طول جواب')
