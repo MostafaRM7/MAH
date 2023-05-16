@@ -4,7 +4,7 @@ from decouple import config
 
 
 @shared_task
-def send_sms(otp_token, phone_number):
+def send_otp(otp_token, phone_number):
     username = config('SMS_USERNAME')
     password = config('SMS_PASSWORD')
     api = Rest(username, password)
