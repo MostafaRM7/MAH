@@ -12,8 +12,7 @@ class WelcomePageSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        WelcomePage.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return WelcomePage.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class ThanksPageSerializer(serializers.ModelSerializer):
@@ -26,8 +25,7 @@ class ThanksPageSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        ThanksPage.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return ThanksPage.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class PublicQuestionnaireSerializer(serializers.ModelSerializer):
@@ -72,8 +70,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        Questionnaire.objects.create(**validated_data, owner=self.context.get('request').user)
-        return validated_data
+        return Questionnaire.objects.create(**validated_data, owner=self.context.get('request').user)
 
 
 class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):

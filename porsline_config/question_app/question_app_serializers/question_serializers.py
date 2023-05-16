@@ -364,8 +364,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        TextAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return TextAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
@@ -390,8 +389,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        NumberAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return NumberAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
@@ -406,8 +404,7 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        IntegerSelectiveQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return IntegerSelectiveQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
@@ -438,8 +435,7 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        IntegerRangeQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return IntegerRangeQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
@@ -453,8 +449,7 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        PictureFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return PictureFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
@@ -468,8 +463,7 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        EmailFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return EmailFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
@@ -483,8 +477,7 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        LinkQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return LinkQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
@@ -498,8 +491,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        FileQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return FileQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class QuestionGroupSerializer(serializers.ModelSerializer):
@@ -515,5 +507,4 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        QuestionGroup.objects.create(**validated_data, questionnaire=questionnaire)
-        return validated_data
+        return QuestionGroup.objects.create(**validated_data, questionnaire=questionnaire)
