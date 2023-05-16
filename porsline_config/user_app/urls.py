@@ -6,11 +6,11 @@ from .views import UserViewSet, FolderViewSet, GateWayViewSet, OTPCheckViewSet, 
 base_router = DefaultRouter()
 base_router.register('users', UserViewSet, basename='users')
 base_router.register('folders', FolderViewSet, basename='folders')
-base_router.register('auth/gateway', GateWayViewSet, basename='login')
-base_router.register('auth/verify-otp', OTPCheckViewSet, basename='verify')
-base_router.register('auth/refresh-token', RefreshTokenViewSet, basename='refresh')
+base_router.register('auth/gateway', GateWayViewSet, basename='login/register')
+base_router.register('auth/verify-otp', OTPCheckViewSet, basename='verify-otp')
+base_router.register('auth/refresh-token', RefreshTokenViewSet, basename='refresh-token')
 urlpatterns = [
     path('', include(base_router.urls)),
-    path('auth/verify-token/', TokenVerifyView.as_view(), name='token_verify')
+    path('auth/verify-token/', TokenVerifyView.as_view(), name='token-verify')
 ]
 

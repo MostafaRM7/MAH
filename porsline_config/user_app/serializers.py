@@ -97,6 +97,6 @@ class RefreshTokenSerializer(serializers.Serializer):
             refresh.set_exp()
 
         validated_data['refresh'] = str(refresh)
-        validated_data['access'] = data['access']
+        validated_data['access'] = data.get('access')
 
         return validated_data
