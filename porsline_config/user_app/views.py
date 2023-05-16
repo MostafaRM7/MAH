@@ -7,7 +7,7 @@ from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
-from .serializers import UserSerializer, FolderSerializer, LoginSerializer, OTPCheckSerializer, RefreshTokenSerializer
+from .serializers import UserSerializer, FolderSerializer, GateWaySerializer, OTPCheckSerializer, RefreshTokenSerializer
 from .models import OTPToken
 
 
@@ -56,7 +56,7 @@ class FolderViewSet(viewsets.ModelViewSet):
 
 
 class GateWayViewSet(CreateModelMixin, GenericViewSet):
-    serializer_class = LoginSerializer
+    serializer_class = GateWaySerializer
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
