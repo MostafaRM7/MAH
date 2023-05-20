@@ -10,6 +10,8 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, validators=[
         RegexValidator(regex='^09[0-9]{9}$', message='شماره تلفن همراه وارد شده صحیح نمی باشد')], unique=True,
                                     verbose_name='شماره تلفن همراه')
+    username = None
+    USERNAME_FIELD = 'phone_number'
 
 
 class OTPToken(models.Model):
