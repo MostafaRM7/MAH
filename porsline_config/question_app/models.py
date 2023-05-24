@@ -229,7 +229,6 @@ class IntegerSelectiveQuestion(Question):
         (LIKE, 'Like'),
         (CHECK_MARK, 'Check Mark'),
     ]
-    # TODO asking from ui/ux for pic background
     shape = models.CharField(choices=STYLE_CHOICES, default=STAR, max_length=2, verbose_name='شکل دکمه')
     max = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
 

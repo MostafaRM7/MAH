@@ -1,5 +1,4 @@
 import re
-from django.db import transaction
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.settings import api_settings
@@ -11,7 +10,11 @@ from .models import OTPToken
 
 
 class FolderSerializer(serializers.ModelSerializer):
-    questionnaires = general_serializers.NoQuestionQuestionnaireSerializer(many=True, read_only=True)
+    questionnaires = serializers.SerializerMethodField(method_name='get_questionnaires')
+
+    def get_questionnaires(self, instance):
+        return general_serializers.NoQuestionQuestionnaireSerializer(instance.questionnaires.filter(is_delete=False),
+                                                                     many=True, read_only=True).data
 
     class Meta:
         model = Folder
