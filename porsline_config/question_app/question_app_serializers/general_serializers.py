@@ -10,6 +10,18 @@ class WelcomePageSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'media', 'button_text', 'button_shape', 'is_solid_button', 'questionnaire')
         read_only_fields = ('questionnaire',)
 
+    def validate(self, data):
+        """
+        Handleing 500 error when a second welcomepage created for a questionnaire
+        """
+        questionnaire_uuid = self.context.get('questionnaire_uuid')
+        if WelcomePage.objects.filter(questionnaire__uuid=questionnaire_uuid).exists():
+            raise serializers.ValidationError(
+                {'questionnaire': 'یک صفحه خوش آمدگویی برای این پرسشنامه وجود دارد'},
+                status.HTTP_400_BAD_REQUEST
+            )
+        return data
+
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return WelcomePage.objects.create(**validated_data, questionnaire=questionnaire)
@@ -22,6 +34,18 @@ class ThanksPageSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'media', 'share_link', 'instagram', 'telegram', 'whatsapp', 'eitaa', 'sorush',
             'questionnaire')
         read_only_fields = ('questionnaire',)
+
+    def validate(self, data):
+        """
+        Handleing 500 error when a second welcomepage created for a questionnaire
+        """
+        questionnaire_uuid = self.context.get('questionnaire_uuid')
+        if ThanksPage.objects.filter(questionnaire__uuid=questionnaire_uuid).exists():
+            raise serializers.ValidationError(
+                {'questionnaire': 'یک صفحه خوش آمدگویی برای این پرسشنامه وجود دارد'},
+                status.HTTP_400_BAD_REQUEST
+            )
+        return data
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))

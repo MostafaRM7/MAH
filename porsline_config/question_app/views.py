@@ -286,6 +286,10 @@ class WelcomePageViewSet(viewsets.ModelViewSet):
     lookup_field = 'id'
     permission_classes = (IsPageOwnerOrReadOnly,)
 
+    def get_queryset(self):
+        queryset = WelcomePage.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        return queryset
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
@@ -297,6 +301,10 @@ class ThanksPageViewSet(viewsets.ModelViewSet):
     serializer_class = ThanksPageSerializer
     lookup_field = 'id'
     permission_classes = (IsPageOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = ThanksPage.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        return queryset
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
