@@ -37,7 +37,7 @@ class ThanksPageSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """
-        Handleing 500 error when a second welcomepage created for a questionnaire
+        Handleing 500 error when a second thankspage created for a questionnaire
         """
         questionnaire_uuid = self.context.get('questionnaire_uuid')
         if ThanksPage.objects.filter(questionnaire__uuid=questionnaire_uuid).exists():

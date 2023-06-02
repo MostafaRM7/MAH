@@ -39,7 +39,7 @@ class Questionnaire(models.Model):
 
 class Question(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']  # TODO - formats?
+                                'mkv', 'webm']
     QUESTION_TYPES = (
         ('optional', 'Optional'),
         ('drop_down', 'Drop Down'),
@@ -53,6 +53,7 @@ class Question(models.Model):
         ('link', 'Link'),
         ('file', 'File'),
         ('group', 'Group'),
+        ('no_answer', 'No Answer')
     )
 
     placement = models.PositiveIntegerField(null=True, blank=True, verbose_name='جایگاه')
@@ -190,6 +191,7 @@ class NumberAnswerQuestion(Question):
     max = models.IntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
 
     def save(self, *args, **kwargs):
+        self.is_required = False
         self.question_type = 'number_answer'
         super(NumberAnswerQuestion, self).save(*args, **kwargs)
 
@@ -318,9 +320,31 @@ class QuestionGroup(Question):
         super(QuestionGroup, self).save(*args, **kwargs)
 
 
+class NoAnswerQuestion(Question):
+    SHARP = 'sharp'
+    ROUND = 'round'
+    OVAL = 'oval'
+    BUTTON_SHAPES = (
+        (SHARP, 'Sharp corners'),
+        (ROUND, 'Round corners'),
+        (OVAL, 'Oval')
+    )
+    button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND, verbose_name='شکل دکمه')
+    is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')
+    button_text = models.CharField(max_length=100, verbose_name='متن دکمه')
+
+    def save(self, *args, **kwargs):
+        self.is_required = False
+        self.question_type = 'no_answer'
+        super(NoAnswerQuestion, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.question_text
+
+
 class WelcomePage(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']  # TODO asking from ui/ux
+                                'mkv', 'webm']
     SHARP = 'sharp'
     ROUND = 'round'
     OVAL = 'oval'
@@ -343,7 +367,7 @@ class WelcomePage(models.Model):
 
 class ThanksPage(models.Model):
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
-                                'mkv', 'webm']  # TODO asking from ui/ux
+                                'mkv', 'webm']
     title = models.CharField(max_length=255, verbose_name='عنوان')
     description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
     media = models.FileField(upload_to='thanks_page/%Y/%m/%d', null=True, blank=True,

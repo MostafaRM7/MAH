@@ -38,6 +38,8 @@ class QuestionSerializer(serializers.ModelSerializer):
             return LinkQuestionSerializer(instance.linkquestion).data
         elif question_type == 'file':
             return FileQuestionSerializer(instance.filequestion).data
+        elif question_type == 'no_answer':
+            return NoAnswerQuestionSerializer(instance.noanswerquestion).data
         elif question_type == 'group':
             return QuestionGroupSerializer(instance.questiongroup).data
 
@@ -77,6 +79,8 @@ class NoGroupQuestionSerializer(serializers.ModelSerializer):
                 return LinkQuestionSerializer(instance.linkquestion).data
             elif question_type == 'file':
                 return FileQuestionSerializer(instance.filequestion).data
+            elif question_type == 'no_answer':
+                return NoAnswerQuestionSerializer(instance.noanswerquestion).data
             elif question_type == 'group':
                 return QuestionGroupSerializer(instance.questiongroup).data
         return {"in group"}
@@ -188,7 +192,6 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         Option.objects.bulk_create(options)
         return optional_question
 
-    # TODO - Need rework
     @transaction.atomic()
     def update(self, instance, validated_data):
         options_data = validated_data.pop('options', None)
@@ -269,7 +272,6 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         DropDownOption.objects.bulk_create(options)
         return drop_down_question
 
-    # TODO - Need rework
     @transaction.atomic()
     def update(self, instance, validated_data):
         options_data = validated_data.pop('options', None)
@@ -508,3 +510,17 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return QuestionGroup.objects.create(**validated_data, questionnaire=questionnaire)
+
+
+class NoAnswerQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NoAnswerQuestion
+        fields = (
+            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
+            'show_number', 'media', 'button_shape', 'is_solid_button', 'button_text'
+        )
+        read_only_fields = ('question_type', 'questionnaire')
+
+    def create(self, validated_data):
+        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        return NoAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)

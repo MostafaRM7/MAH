@@ -175,8 +175,6 @@ class TestUpdatingQuestion:
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    # TODO - Why?!
-    # @pytest.mark.skip
     def test_if_user_is_allowed_and_data_valid_returns_200(self, api_client, authenticate):
         user = baker.make(get_user_model(), is_staff=True)
         authenticate(user)

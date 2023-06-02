@@ -28,6 +28,7 @@ questionnaire_router.register('email-questions', views.EmailFieldQuestionViewSet
 questionnaire_router.register('link-questions', views.LinkQuestionViewSet, basename='link_questions')
 questionnaire_router.register('file-questions', views.FileQuestionViewSet, basename='file_questions')
 questionnaire_router.register('question-groups', views.QuestionGroupViewSet, basename='question_groups')
+questionnaire_router.register('noanswer-questions', views.NoAnswerQuestionViewSet, basename='noanswer_questions')
 
 urlpatterns = [
     path('search-questionnaires/', views.SearchQuestionnaire.as_view(),

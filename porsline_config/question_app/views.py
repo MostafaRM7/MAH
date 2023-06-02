@@ -262,6 +262,21 @@ class QuestionGroupViewSet(viewsets.ModelViewSet):
         return context
 
 
+class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = NoAnswerQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = NoAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
+        return context
+
+
 class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                        viewsets.mixins.ListModelMixin,
                        viewsets.GenericViewSet):
