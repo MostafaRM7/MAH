@@ -16,7 +16,7 @@ class UserViewSet(viewsets.ModelViewSet):
         A simple ViewSet for listing or retrieving the current user.
     """
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAdminUser,)
 
     def get_queryset(self):
         queryset = get_user_model().objects.all()
@@ -27,7 +27,7 @@ class UserViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         return context
 
-    @action(detail=False, methods=['get', 'patch'])
+    @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
         if request.method == 'GET':
             serializer = UserSerializer(request.user)
@@ -60,11 +60,9 @@ class GateWayViewSet(CreateModelMixin, GenericViewSet):
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
-        print("create")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        print("saved")
         headers = self.get_success_headers(serializer.data)
         return Response(data={'response: کد با موفقیت ارسال شد'}, status=status.HTTP_201_CREATED, headers=headers)
 
