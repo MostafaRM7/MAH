@@ -288,7 +288,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
 
     permission_classes = (AnonPOSTOrOwner,)
 
-    @action(methods=['get'], detail=False, permission_classes=[IsQuestionOwnerOrReadOnly])
+    @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwnerOrReadOnly])
     def search(self, request, questionnaire_uuid):
         search = request.query_params.get('search', None)
         if search is None:
