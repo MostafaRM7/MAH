@@ -66,7 +66,6 @@ class OTPCheckSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         token = validated_data.get('token')
-        print(token)
         otp = OTPToken.objects.filter(token=token)
         if otp.exists():
             otp = otp.first()

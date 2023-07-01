@@ -1,6 +1,9 @@
 from uuid import UUID
+
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
@@ -10,6 +13,7 @@ from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer
 from .question_app_serializers.general_serializers import *
 from .question_app_serializers.question_serializers import *
+from question_app.models import Question
 
 
 class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -283,6 +287,52 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
     serializer_class = AnswerSetSerializer
 
     permission_classes = (AnonPOSTOrOwner,)
+
+    @action(methods=['get'], detail=False, permission_classes=[IsQuestionOwnerOrReadOnly])
+    def search(self, request, questionnaire_uuid):
+        search = request.query_params.get('search', None)
+        if search is None:
+            return Response({'message': 'لطفا عبارت سرچ را وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
+        result = []
+        questionnaire = self.get_queryset().first().questionnaire
+        for question in questionnaire.questions.all():
+            for answer in question.answers.all():
+                if question.question_type == 'text_answer':
+                    if search in answer.answer.get('text_answer'):
+                        result.append(answer.answer_set)
+                elif question.question_type == 'number_answer':
+                    if search == answer.answer.get('number_answer'):
+                        result.append(answer.answer_set)
+                elif question.question_type == 'integer_range':
+                    if int(search) == answer.answer.get('integer_range'):
+                        result.append(answer.answer_set)
+                elif question.question_type == 'integer_selective':
+                    if int(search) == answer.answer.get('integer_selective'):
+                        result.append(answer.answer_set)
+                elif question.question_type == 'email_field':
+                    if search in answer.answer.get('email_field'):
+                        result.append(answer.answer_set)
+                elif question.question_type == 'link':
+                    if search in answer.answer.get('link'):
+                        result.append(answer.answer_set)
+                elif question.question_type == 'optional':
+                    for option_id in answer.get('selected_options'):
+                        option_text = Option.objects.get(id=option_id).text
+                        if search in option_text:
+                            result.append(answer.answer_set)
+                elif question.question_type == 'drop_down':
+                    for option_id in answer.get('selected_options'):
+                        option_text = DropDownOption.objects.get(id=option_id).text
+                        if search in option_text:
+                            result.append(answer.answer_set)
+                elif question.question_type == 'sort':
+                    for option in answer.get('sorted_options'):
+                        option_text = SortOption.objects.get(id=option).text
+                        if search in option_text:
+                            result.append(answer.answer_set)
+        result = set(result)
+        serializer = AnswerSetSerializer(result, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         queryset = AnswerSet.objects.prefetch_related('answers').filter(
