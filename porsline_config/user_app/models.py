@@ -16,8 +16,9 @@ class User(AbstractUser):
 
 class OTPToken(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='otp_token', verbose_name='کاربر')
-    token = models.CharField(default=randint(10000, 99999), max_length=6, null=True, blank=True,
-                             verbose_name='کد فعال سازی', editable=False, unique=True)
+    # default = randint(10000, 99999) unique=True
+    token = models.CharField(default=12345, max_length=6, null=True, blank=True,
+                             verbose_name='کد فعال سازی', editable=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
 
     def __str__(self):

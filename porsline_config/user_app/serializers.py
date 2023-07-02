@@ -37,11 +37,10 @@ class GateWaySerializer(serializers.Serializer):
         otp = OTPToken.objects.filter(user__phone_number=validated_data.get('phone_number'))
         if otp.exists():
             otp.delete()
-        else:
-            user = get_user_model().objects.get_or_create(phone_number=validated_data.get('phone_number'))
-            otp = OTPToken.objects.create(user=user[0])
-            send_otp.delay(otp.token, validated_data.get('phone_number'))
-            print(otp.token)
+        user = get_user_model().objects.get_or_create(phone_number=validated_data.get('phone_number'))
+        otp = OTPToken.objects.create(user=user[0])
+        print(otp.token)
+        send_otp.delay(otp.token, validated_data.get('phone_number'))
         return validated_data
 
     def validate(self, attrs):
