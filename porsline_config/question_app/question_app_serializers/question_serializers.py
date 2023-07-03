@@ -1,7 +1,9 @@
 from django.db import transaction
+from django.http import HttpRequest
 from rest_framework import serializers
 from rest_framework import status
 from ..models import *
+from porsline_config import settings
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -17,31 +19,31 @@ class QuestionSerializer(serializers.ModelSerializer):
         """
         question_type = instance.question_type
         if question_type == 'optional':
-            return OptionalQuestionSerializer(instance.optionalquestion).data
+            return OptionalQuestionSerializer(instance.optionalquestion, context=self.context).data
         elif question_type == 'drop_down':
-            return DropDownQuestionSerializer(instance.dropdownquestion).data
+            return DropDownQuestionSerializer(instance.dropdownquestion, context=self.context).data
         elif question_type == 'sort':
-            return SortQuestionSerializer(instance.sortquestion).data
+            return SortQuestionSerializer(instance.sortquestion, context=self.context).data
         elif question_type == 'text_answer':
-            return TextAnswerQuestionSerializer(instance.textanswerquestion).data
+            return TextAnswerQuestionSerializer(instance.textanswerquestion, context=self.context).data
         elif question_type == 'number_answer':
-            return NumberAnswerQuestionSerializer(instance.numberanswerquestion).data
+            return NumberAnswerQuestionSerializer(instance.numberanswerquestion, context=self.context).data
         elif question_type == 'integer_range':
-            return IntegerRangeQuestionSerializer(instance.integerrangequestion).data
+            return IntegerRangeQuestionSerializer(instance.integerrangequestion, context=self.context).data
         elif question_type == 'integer_selective':
-            return IntegerSelectiveQuestionSerializer(instance.integerselectivequestion).data
+            return IntegerSelectiveQuestionSerializer(instance.integerselectivequestion, context=self.context).data
         elif question_type == 'picture_field':
-            return PictureFieldQuestionSerializer(instance.picturefieldquestion).data
+            return PictureFieldQuestionSerializer(instance.picturefieldquestion, context=self.context).data
         elif question_type == 'email_field':
-            return EmailFieldQuestionSerializer(instance.emailfieldquestion).data
+            return EmailFieldQuestionSerializer(instance.emailfieldquestion, context=self.context).data
         elif question_type == 'link':
-            return LinkQuestionSerializer(instance.linkquestion).data
+            return LinkQuestionSerializer(instance.linkquestion, context=self.context).data
         elif question_type == 'file':
-            return FileQuestionSerializer(instance.filequestion).data
+            return FileQuestionSerializer(instance.filequestion, context=self.context).data
         elif question_type == 'no_answer':
-            return NoAnswerQuestionSerializer(instance.noanswerquestion).data
+            return NoAnswerQuestionSerializer(instance.noanswerquestion, context=self.context).data
         elif question_type == 'group':
-            return QuestionGroupSerializer(instance.questiongroup).data
+            return QuestionGroupSerializer(instance.questiongroup, context=self.context).data
 
 
 class NoGroupQuestionSerializer(serializers.ModelSerializer):
@@ -58,31 +60,31 @@ class NoGroupQuestionSerializer(serializers.ModelSerializer):
         question_type = instance.question_type
         if instance.group is None:
             if question_type == 'optional':
-                return OptionalQuestionSerializer(instance.optionalquestion).data
+                return OptionalQuestionSerializer(instance.optionalquestion, context=self.context).data
             elif question_type == 'drop_down':
-                return DropDownQuestionSerializer(instance.dropdownquestion).data
+                return DropDownQuestionSerializer(instance.dropdownquestion, context=self.context).data
             elif question_type == 'sort':
-                return SortQuestionSerializer(instance.sortquestion).data
+                return SortQuestionSerializer(instance.sortquestion, context=self.context).data
             elif question_type == 'text_answer':
-                return TextAnswerQuestionSerializer(instance.textanswerquestion).data
+                return TextAnswerQuestionSerializer(instance.textanswerquestion, context=self.context).data
             elif question_type == 'number_answer':
-                return NumberAnswerQuestionSerializer(instance.numberanswerquestion).data
+                return NumberAnswerQuestionSerializer(instance.numberanswerquestion, context=self.context).data
             elif question_type == 'integer_range':
-                return IntegerRangeQuestionSerializer(instance.integerrangequestion).data
+                return IntegerRangeQuestionSerializer(instance.integerrangequestion, context=self.context).data
             elif question_type == 'integer_selective':
-                return IntegerSelectiveQuestionSerializer(instance.integerselectivequestion).data
+                return IntegerSelectiveQuestionSerializer(instance.integerselectivequestion, context=self.context).data
             elif question_type == 'picture_field':
-                return PictureFieldQuestionSerializer(instance.picturefieldquestion).data
+                return PictureFieldQuestionSerializer(instance.picturefieldquestion, context=self.context).data
             elif question_type == 'email_field':
-                return EmailFieldQuestionSerializer(instance.emailfieldquestion).data
+                return EmailFieldQuestionSerializer(instance.emailfieldquestion, context=self.context).data
             elif question_type == 'link':
-                return LinkQuestionSerializer(instance.linkquestion).data
+                return LinkQuestionSerializer(instance.linkquestion, context=self.context).data
             elif question_type == 'file':
-                return FileQuestionSerializer(instance.filequestion).data
+                return FileQuestionSerializer(instance.filequestion, context=self.context).data
             elif question_type == 'no_answer':
-                return NoAnswerQuestionSerializer(instance.noanswerquestion).data
+                return NoAnswerQuestionSerializer(instance.noanswerquestion, context=self.context).data
             elif question_type == 'group':
-                return QuestionGroupSerializer(instance.questiongroup).data
+                return QuestionGroupSerializer(instance.questiongroup, context=self.context).data
         return {"in group"}
 
 
@@ -94,6 +96,14 @@ class OptionSerializer(serializers.ModelSerializer):
 
 class OptionalQuestionSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True)
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
 
     class Meta:
         model = OptionalQuestion
@@ -224,6 +234,14 @@ class DropDownOptionSerializer(serializers.ModelSerializer):
 
 class DropDownQuestionSerializer(serializers.ModelSerializer):
     options = DropDownOptionSerializer(many=True)
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
 
     class Meta:
         model = DropDownQuestion
@@ -304,6 +322,14 @@ class SortOptionSerializer(serializers.ModelSerializer):
 
 class SortQuestionSerializer(serializers.ModelSerializer):
     options = SortOptionSerializer(many=True)
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
 
     class Meta:
         model = SortQuestion
@@ -345,6 +371,15 @@ class SortQuestionSerializer(serializers.ModelSerializer):
 
 
 class TextAnswerQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = TextAnswerQuestion
         fields = (
@@ -370,6 +405,15 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
 
 
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = NumberAnswerQuestion
         fields = (
@@ -395,6 +439,15 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = IntegerSelectiveQuestion
         fields = (
@@ -410,6 +463,15 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = IntegerRangeQuestion
         fields = (
@@ -441,6 +503,15 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
 
 
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = PictureFieldQuestion
         fields = (
@@ -455,6 +526,15 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = EmailFieldQuestion
         fields = (
@@ -469,6 +549,15 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = LinkQuestion
         fields = (
@@ -483,6 +572,15 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = FileQuestion
         fields = (
@@ -498,6 +596,14 @@ class FileQuestionSerializer(serializers.ModelSerializer):
 
 class QuestionGroupSerializer(serializers.ModelSerializer):
     child_questions = QuestionSerializer(many=True, read_only=True)
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
 
     class Meta:
         model = QuestionGroup
@@ -513,6 +619,15 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
 
 
 class NoAnswerQuestionSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField(method_name='get_media')
+
+    def get_media(self, obj):
+        print("shit")
+        request: HttpRequest = self.context.get('request')
+        print(self.context)
+        if obj.media:
+            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+
     class Meta:
         model = NoAnswerQuestion
         fields = (
