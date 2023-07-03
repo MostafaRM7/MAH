@@ -22,7 +22,6 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     """
     queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions').filter(
         is_delete=False,
-        is_active=True,
         folder__isnull=False,
         pub_date__lte=timezone.now(),
         end_date__gte=timezone.now(),
