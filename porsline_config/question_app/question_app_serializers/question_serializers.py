@@ -103,7 +103,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = OptionalQuestion
@@ -241,7 +241,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = DropDownQuestion
@@ -329,7 +329,7 @@ class SortQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = SortQuestion
@@ -378,7 +378,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = TextAnswerQuestion
@@ -412,7 +412,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = NumberAnswerQuestion
@@ -446,7 +446,7 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = IntegerSelectiveQuestion
@@ -470,7 +470,7 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = IntegerRangeQuestion
@@ -510,7 +510,7 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = PictureFieldQuestion
@@ -533,7 +533,7 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = EmailFieldQuestion
@@ -556,7 +556,7 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = LinkQuestion
@@ -579,7 +579,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = FileQuestion
@@ -603,7 +603,7 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = QuestionGroup
@@ -626,7 +626,7 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
         request: HttpRequest = self.context.get('request')
         print(self.context)
         if obj.media:
-            return f'{request.scheme}://{request.get_host()}/media/{obj.media}'
+            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = NoAnswerQuestion
