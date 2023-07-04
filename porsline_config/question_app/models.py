@@ -67,6 +67,7 @@ class Question(models.Model):
     media = models.FileField(upload_to='question_media/%Y/%m/%d', null=True, blank=True,
                              validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)],
                              verbose_name='تصویر یا فیلم')
+    double_picture_size = models.BooleanField(default=False, verbose_name='اندازه تصویر دو برابر')
     show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
     group = models.ForeignKey('QuestionGroup', on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='child_questions', verbose_name='گروه')

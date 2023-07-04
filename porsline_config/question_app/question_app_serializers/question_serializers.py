@@ -96,14 +96,6 @@ class OptionSerializer(serializers.ModelSerializer):
 
 class OptionalQuestionSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True)
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = OptionalQuestion
@@ -113,6 +105,13 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             'max_selected_options',
             'min_selected_options', 'show_number', 'additional_options', 'all_options', 'nothing_selected', 'options')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
 
     def validate(self, data):
         additional_options = data.get('additional_options')
@@ -234,14 +233,6 @@ class DropDownOptionSerializer(serializers.ModelSerializer):
 
 class DropDownQuestionSerializer(serializers.ModelSerializer):
     options = DropDownOptionSerializer(many=True)
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = DropDownQuestion
@@ -251,6 +242,13 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media', 'multiple_choice', 'is_alphabetic_order', 'is_random_options',
             'max_selected_options', 'min_selected_options', 'options')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
 
     def validate(self, data):
         max_selected_options = data.get('max_selected_options')
@@ -321,16 +319,6 @@ class SortOptionSerializer(serializers.ModelSerializer):
 
 
 class SortQuestionSerializer(serializers.ModelSerializer):
-    options = SortOptionSerializer(many=True)
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = SortQuestion
         fields = (
@@ -338,6 +326,13 @@ class SortQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'is_random_options', 'options')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
 
     def create(self, validated_data):
         options_data = validated_data.pop('options')
@@ -371,15 +366,6 @@ class SortQuestionSerializer(serializers.ModelSerializer):
 
 
 class TextAnswerQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = TextAnswerQuestion
         fields = (
@@ -387,6 +373,13 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'show_number', 'answer_template', 'pattern', 'min', 'max')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
 
     def validate(self, data):
         max_len = data.get('max')
@@ -405,15 +398,6 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
 
 
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = NumberAnswerQuestion
         fields = (
@@ -421,6 +405,13 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
             'is_required',
             'show_number', 'media', 'min', 'max')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
 
     def validate(self, data):
         max_value = data.get('max')
@@ -439,15 +430,6 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = IntegerSelectiveQuestion
         fields = (
@@ -457,21 +439,19 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('question_type', 'questionnaire')
 
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
+
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return IntegerSelectiveQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = IntegerRangeQuestion
         fields = (
@@ -480,6 +460,13 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media', 'min', 'max', 'min_label', 'mid_label', 'max_label'
         )
         read_only_fields = ('question_type', 'questionnaire')
+
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
 
     def validate(self, data):
         max_value = data.get('max')
@@ -503,15 +490,6 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
 
 
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = PictureFieldQuestion
         fields = (
@@ -520,21 +498,19 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media')
         read_only_fields = ('question_type', 'questionnaire')
 
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
+
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return PictureFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = EmailFieldQuestion
         fields = (
@@ -543,21 +519,19 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media')
         read_only_fields = ('question_type', 'questionnaire')
 
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
+
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return EmailFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = LinkQuestion
         fields = (
@@ -566,21 +540,19 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media')
         read_only_fields = ('question_type', 'questionnaire')
 
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
+
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return LinkQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = FileQuestion
         fields = (
@@ -589,6 +561,13 @@ class FileQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media', 'max_volume')
         read_only_fields = ('question_type', 'questionnaire')
 
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
+
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return FileQuestion.objects.create(**validated_data, questionnaire=questionnaire)
@@ -596,14 +575,6 @@ class FileQuestionSerializer(serializers.ModelSerializer):
 
 class QuestionGroupSerializer(serializers.ModelSerializer):
     child_questions = QuestionSerializer(many=True, read_only=True)
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        print("shit")
-        request: HttpRequest = self.context.get('request')
-        print(self.context)
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
     class Meta:
         model = QuestionGroup
@@ -613,19 +584,19 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('question_type', 'questionnaire')
 
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
+
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return QuestionGroup.objects.create(**validated_data, questionnaire=questionnaire)
 
 
 class NoAnswerQuestionSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField(method_name='get_media')
-
-    def get_media(self, obj):
-        request: HttpRequest = self.context.get('request')
-        if obj.media:
-            return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
-
     class Meta:
         model = NoAnswerQuestion
         fields = (
@@ -633,6 +604,13 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media', 'button_shape', 'is_solid_button', 'button_text'
         )
         read_only_fields = ('question_type', 'questionnaire')
+
+    def to_representation(self, instance):
+        request: HttpRequest = self.context.get('request')
+        data = super().to_representation(instance)
+        if data.get('media'):
+            data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
+        return data
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
