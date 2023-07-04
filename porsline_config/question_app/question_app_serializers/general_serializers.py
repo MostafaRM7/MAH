@@ -80,8 +80,6 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         folder = data.get('folder')
         request = self.context.get('request')
         if folder is not None:
-            print(folder)
-            print("Not None")
             if request.user != folder.owner:
                 raise serializers.ValidationError(
                     {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},

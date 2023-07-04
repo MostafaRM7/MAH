@@ -622,9 +622,7 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
     media = serializers.SerializerMethodField(method_name='get_media')
 
     def get_media(self, obj):
-        print("shit")
         request: HttpRequest = self.context.get('request')
-        print(self.context)
         if obj.media:
             return f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{obj.media}'
 
