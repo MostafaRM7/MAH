@@ -19,7 +19,7 @@ class Questionnaire(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام')
     is_active = models.BooleanField(default=False, verbose_name='فعال/غیرفعال')
     is_delete = models.BooleanField(default=False, verbose_name='حذف شده/نشده')
-    pub_date = models.DateField(default=timezone.now, verbose_name='تاریخ انتشار')
+    pub_date = models.DateField(null=True, blank=True, verbose_name='تاریخ انتشار')
     end_date = models.DateField(null=True, blank=True, verbose_name='تاریخ پایان')
     timer = models.DurationField(null=True, blank=True, verbose_name='تایمر')
     show_question_in_pages = models.BooleanField(default=True, verbose_name='نشان دادن سوال ها در صفحات مجزا')

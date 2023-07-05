@@ -1,6 +1,7 @@
 from .question_serializers import *
 from ..models import *
 from rest_framework import serializers, status
+from django.utils import timezone
 
 
 class WelcomePageSerializer(serializers.ModelSerializer):
@@ -79,6 +80,18 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
     def validate(self, data):
         folder = data.get('folder')
         request = self.context.get('request')
+        pub_date = data.get('pub_date')
+        end_date = data.get('end_date')
+        if pub_date:
+            if pub_date < timezone.now().date():
+                raise serializers.ValidationError(
+                    {'pub_date': 'تاریخ شروع پرسشنامه نمی تواند قبل از زمان حال باشد'}
+                )
+            if end_date:
+                if end_date < pub_date:
+                    raise serializers.ValidationError(
+                        {'date': 'تاریخ شروع پرسشنامه نمی تواند بعد از تاریخ پایان باشد'}
+                    )
         if folder is not None:
             if request.user != folder.owner:
                 raise serializers.ValidationError(
@@ -94,7 +107,12 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        return Questionnaire.objects.create(**validated_data, owner=self.context.get('request').user)
+        pub_date = validated_data.get('pub_date')
+        if pub_date:
+            validated_data.pop('pub_date')
+        else:
+            pub_date = timezone.now().date()
+        return Questionnaire.objects.create(**validated_data, owner=self.context.get('request').user, pub_date=pub_date)
 
 
 class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
