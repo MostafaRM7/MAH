@@ -550,6 +550,7 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        print(validated_data)
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         return LinkQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 

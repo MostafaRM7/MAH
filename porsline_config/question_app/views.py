@@ -2,6 +2,7 @@ from uuid import UUID
 
 from django.db.models import Q
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -9,6 +10,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from .filtersets import AnswerSetFilterSet
 from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer
 from .question_app_serializers.general_serializers import *
@@ -289,8 +292,9 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                        viewsets.mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = AnswerSetSerializer
-
     permission_classes = (AnonPOSTOrOwner,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = AnswerSetFilterSet
 
     @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwnerOrReadOnly])
     def search(self, request, questionnaire_uuid):

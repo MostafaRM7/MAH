@@ -289,7 +289,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerSet
-        fields = ('id', 'questionnaire', 'answers')
+        fields = ('id', 'questionnaire', 'answers', 'answered_at')
         read_only_fields = ('questionnaire',)
 
     def validate(self, data):

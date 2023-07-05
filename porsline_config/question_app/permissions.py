@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from .models import Questionnaire
 
@@ -6,7 +7,7 @@ class IsQuestionnaireOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         uuid = view.kwargs.get('uuid')
         if uuid:
-            return request.user == Questionnaire.objects.get(uuid=uuid).owner or request.user.is_staff
+            return request.user == get_object_or_404(Questionnaire, uuid=uuid) or request.user.is_staff
         else:
             if request.method == 'POST':
                 return request.user.is_authenticated
@@ -17,7 +18,7 @@ class IsQuestionnaireOwnerOrReadOnly(BasePermission):
 class IsQuestionOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         question_id = view.kwargs.get('id')
-        questionnaire = Questionnaire.objects.get(uuid=view.kwargs.get('questionnaire_uuid'))
+        questionnaire = get_object_or_404(Questionnaire, uuid=view.kwargs.get('questionnaire_uuid'))
         if question_id:
             if request.user.is_authenticated:
                 return questionnaire in request.user.questionnaires.all() or request.user.is_staff
@@ -29,7 +30,7 @@ class IsQuestionOwnerOrReadOnly(BasePermission):
 class ChangePlacementForOwnerOrStaff(BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
-            questionnaire = Questionnaire.objects.get(uuid=view.kwargs.get('questionnaire_uuid'))
+            questionnaire = get_object_or_404(Questionnaire, uuid=view.kwargs.get('questionnaire_uuid'))
             if request.user.is_authenticated:
                 return questionnaire in request.user.questionnaires.all() or request.user.is_staff
         return False
@@ -38,7 +39,7 @@ class ChangePlacementForOwnerOrStaff(BasePermission):
 class AnonPOSTOrOwner(BasePermission):
     def has_permission(self, request, view):
         answer_set_id = view.kwargs.get('id')
-        questionnaire = Questionnaire.objects.get(uuid=view.kwargs.get('questionnaire_uuid'))
+        questionnaire = get_object_or_404(Questionnaire, uuid=view.kwargs.get('questionnaire_uuid'))
         if answer_set_id:
             if request.user.is_authenticated:
                 return questionnaire in request.user.questionnaires.all() or request.user.is_staff
@@ -53,7 +54,7 @@ class AnonPOSTOrOwner(BasePermission):
 class IsPageOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         page_id = view.kwargs.get('id')
-        questionnaire = Questionnaire.objects.get(uuid=view.kwargs.get('questionnaire_uuid'))
+        questionnaire = get_object_or_404(Questionnaire, uuid=view.kwargs.get('questionnaire_uuid'))
         if page_id:
             if request.user.is_authenticated:
                 return questionnaire in request.user.questionnaires.all() or request.user.is_staff

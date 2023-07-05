@@ -287,6 +287,7 @@ class FileQuestion(Question):
 class AnswerSet(models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.PROTECT,
                                       related_name='answer_set', verbose_name='پرسشنامه')
+    answered_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان پاسخگویی')
 
     def __str__(self):
         return f'{self.questionnaire} - AnswerSet'
