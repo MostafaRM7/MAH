@@ -21,7 +21,7 @@ class WelcomePageSerializer(serializers.ModelSerializer):
                     {'questionnaire': 'یک صفحه خوش آمدگویی برای این پرسشنامه وجود دارد'},
                     status.HTTP_400_BAD_REQUEST
                 )
-            return data
+        return data
 
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
