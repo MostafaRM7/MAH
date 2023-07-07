@@ -83,6 +83,8 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         pub_date = data.get('pub_date')
         end_date = data.get('end_date')
         if pub_date:
+            print(pub_date)
+            print(timezone.now().date())
             if pub_date < timezone.now().date():
                 raise serializers.ValidationError(
                     {'pub_date': 'تاریخ شروع پرسشنامه نمی تواند قبل از زمان حال باشد'}
@@ -107,11 +109,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        if validated_data.get('pub_date'):
-            pub_date = validated_data.pop('pub_date')
-        else:
-            pub_date = timezone.now().date()
-        return Questionnaire.objects.create(owner=self.context.get('request').user, pub_date=pub_date, **validated_data)
+        return Questionnaire.objects.create(owner=self.context.get('request').user, pub_date=validated_data.pop('pub_date', timezone.now().date()), **validated_data)
 
 
 class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
