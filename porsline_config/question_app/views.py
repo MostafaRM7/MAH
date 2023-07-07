@@ -391,11 +391,14 @@ class ChangeQuestionsPlacements(APIView):
     @transaction.atomic()
     def post(self, request, questionnaire_uuid):
         placements = request.data.get('placements')
-        for placement in placements:
-            question = get_object_or_404(Question, id=placement.get('question_id'),
-                                         questionnaire__uuid=questionnaire_uuid)
-            question.placement = int(placement.get('new_placement'))
-            question.save()
+        try:
+            for placement in placements:
+                question = get_object_or_404(Question, id=placement.get('question_id'),
+                                             questionnaire__uuid=questionnaire_uuid)
+                question.placement = int(placement.get('new_placement'))
+                question.save()
+        except TypeError:
+            return Response({'message': 'لطفا اطلاعات را به درستی وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
 
 
