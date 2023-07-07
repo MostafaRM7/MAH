@@ -111,7 +111,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
             pub_date = validated_data.pop('pub_date')
         else:
             pub_date = timezone.now().date()
-        return Questionnaire.objects.create(**validated_data, owner=self.context.get('request').user, pub_date=pub_date)
+        return Questionnaire.objects.create(owner=self.context.get('request').user, pub_date=pub_date, **validated_data)
 
 
 class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
