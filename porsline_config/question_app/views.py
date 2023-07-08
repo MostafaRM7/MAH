@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from .filtersets import AnswerSetFilterSet
 from .permissions import *
-from .question_app_serializers.answer_serializers import AnswerSetSerializer
+from .question_app_serializers.answer_serializers import AnswerSetSerializer, AnswerSerializer
 from .question_app_serializers.general_serializers import *
 from .question_app_serializers.question_serializers import *
 from question_app.models import Question
@@ -290,11 +290,22 @@ class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
 
 class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                        viewsets.mixins.ListModelMixin,
+                       viewsets.mixins.RetrieveModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = AnswerSetSerializer
     permission_classes = (AnonPOSTOrOwner,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AnswerSetFilterSet
+
+    @action(methods=['post'], detail=True, permission_classes=[AnonPOSTOrOwner], url_path='add-answer')
+    @transaction.atomic()
+    def add_answer(self, request, questionnaire_uuid, pk):
+        answer_set = self.get_object()
+        answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set})
+        answers.is_valid(raise_exception=True)
+        answers.save()
+        answer_set.refresh_from_db()
+        return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwnerOrReadOnly])
     def search(self, request, questionnaire_uuid):
@@ -312,11 +323,17 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                     if search == answer.answer.get('number_answer'):
                         result.append(answer.answer_set)
                 elif question.question_type == 'integer_range':
-                    if int(search) == answer.answer.get('integer_range'):
-                        result.append(answer.answer_set)
+                    try:
+                        if int(search) == answer.answer.get('integer_range'):
+                            result.append(answer.answer_set)
+                    except ValueError:
+                        pass
                 elif question.question_type == 'integer_selective':
-                    if int(search) == answer.answer.get('integer_selective'):
-                        result.append(answer.answer_set)
+                    try:
+                        if int(search) == answer.answer.get('integer_selective'):
+                            result.append(answer.answer_set)
+                    except ValueError:
+                        pass
                 elif question.question_type == 'email_field':
                     if search in answer.answer.get('email_field'):
                         result.append(answer.answer_set)
@@ -324,18 +341,18 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                     if search in answer.answer.get('link'):
                         result.append(answer.answer_set)
                 elif question.question_type == 'optional':
-                    for option_id in answer.get('selected_options'):
+                    for option_id in answer.answer.get('selected_options'):
                         option_text = Option.objects.get(id=option_id).text
                         if search in option_text:
                             result.append(answer.answer_set)
                 elif question.question_type == 'drop_down':
-                    for option_id in answer.get('selected_options'):
+                    for option_id in answer.answer.get('selected_options'):
                         option_text = DropDownOption.objects.get(id=option_id).text
                         if search in option_text:
                             result.append(answer.answer_set)
                 elif question.question_type == 'sort':
-                    for option in answer.get('sorted_options'):
-                        option_text = SortOption.objects.get(id=option).text
+                    for option in answer.answer.get('sorted_options'):
+                        option_text = SortOption.objects.get(id=option.get('id')).text
                         if search in option_text:
                             result.append(answer.answer_set)
         result = set(result)
@@ -387,6 +404,7 @@ class ThanksPageViewSet(viewsets.ModelViewSet):
 
 class ChangeQuestionsPlacements(APIView):
     permission_classes = (ChangePlacementForOwnerOrStaff,)
+
     @transaction.atomic()
     def post(self, request, questionnaire_uuid):
         placements = request.data.get('placements')

@@ -1,17 +1,33 @@
 from .general_serializers import *
 from ..models import *
 from .. import utils
+import datetime
 
 
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        fields = ('question', 'answer', 'file')
+        fields = ('id', 'question', 'answer', 'file', 'answered_at')
+        read_only_fields = ('answered_at',)
 
     def validate(self, data):
         question = data.get('question')
         answer = data.get('answer')
         file = data.get('file')
+        answer_set: AnswerSet = self.context.get('answer_set')
+        # if answer_set.answers.filter(question=question):
+        #     raise serializers.ValidationError(
+        #         {'answer': f' سوال {question.title} با آی دی {question.id} قبلا پاسخ داده شده است'},
+        #         status.HTTP_400_BAD_REQUEST
+        #     )
+        timer = answer_set.questionnaire.timer
+        iran_answered_at = answer_set.answered_at.replace(tzinfo=None) + datetime.timedelta(hours=3, minutes=30)
+        if timer:
+            if datetime.datetime.now().replace(tzinfo=None) - iran_answered_at > timer:
+                raise serializers.ValidationError(
+                    {'answered_at': 'زمان پاسخ دهی به سوالات به پایان رسیده است'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         is_required = question.is_required
         if question.question_type == "optional":
             optional_question: OptionalQuestion = question.optionalquestion
@@ -283,41 +299,54 @@ class AnswerSerializer(serializers.ModelSerializer):
                     )
         return data
 
+    def create(self, validated_data):
+        answer_set = self.context.get('answer_set')
+        question = validated_data.get('question')
+        if answer_set.answers.filter(question=question):
+            answer_set.answers.filter(question=question).delete()
+        answer = Answer.objects.create(answer_set=self.context.get('answer_set'), **validated_data)
+        return answer
+
 
 class AnswerSetSerializer(serializers.ModelSerializer):
-    answers = AnswerSerializer(many=True)
+    answers = AnswerSerializer(many=True, read_only=True)
 
     class Meta:
         model = AnswerSet
-        fields = ('id', 'questionnaire', 'answers', 'answered_at')
+        fields = ('id', 'questionnaire', 'answered_at', 'answers')
         read_only_fields = ('questionnaire',)
 
     def validate(self, data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        answers = data.get('answers')
+        # answers = data.get('answers')
         questions = questionnaire.questions.all()
-        answered_questions = [answer.get('question') for answer in answers]
+        # answered_questions = [answer.get('question') for answer in answers]
         for question in questions:
             if question.questionnaire != questionnaire:
                 raise serializers.ValidationError(
                     {'questionnaire': f'پرسشنامه سوالی با عنوان {question.title}ندارد'},
                     status.HTTP_400_BAD_REQUEST
                 )
-            else:
-                is_required = question.is_required
-                if is_required and question not in answered_questions:
-                    raise serializers.ValidationError(
-                        {'question': f'پاسخ به سوال با عنوان {question.title}اجباری است'},
-                        status.HTTP_400_BAD_REQUEST
-                    )
+            # else:
+            #     is_required = question.is_required
+            #     if is_required and question not in answered_questions:
+            #         raise serializers.ValidationError(
+            #             {'question': f'پاسخ به سوال با عنوان {question.title}اجباری است'},
+            #             status.HTTP_400_BAD_REQUEST
+            #         )
 
         return data
 
     @transaction.atomic()
     def create(self, validated_data):
-        answers_data = validated_data.pop('answers')
+        # answers_data = validated_data.pop('answers')
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire)
-        answers = [Answer(answer_set=answer_set, **answer_data) for answer_data in answers_data]
-        Answer.objects.bulk_create(answers)
+        # answers = [Answer(answer_set=answer_set, **answer_data) for answer_data in answers_data]
+        # Answer.objects.bulk_create(answers)
         return answer_set
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['questionnaire'] = instance.questionnaire.uuid
+        return representation

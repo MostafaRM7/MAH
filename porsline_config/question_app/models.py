@@ -299,6 +299,7 @@ class Answer(models.Model):
                                    verbose_name='دسته جواب')
     answer = models.JSONField(verbose_name='جواب')
     file = models.FileField(upload_to='answer_file/%Y/%m/%d', null=True, blank=True, verbose_name='فایل')
+    answered_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان پاسخگویی')
 
     def __str__(self):
         return f'{self.answer_set} - {self.question}'
