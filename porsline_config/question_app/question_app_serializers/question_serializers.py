@@ -321,6 +321,7 @@ class SortOptionSerializer(serializers.ModelSerializer):
 
 
 class SortQuestionSerializer(serializers.ModelSerializer):
+    options = SortOptionSerializer(many=True)
     class Meta:
         model = SortQuestion
         fields = (
