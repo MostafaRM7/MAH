@@ -17,7 +17,6 @@ class Folder(models.Model):
 
 class Questionnaire(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام')
-    is_active = models.BooleanField(default=False, verbose_name='فعال/غیرفعال')
     is_delete = models.BooleanField(default=False, verbose_name='حذف شده/نشده')
     pub_date = models.DateField(null=True, blank=True, verbose_name='تاریخ انتشار')
     end_date = models.DateField(null=True, blank=True, verbose_name='تاریخ پایان')
@@ -61,7 +60,7 @@ class Question(models.Model):
     title = models.CharField(max_length=255, verbose_name='عنوان')
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions',
                                       verbose_name='پرسشنامه')
-    question_text = models.TextField(verbose_name='متن سوال')
+    question_text = models.TextField(verbose_name='متن سوال', null=True, blank=True)
     question_type = models.CharField(max_length=50, choices=QUESTION_TYPES, editable=False, verbose_name='نوع سوال')
     is_required = models.BooleanField(default=False, verbose_name='اجباری/عیراجباری')
     media = models.FileField(upload_to='question_media/%Y/%m/%d', null=True, blank=True,

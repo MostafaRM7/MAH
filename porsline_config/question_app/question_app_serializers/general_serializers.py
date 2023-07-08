@@ -69,6 +69,16 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
     welcome_page = WelcomePageSerializer(read_only=True)
     thanks_page = ThanksPageSerializer(read_only=True)
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
+    is_active = serializers.SerializerMethodField(method_name='get_is_active')
+
+    def get_is_active(self, obj):
+        if obj.end_date:
+            if obj.pub_date <= timezone.now().date() <= obj.end_date:
+                return True
+        else:
+            if obj.pub_date <= timezone.now().date():
+                return True
+        return False
 
     class Meta:
         model = Questionnaire
@@ -109,7 +119,9 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        return Questionnaire.objects.create(owner=self.context.get('request').user, pub_date=validated_data.pop('pub_date', timezone.now().date()), **validated_data)
+        return Questionnaire.objects.create(owner=self.context.get('request').user,
+                                            pub_date=validated_data.pop('pub_date', timezone.now().date()),
+                                            **validated_data)
 
 
 class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
