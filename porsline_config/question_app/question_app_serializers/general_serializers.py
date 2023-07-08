@@ -72,12 +72,17 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
     is_active = serializers.SerializerMethodField(method_name='get_is_active')
 
     def get_is_active(self, obj):
-        if obj.end_date:
+        if obj.end_date and obj.pub_date:
             if obj.pub_date <= timezone.now().date() <= obj.end_date:
                 return True
-        else:
+        elif obj.pub_date and not obj.end_date:
             if obj.pub_date <= timezone.now().date():
                 return True
+        elif obj.end_date and not obj.pub_date:
+            if timezone.now().date() <= obj.end_date:
+                return True
+        elif obj.pub_date is None and obj.end_date is None:
+            return True
         return False
 
     class Meta:
@@ -100,6 +105,10 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
                     {'pub_date': 'تاریخ شروع پرسشنامه نمی تواند قبل از زمان حال باشد'}
                 )
             if end_date:
+                if end_date < timezone.now().date():
+                    raise serializers.ValidationError(
+                        {'end_date': 'تاریخ پایان پرسشنامه نمی تواند قبل از زمان حال باشد'}
+                    )
                 if end_date < pub_date:
                     raise serializers.ValidationError(
                         {'date': 'تاریخ شروع پرسشنامه نمی تواند بعد از تاریخ پایان باشد'}
