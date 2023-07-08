@@ -45,7 +45,7 @@ class ThanksPageSerializer(serializers.ModelSerializer):
         if self.context.get('request').method == 'POST':
             if ThanksPage.objects.filter(questionnaire__uuid=questionnaire_uuid).exists():
                 raise serializers.ValidationError(
-                    {'questionnaire': 'یک صفحه خوش آمدگویی برای این پرسشنامه وجود دارد'},
+                    {'questionnaire': 'یک صفحه تشکر برای این پرسشنامه وجود دارد'},
                     status.HTTP_400_BAD_REQUEST
                 )
         return data
