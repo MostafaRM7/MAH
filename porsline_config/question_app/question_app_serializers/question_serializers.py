@@ -122,7 +122,6 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         multiple_choice = data.get('multiple_choice')
         all_options = data.get('all_options')
         nothing_selected = data.get('nothing_selected')
-        print(options)
         if options:
             option_names = [option.get('text') for option in options]
         else:
@@ -322,6 +321,7 @@ class SortOptionSerializer(serializers.ModelSerializer):
 
 class SortQuestionSerializer(serializers.ModelSerializer):
     options = SortOptionSerializer(many=True)
+
     class Meta:
         model = SortQuestion
         fields = (
@@ -354,7 +354,7 @@ class SortQuestionSerializer(serializers.ModelSerializer):
             for option_data in options_data:
                 option_id = option_data.get('id', None)
                 if option_id is None:
-                    SortOption.objects.create(drop_down_question=instance, **option_data)
+                    SortOption.objects.create(sort_question=instance, **option_data)
                 else:
                     option = options.pop(option_id, None)
                     if option is not None:
@@ -498,7 +498,7 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
             'is_required',
-            'show_number', 'media','double_picture_size',)
+            'show_number', 'media', 'double_picture_size',)
         read_only_fields = ('question_type', 'questionnaire')
 
     def to_representation(self, instance):
