@@ -18,6 +18,7 @@ class Folder(models.Model):
 class Questionnaire(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام')
     is_delete = models.BooleanField(default=False, verbose_name='حذف شده/نشده')
+    is_active = models.BooleanField(default=True, verbose_name='فعال/غیرفعال')
     pub_date = models.DateField(null=True, blank=True, verbose_name='تاریخ انتشار')
     end_date = models.DateField(null=True, blank=True, verbose_name='تاریخ پایان')
     timer = models.DurationField(null=True, blank=True, verbose_name='تایمر')

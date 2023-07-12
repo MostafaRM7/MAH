@@ -28,11 +28,13 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
           folder__isnull=False,
           pub_date__lte=timezone.now(),
           end_date__isnull=False,
-          end_date__gte=timezone.now())
+          end_date__gte=timezone.now(),
+          is_active=True)
         | Q(is_delete=False,
             folder__isnull=False,
             pub_date__lte=timezone.now(),
-            end_date__isnull=True)
+            end_date__isnull=True,
+            is_active=True)
     )
     serializer_class = PublicQuestionnaireSerializer
     lookup_field = 'uuid'
