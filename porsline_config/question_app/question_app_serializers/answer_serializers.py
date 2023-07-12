@@ -43,7 +43,7 @@ class AnswerSerializer(serializers.ModelSerializer):
                     for selection in selections:
                         if selection not in options_ids:
                             raise serializers.ValidationError(
-                                {'question': 'گزینه انتخاب شده مربوط به این سوال نیست'},
+                                {question.id: 'گزینه انتخاب شده مربوط به این سوال نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                         for option in options:
@@ -51,49 +51,49 @@ class AnswerSerializer(serializers.ModelSerializer):
                                 if option.text == 'هیچ کدام':
                                     if selected_count > 1:
                                         raise serializers.ValidationError(
-                                            {'question': 'هیچ کدام نمی تواند با سایر گزینه ها انتخاب شود'},
+                                            {question.id: 'هیچ کدام نمی تواند با سایر گزینه ها انتخاب شود'},
                                             status.HTTP_400_BAD_REQUEST
                                         )
                                 elif option.text == 'همه گزینه ها':
                                     if selected_count > 1:
                                         raise serializers.ValidationError(
-                                            {'question': 'همه گزینه ها نمی تواند با سایر گزینه ها انتخاب شود'},
+                                            {question.id: 'همه گزینه ها نمی تواند با سایر گزینه ها انتخاب شود'},
                                             status.HTTP_400_BAD_REQUEST
                                         )
 
                     if selected_count == 0 and is_required:
                         raise serializers.ValidationError(
-                            {'question': 'پاسخ به سوال اجباری است'},
+                            {question.id: 'پاسخ به سوال اجباری است'},
                             status.HTTP_400_BAD_REQUEST
                         )
                     if multiple_choice:
                         if selected_count >= 1:
                             if selected_count > max_selected_options:
                                 raise serializers.ValidationError(
-                                    {'question': f'حداکثر می توان {max_selected_options}گزینه انتخاب کرد'},
+                                    {question.id: f'حداکثر می توان {max_selected_options}گزینه انتخاب کرد'},
                                     status.HTTP_400_BAD_REQUEST
                                 )
                             elif selected_count < min_selected_options:
                                 raise serializers.ValidationError(
-                                    {'question': f'حداقل می توان {min_selected_options}گزینه انتخاب کرد'},
+                                    {question.id: f'حداقل می توان {min_selected_options}گزینه انتخاب کرد'},
                                     status.HTTP_400_BAD_REQUEST
                                 )
                     else:
                         if selected_count > 1:
                             raise serializers.ValidationError(
-                                {'question': 'این سوال چند انتخابی نیست'},
+                                {question.id: 'این سوال چند انتخابی نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                 else:
                     raise serializers.ValidationError(
                         {
-                            'answer': 'برای جواب از selected_options استفاده کنید'
+                            question.id: 'برای جواب از selected_options استفاده کنید'
                         }
                     )
             else:
                 if is_required:
                     raise serializers.ValidationError(
-                        {'question': 'پاسخ به سوال اجباری است'},
+                        {question.id: 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
         elif question.question_type == "drop_down":
@@ -110,42 +110,42 @@ class AnswerSerializer(serializers.ModelSerializer):
                     for selection in selections:
                         if selection not in options_ids:
                             raise serializers.ValidationError(
-                                {'question': 'گزینه انتخاب شده مربوط به این سوال نیست'},
+                                {question.id: 'گزینه انتخاب شده مربوط به این سوال نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     if is_required and selected_count == 0:
                         raise serializers.ValidationError(
-                            {'is_required': 'پاسخ به سوال اجباری است'},
+                            {question.id: 'پاسخ به سوال اجباری است'},
                             status.HTTP_400_BAD_REQUEST
                         )
                     if multiple_choice:
                         if selected_count >= 1:
                             if selected_count > max_selected_options:
                                 raise serializers.ValidationError(
-                                    {'question': f'حداکثر می توان {max_selected_options}گزینه انتخاب کرد'},
+                                    {question.id: f'حداکثر می توان {max_selected_options}گزینه انتخاب کرد'},
                                     status.HTTP_400_BAD_REQUEST
                                 )
                             elif selected_count < min_selected_options:
                                 raise serializers.ValidationError(
-                                    {'question': f'حداقل می توان {min_selected_options}گزینه انتخاب کرد'},
+                                    {question.id: f'حداقل می توان {min_selected_options}گزینه انتخاب کرد'},
                                     status.HTTP_400_BAD_REQUEST
                                 )
                     else:
                         if selected_count > 1:
                             raise serializers.ValidationError(
-                                {'question': 'این سوال چند انتخابی نیست'},
+                                {question.id: 'این سوال چند انتخابی نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                 else:
                     raise serializers.ValidationError(
                         {
-                            'answer': 'برای جواب از selected_options استفاده کنید'
+                            question.id: 'برای جواب از selected_options استفاده کنید'
                         }
                     )
             else:
                 if is_required:
                     raise serializers.ValidationError(
-                        {'question': 'پاسخ به سوال اجباری است'},
+                        {question.id: 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
         elif question.question_type == "text_answer":
@@ -159,66 +159,66 @@ class AnswerSerializer(serializers.ModelSerializer):
                     if max_length is not None and min_length is not None:
                         if len(answer) > max_length:
                             raise serializers.ValidationError(
-                                {'question': f'طول پاسخ بیشتر از {max_length}است'},
+                                {question.id: f'طول پاسخ بیشتر از {max_length}است'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                         if len(answer) < min_length:
                             raise serializers.ValidationError(
-                                {'question': f'طول پاسخ کمتر از {min_length}است'},
+                                {question.id: f'طول پاسخ کمتر از {min_length}است'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     if pattern == 'jalali_date':
                         if not utils.is_jalali_date(answer):
                             raise serializers.ValidationError(
-                                {'question': 'پاسخ در قالب تاریخ شمسی نیست'},
+                                {question.id: 'پاسخ در قالب تاریخ شمسی نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == 'georgian_date':
                         if not utils.is_georgian_date(answer):
                             raise serializers.ValidationError(
-                                {'question': 'پاسخ در قالب تاریخ میلادی نیست'},
+                                {question.id: 'پاسخ در قالب تاریخ میلادی نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == 'mobile_number':
                         if not utils.validate_mobile_number(answer):
                             raise serializers.ValidationError(
-                                {'question': 'پاسخ در قالب شماره موبایل نیست'},
+                                {question.id: 'پاسخ در قالب شماره موبایل نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == 'phone_number':
                         if not utils.validate_city_phone_number(answer):
                             raise serializers.ValidationError(
-                                {'question': 'پاسخ در قالب شماره تلفن ثابت نیست'},
+                                {question.id: 'پاسخ در قالب شماره تلفن ثابت نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == 'number_character':
                         if not utils.is_numeric(answer):
                             raise serializers.ValidationError(
-                                {'question': 'پاسخ باید فقط عددی باشد'},
+                                {question.id: 'پاسخ باید فقط عددی باشد'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == 'persian_letters':
                         if not utils.is_persian(answer):
                             raise serializers.ValidationError(
-                                {'question': 'پاسخ باید فقط از حروف فارسی تشکیل شده باشد'},
+                                {question.id: 'پاسخ باید فقط از حروف فارسی تشکیل شده باشد'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == 'english_letters':
                         if not utils.is_english(answer):
                             raise serializers.ValidationError(
-                                {'question': 'پاسخ باید فقط از حروف لاتین تشکیل شده باشد'},
+                                {question.id: 'پاسخ باید فقط از حروف لاتین تشکیل شده باشد'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                 else:
                     raise serializers.ValidationError(
                         {
-                            'answer': 'از text_answer برای پاسخ استفاده کنید'
+                            question.id: 'از text_answer برای پاسخ استفاده کنید'
                         }
                     )
             else:
                 if is_required:
                     raise serializers.ValidationError(
-                        {'question': 'پاسخ به سوال اجباری است'},
+                        {question.id: 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
         elif question.question_type == "number_answer":
@@ -231,24 +231,24 @@ class AnswerSerializer(serializers.ModelSerializer):
                     if max_value is not None and min_value is not None:
                         if int(answer) > max_value:
                             raise serializers.ValidationError(
-                                {'question': f'پاسخ بزرگتر از {max_value}است'},
+                                {question.id: f'پاسخ بزرگتر از {max_value}است'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                         if int(answer) < min_value:
                             raise serializers.ValidationError(
-                                {'question': f'پاسخ کوچکتر از {min_value}است'},
+                                {question.id: f'پاسخ کوچکتر از {min_value}است'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                 else:
                     raise serializers.ValidationError(
                         {
-                            'answer': 'از number_answer برای پاسخ استفاده کنید'
+                            question.id: 'از number_answer برای پاسخ استفاده کنید'
                         }
                     )
             else:
                 if is_required:
                     raise serializers.ValidationError(
-                        {'question': 'پاسخ به سوال اجباری است'},
+                        {question.id: 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
         elif question.question_type == "integer_range":
@@ -261,24 +261,24 @@ class AnswerSerializer(serializers.ModelSerializer):
                     if max_value is not None and min_value is not None:
                         if int(answer) > max_value:
                             raise serializers.ValidationError(
-                                {'question': f'پاسخ بزرگتر از {max_value}است'},
+                                {question.id: f'پاسخ بزرگتر از {max_value}است'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                         if int(answer) < min_value:
                             raise serializers.ValidationError(
-                                {'question': f'پاسخ کوچکتر از {min_value}است'},
+                                {question.id: f'پاسخ کوچکتر از {min_value}است'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                 else:
                     raise serializers.ValidationError(
                         {
-                            'answer': 'از integer_range برای پاسخ استفاده کنید'
+                            question.id: 'از integer_range برای پاسخ استفاده کنید'
                         }
                     )
             else:
                 if is_required:
                     raise serializers.ValidationError(
-                        {'question': 'پاسخ به سوال اجباری است'},
+                        {question.id: 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
         elif question.question_type == "file":
@@ -289,12 +289,12 @@ class AnswerSerializer(serializers.ModelSerializer):
                     if max_size:
                         if file.size > max_size:
                             raise serializers.ValidationError(
-                                {'question': f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
+                                {question.id: f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                 else:
                     raise serializers.ValidationError(
-                        {'file': 'پاسخ به این سوال (آپلود فایل) اجباری است'},
+                        {question.id: 'پاسخ به این سوال (آپلود فایل) اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
         return data
