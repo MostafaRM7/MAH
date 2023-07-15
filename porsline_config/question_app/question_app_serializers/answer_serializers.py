@@ -29,6 +29,8 @@ class AnswerSerializer(serializers.ModelSerializer):
                     status.HTTP_400_BAD_REQUEST
                 )
         is_required = question.is_required
+        print(question)
+        print(question.question_type)
         if question.question_type == "optional":
             optional_question: OptionalQuestion = question.optionalquestion
             max_selected_options = optional_question.max_selected_options
@@ -156,9 +158,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             if answer is not None:
                 answer = answer.get('text_answer')
                 if answer:
-                    if (max_length is not None and min_length is not None) and pattern in [
-                        TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS,
-                        TextAnswerQuestion.FREE]:
+                    if (max_length is not None and min_length is not None) and pattern in [TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS, TextAnswerQuestion.FREE]:
                         if len(answer) > max_length:
                             raise serializers.ValidationError(
                                 {question.id: f'طول پاسخ بیشتر از {max_length}است'},
