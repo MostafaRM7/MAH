@@ -157,3 +157,7 @@ SIMPLE_JWT = {
 CELERY_BROKER_URL = 'redis://localhost:6379/1'
 
 AUTH_USER_MODEL = 'user_app.User'
+
+OTP_LIFE_TIME = 2
+
+OTP_TRY_COUNT = 3

@@ -149,6 +149,20 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                         },
                         status.HTTP_400_BAD_REQUEST
                     )
+            elif max_selected_options > len(options):
+                raise serializers.ValidationError(
+                    {
+                        'max_selected_options': 'مقدار حداکثر گزینه های انتخابی نمی تواند از تعداد گزینه ها بیشتر باشد'
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
+            elif len(options) < min_selected_options:
+                raise serializers.ValidationError(
+                    {
+                        'options': 'تعداد گزینه ها نمی تواند از حداقل گزینه های انتخابی کمتر باشد'
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
         if not additional_options and (nothing_selected or all_options):
             raise serializers.ValidationError(
                 {
@@ -391,6 +405,11 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
             if max_len < min_len:
                 raise serializers.ValidationError(
                     {'max': 'مقدار حداقل طول پاسخ نمی تواند از حداکثر طول پاسخ بیشتر باشد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            if max_len == 0 and min_len == 0:
+                raise serializers.ValidationError(
+                    {'max': 'سوال نمی تواند طول پاسخ صفر داشته باشد(برای این کار سوال را اختیاری کنید)'},
                     status.HTTP_400_BAD_REQUEST
                 )
         return data

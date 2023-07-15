@@ -156,7 +156,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             if answer is not None:
                 answer = answer.get('text_answer')
                 if answer:
-                    if max_length is not None and min_length is not None:
+                    if (max_length is not None and min_length is not None) and pattern in [TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS, TextAnswerQuestion.FREE]:
                         if len(answer) > max_length:
                             raise serializers.ValidationError(
                                 {question.id: f'طول پاسخ بیشتر از {max_length}است'},
@@ -167,43 +167,43 @@ class AnswerSerializer(serializers.ModelSerializer):
                                 {question.id: f'طول پاسخ کمتر از {min_length}است'},
                                 status.HTTP_400_BAD_REQUEST
                             )
-                    if pattern == 'jalali_date':
+                    if pattern == TextAnswerQuestion.JALALI_DATE:
                         if not utils.is_jalali_date(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ در قالب تاریخ شمسی نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
-                    elif pattern == 'georgian_date':
+                    elif pattern == TextAnswerQuestion.GEORGIAN_DATE:
                         if not utils.is_georgian_date(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ در قالب تاریخ میلادی نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
-                    elif pattern == 'mobile_number':
+                    elif pattern == TextAnswerQuestion.MOBILE_NUMBER:
                         if not utils.validate_mobile_number(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ در قالب شماره موبایل نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
-                    elif pattern == 'phone_number':
+                    elif pattern == TextAnswerQuestion.PHONE_NUMBER:
                         if not utils.validate_city_phone_number(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ در قالب شماره تلفن ثابت نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
-                    elif pattern == 'number_character':
+                    elif pattern == TextAnswerQuestion.NUMBER_CHARACTERS:
                         if not utils.is_numeric(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ باید فقط عددی باشد'},
                                 status.HTTP_400_BAD_REQUEST
                             )
-                    elif pattern == 'persian_letters':
+                    elif pattern == TextAnswerQuestion.PERSIAN_LETTERS:
                         if not utils.is_persian(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ باید فقط از حروف فارسی تشکیل شده باشد'},
                                 status.HTTP_400_BAD_REQUEST
                             )
-                    elif pattern == 'english_letters':
+                    elif pattern == TextAnswerQuestion.ENGLISH_LETTERS:
                         if not utils.is_english(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ باید فقط از حروف لاتین تشکیل شده باشد'},
