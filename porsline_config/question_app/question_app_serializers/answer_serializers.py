@@ -156,7 +156,9 @@ class AnswerSerializer(serializers.ModelSerializer):
             if answer is not None:
                 answer = answer.get('text_answer')
                 if answer:
-                    if (max_length is not None and min_length is not None) and pattern in [TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS, TextAnswerQuestion.FREE]:
+                    if (max_length is not None and min_length is not None) and pattern in [
+                        TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS,
+                        TextAnswerQuestion.FREE]:
                         if len(answer) > max_length:
                             raise serializers.ValidationError(
                                 {question.id: f'طول پاسخ بیشتر از {max_length}است'},
@@ -284,19 +286,18 @@ class AnswerSerializer(serializers.ModelSerializer):
         elif question.question_type == "file":
             file_question: FileQuestion = question.filequestion
             max_size = file_question.max_volume
-            if answer is not None:
-                if file is not None:
-                    if max_size:
-                        if file.size > max_size:
-                            raise serializers.ValidationError(
-                                {question.id: f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
-                                status.HTTP_400_BAD_REQUEST
-                            )
-                else:
-                    raise serializers.ValidationError(
-                        {question.id: 'پاسخ به این سوال (آپلود فایل) اجباری است'},
-                        status.HTTP_400_BAD_REQUEST
-                    )
+            if file is not None:
+                if max_size:
+                    if file.size > max_size:
+                        raise serializers.ValidationError(
+                            {question.id: f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
+            elif file is None and is_required:
+                raise serializers.ValidationError(
+                    {question.id: 'پاسخ به این سوال (آپلود فایل) اجباری است'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         return data
 
     def create(self, validated_data):
