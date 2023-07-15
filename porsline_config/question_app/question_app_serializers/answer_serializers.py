@@ -29,8 +29,11 @@ class AnswerSerializer(serializers.ModelSerializer):
                     status.HTTP_400_BAD_REQUEST
                 )
         is_required = question.is_required
-        print(question)
-        print(question.question_type)
+        if is_required and answer is None:
+            raise serializers.ValidationError(
+                {question.id: 'پاسخ به سوال اجباری است'},
+                status.HTTP_400_BAD_REQUEST
+            )
         if question.question_type == "optional":
             optional_question: OptionalQuestion = question.optionalquestion
             max_selected_options = optional_question.max_selected_options
