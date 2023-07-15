@@ -29,7 +29,7 @@ class AnswerSerializer(serializers.ModelSerializer):
                     status.HTTP_400_BAD_REQUEST
                 )
         is_required = question.is_required
-        if is_required and answer is None:
+        if is_required and answer is None and question.question_type != 'file':
             raise serializers.ValidationError(
                 {question.id: 'پاسخ به سوال اجباری است'},
                 status.HTTP_400_BAD_REQUEST
