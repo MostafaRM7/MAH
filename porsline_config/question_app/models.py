@@ -297,7 +297,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers', verbose_name='سوال')
     answer_set = models.ForeignKey(AnswerSet, on_delete=models.CASCADE, related_name='answers',
                                    verbose_name='دسته جواب')
-    answer = models.JSONField(verbose_name='جواب')
+    answer = models.JSONField(verbose_name='جواب', null=True, blank=True)
     file = models.FileField(upload_to='answer_file/%Y/%m/%d', null=True, blank=True, verbose_name='فایل')
     answered_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان پاسخگویی')
 
