@@ -274,7 +274,7 @@ class LinkQuestion(Question):
 
 
 class FileQuestion(Question):
-    max_volume = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر حجم')
+    max_volume = models.PositiveIntegerField(default=30, verbose_name='حداکثر حجم')
 
     def save(self, *args, **kwargs):
         self.question_type = 'file'

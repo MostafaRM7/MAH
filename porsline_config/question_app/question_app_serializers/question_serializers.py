@@ -584,6 +584,14 @@ class FileQuestionSerializer(serializers.ModelSerializer):
             'show_number', 'media', 'double_picture_size', 'max_volume')
         read_only_fields = ('question_type', 'questionnaire')
 
+    def validate_max_volume(self, value):
+        if value > 30:
+            raise serializers.ValidationError(
+                {'max_volume': 'حداکثر حجم فایل نمی تواند بیشتر از ۳۰ مگابایت باشد'},
+                status.HTTP_400_BAD_REQUEST
+            )
+        return value
+
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
         data = super().to_representation(instance)

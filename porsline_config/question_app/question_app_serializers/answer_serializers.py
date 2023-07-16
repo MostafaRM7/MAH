@@ -34,6 +34,11 @@ class AnswerSerializer(serializers.ModelSerializer):
                 {question.id: 'پاسخ به سوال اجباری است'},
                 status.HTTP_400_BAD_REQUEST
             )
+        elif is_required and file is None and question.question_type == 'file':
+            raise serializers.ValidationError(
+                {question.id: 'پاسخ به سوال (آپلود فایل) اجباری است'},
+                status.HTTP_400_BAD_REQUEST
+            )
         if question.question_type == "optional":
             optional_question: OptionalQuestion = question.optionalquestion
             max_selected_options = optional_question.max_selected_options
@@ -290,12 +295,11 @@ class AnswerSerializer(serializers.ModelSerializer):
             file_question: FileQuestion = question.filequestion
             max_size = file_question.max_volume
             if file is not None:
-                if max_size:
-                    if file.size > max_size:
-                        raise serializers.ValidationError(
-                            {question.id: f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
-                            status.HTTP_400_BAD_REQUEST
-                        )
+                if file.size > max_size:
+                    raise serializers.ValidationError(
+                        {question.id: f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
+                        status.HTTP_400_BAD_REQUEST
+                    )
             elif file is None and is_required:
                 raise serializers.ValidationError(
                     {question.id: 'پاسخ به این سوال (آپلود فایل) اجباری است'},
