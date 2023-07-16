@@ -295,7 +295,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             file_question: FileQuestion = question.filequestion
             max_size = file_question.max_volume
             if file is not None:
-                if file.size > max_size:
+                if file.size > max_size * 1024 * 1024:
                     raise serializers.ValidationError(
                         {question.id: f'حجم فایل نباید بیشتر از {max_size} مگابایت باشد'},
                         status.HTTP_400_BAD_REQUEST
