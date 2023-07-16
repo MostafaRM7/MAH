@@ -85,7 +85,7 @@ class NoGroupQuestionSerializer(serializers.ModelSerializer):
                 return NoAnswerQuestionSerializer(instance.noanswerquestion, context=self.context).data
             elif question_type == 'group':
                 return QuestionGroupSerializer(instance.questiongroup, context=self.context).data
-        return {"in group"}
+        # return None
 
 
 class OptionSerializer(serializers.ModelSerializer):
