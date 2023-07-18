@@ -11,7 +11,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filtersets import AnswerSetFilterSet
 from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer, AnswerSerializer
 from .question_app_serializers.general_serializers import *
@@ -296,8 +295,6 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = AnswerSetSerializer
     permission_classes = (AnonPOSTOrOwner,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = AnswerSetFilterSet
 
     @action(methods=['post'], detail=True, permission_classes=[AnonPOSTOrOwner], url_path='add-answer')
     @transaction.atomic()
@@ -309,60 +306,8 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
         answer_set.refresh_from_db()
         return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
 
-    @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwnerOrReadOnly])
-    def search(self, request, questionnaire_uuid):
-        search = request.query_params.get('search', None)
-        if search is None:
-            return Response({'message': 'لطفا عبارت سرچ را وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
-        result = []
-        questionnaire = self.get_queryset().first().questionnaire
-        for question in questionnaire.questions.all():
-            for answer in question.answers.all():
-                if question.question_type == 'text_answer':
-                    if search in answer.answer.get('text_answer'):
-                        result.append(answer.answer_set)
-                elif question.question_type == 'number_answer':
-                    if search == answer.answer.get('number_answer'):
-                        result.append(answer.answer_set)
-                elif question.question_type == 'integer_range':
-                    try:
-                        if int(search) == answer.answer.get('integer_range'):
-                            result.append(answer.answer_set)
-                    except ValueError:
-                        pass
-                elif question.question_type == 'integer_selective':
-                    try:
-                        if int(search) == answer.answer.get('integer_selective'):
-                            result.append(answer.answer_set)
-                    except ValueError:
-                        pass
-                elif question.question_type == 'email_field':
-                    if search in answer.answer.get('email_field'):
-                        result.append(answer.answer_set)
-                elif question.question_type == 'link':
-                    if search in answer.answer.get('link'):
-                        result.append(answer.answer_set)
-                elif question.question_type == 'optional':
-                    for option_id in answer.answer.get('selected_options'):
-                        option_text = Option.objects.get(id=option_id).text
-                        if search in option_text:
-                            result.append(answer.answer_set)
-                elif question.question_type == 'drop_down':
-                    for option_id in answer.answer.get('selected_options'):
-                        option_text = DropDownOption.objects.get(id=option_id).text
-                        if search in option_text:
-                            result.append(answer.answer_set)
-                elif question.question_type == 'sort':
-                    for option in answer.answer.get('sorted_options'):
-                        option_text = SortOption.objects.get(id=option.get('id')).text
-                        if search in option_text:
-                            result.append(answer.answer_set)
-        result = set(result)
-        serializer = AnswerSetSerializer(result, many=True)
-        return Response(serializer.data)
-
     def get_queryset(self):
-        queryset = AnswerSet.objects.prefetch_related('answers').filter(
+        queryset = AnswerSet.objects.prefetch_related('answers__question', 'answers').filter(
             questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
 

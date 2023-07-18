@@ -15,6 +15,12 @@ class AnswerSerializer(serializers.ModelSerializer):
         answer = data.get('answer')
         file = data.get('file')
         answer_set: AnswerSet = self.context.get('answer_set')
+        questionnaire = answer_set.questionnaire
+        if question.questionnaire != questionnaire:
+            raise serializers.ValidationError(
+                {question.id: 'سوال متعلق به این پرسشنامه نیست'},
+                status.HTTP_400_BAD_REQUEST
+            )
         # if answer_set.answers.filter(question=question):
         #     raise serializers.ValidationError(
         #         {'answer': f' سوال {question.title} با آی دی {question.id} قبلا پاسخ داده شده است'},
@@ -166,7 +172,9 @@ class AnswerSerializer(serializers.ModelSerializer):
             if answer is not None:
                 answer = answer.get('text_answer')
                 if answer:
-                    if (max_length is not None and min_length is not None) and pattern in [TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS, TextAnswerQuestion.FREE]:
+                    if (max_length is not None and min_length is not None) and pattern in [
+                        TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS,
+                        TextAnswerQuestion.FREE]:
                         if len(answer) > max_length:
                             raise serializers.ValidationError(
                                 {question.id: f'طول پاسخ بیشتر از {max_length}است'},
@@ -308,12 +316,39 @@ class AnswerSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        OPTION_QUESTIONS = ['optional', 'sort', 'drop_down']
         answer_set = self.context.get('answer_set')
         question = validated_data.get('question')
-        if answer_set.answers.filter(question=question):
+        question_type = question.question_type
+        if answer_set.answers.filter(question=question).exists():
             answer_set.answers.filter(question=question).delete()
-        answer = Answer.objects.create(answer_set=self.context.get('answer_set'), **validated_data)
-        return answer
+        if question_type in OPTION_QUESTIONS:
+            match question_type:
+                case 'optional':
+                    answer = validated_data.pop('answer').get('selected_options')
+                    options = Option.objects.filter(id__in=answer)
+                    json_answer = {'selected_options': list(options.values('id', 'text'))}
+                    return Answer.objects.create(answer_set=self.context.get('answer_set'), answer=json_answer,
+                                                 **validated_data)
+                case 'sort':
+                    answer = validated_data.pop('answer').get('sorted_options')
+                    ids = [item.get('id') for item in answer]
+                    placements = {item.get('id'): item.get('placement') for item in answer}
+                    options = SortOption.objects.filter(id__in=ids).order_by(models.Case(
+                        *[models.When(id=id_val, then=models.Value(order_val)) for id_val, order_val in
+                          placements.items()]))
+                    json_answer = {'sorted_options': list(options.values('id', 'text'))}
+                    return Answer.objects.create(answer_set=self.context.get('answer_set'), answer=json_answer,
+                                                 **validated_data)
+
+                case 'drop_down':
+                    answer = validated_data.pop('answer').get('selected_options')
+                    options = DropDownOption.objects.filter(id__in=answer)
+                    json_answer = {'selected_options': list(options.values('id', 'text'))}
+                    return Answer.objects.create(answer_set=self.context.get('answer_set'), answer=json_answer,
+                                                 **validated_data)
+        else:
+            return Answer.objects.create(answer_set=self.context.get('answer_set'), **validated_data)
 
 
 class AnswerSetSerializer(serializers.ModelSerializer):
@@ -322,36 +357,12 @@ class AnswerSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerSet
         fields = ('id', 'questionnaire', 'answered_at', 'answers')
-        read_only_fields = ('questionnaire',)
-
-    def validate(self, data):
-        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
-        # answers = data.get('answers')
-        questions = questionnaire.questions.all()
-        # answered_questions = [answer.get('question') for answer in answers]
-        for question in questions:
-            if question.questionnaire != questionnaire:
-                raise serializers.ValidationError(
-                    {'questionnaire': f'پرسشنامه سوالی با عنوان {question.title}ندارد'},
-                    status.HTTP_400_BAD_REQUEST
-                )
-            # else:
-            #     is_required = question.is_required
-            #     if is_required and question not in answered_questions:
-            #         raise serializers.ValidationError(
-            #             {'question': f'پاسخ به سوال با عنوان {question.title}اجباری است'},
-            #             status.HTTP_400_BAD_REQUEST
-            #         )
-
-        return data
+        read_only_fields = ('questionnaire', 'answered_at')
 
     @transaction.atomic()
     def create(self, validated_data):
-        # answers_data = validated_data.pop('answers')
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire)
-        # answers = [Answer(answer_set=answer_set, **answer_data) for answer_data in answers_data]
-        # Answer.objects.bulk_create(answers)
         return answer_set
 
     def to_representation(self, instance):

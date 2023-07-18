@@ -20,6 +20,7 @@ schema_view = get_schema_view(
 )
 urlpatterns = [
     path('question-api/', include('question_app.urls')),
+    path('result-api/', include('result_app.urls')),
     path('admin/', admin.site.urls),
     path('__debug__/', include('debug_toolbar.urls')),
     path('user-api/', include('user_app.urls')),
