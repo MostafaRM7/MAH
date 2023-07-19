@@ -19,7 +19,7 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AnswerSetFilterSet
 
-    @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwnerOrReadOnly])
+    @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwnerOrReadOnly], filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
     def search(self, request, questionnaire_uuid):
         search = request.query_params.get('search', None)
         if search is None:
