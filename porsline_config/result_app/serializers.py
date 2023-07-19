@@ -12,6 +12,7 @@ class AnswerSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         result = super().to_representation(instance)
         result['question'] = instance.question.title
+        result['question_id'] = instance.question.id
         result['is_required'] = instance.question.is_required
         match instance.question.question_type:
             case 'sort':
