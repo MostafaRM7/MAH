@@ -3,10 +3,10 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from question_app.models import AnswerSet, Option, DropDownOption, SortOption, Questionnaire
-from question_app.permissions import IsQuestionnaireOwnerOrReadOnly
+from question_app.models import AnswerSet, Questionnaire
 from result_app.filtersets import AnswerSetFilterSet
 from result_app.serializers import AnswerSetSerializer
+from .permissions import IsQuestionnaireOwner
 
 
 # Create your views here.
@@ -15,11 +15,12 @@ from result_app.serializers import AnswerSetSerializer
 class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AnswerSet.objects.all()
     serializer_class = AnswerSetSerializer
-    permission_classes = [IsQuestionnaireOwnerOrReadOnly]
+    permission_classes = [IsQuestionnaireOwner]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AnswerSetFilterSet
 
-    @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwnerOrReadOnly], filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
+    @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwner],
+            filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
     def search(self, request, questionnaire_uuid):
         search = request.query_params.get('search', None)
         if search is None:
