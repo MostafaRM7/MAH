@@ -12,21 +12,28 @@ class AnswerSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         result = super().to_representation(instance)
         result['question'] = instance.question.title
+        result['is_required'] = instance.question.is_required
         match instance.question.question_type:
+            case 'sort':
+                result['answer'] = instance.answer.get('sorted_options') if instance.answer else None
+            case 'optional':
+                result['answer'] = instance.answer.get('selected_options') if instance.answer else None
+            case 'drop_down':
+                result['answer'] = instance.answer.get('selected_options') if instance.answer else None
             case 'text_answer':
-                result['answer'] = instance.answer.get('text_answer')
+                result['answer'] = instance.answer.get('text_answer') if instance.answer else None
             case 'number_answer':
-                result['answer'] = instance.answer.get('number_answer')
+                result['answer'] = instance.answer.get('number_answer') if instance.answer else None
             case 'integer_range':
-                result['answer'] = instance.answer.get('integer_range')
+                result['answer'] = instance.answer.get('integer_range') if instance.answer else None
             case 'integer_selective':
-                result['answer'] = instance.answer.get('integer_selective')
+                result['answer'] = instance.answer.get('integer_selective') if instance.answer else None
             case 'email_field':
-                result['answer'] = instance.answer.get('email_field')
+                result['answer'] = instance.answer.get('email_field') if instance.answer else None
             case 'link':
-                result['answer'] = instance.answer.get('link')
+                result['answer'] = instance.answer.get('link') if instance.answer else None
             case 'file':
-                result['answer'] = instance.file.url
+                result['answer'] = instance.file.url if instance.file is not None else None
         return result
 
 

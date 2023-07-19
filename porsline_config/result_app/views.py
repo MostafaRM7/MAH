@@ -32,68 +32,69 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
                 question_type = question.question_type
                 answer_set = answer.answer_set
                 answer_body = answer.answer
-                match question_type:
-                    case 'text_answer':
-                        if search in answer_body.get('text_answer'):
-                            result.append(answer_set)
-                            break
-                    case 'number_answer':
-                        if search == answer_body.get('number_answer'):
-                            result.append(answer_set)
-                            break
-                    case 'integer_range':
-                        try:
-                            if int(search) == answer_body.get('integer_range'):
+                if answer_body:
+                    match question_type:
+                        case 'text_answer':
+                            if search in answer_body.get('text_answer'):
                                 result.append(answer_set)
                                 break
-                        except ValueError:
-                            pass
-                    case 'integer_selective':
-                        try:
-                            if int(search) == answer_body.get('integer_selective'):
+                        case 'number_answer':
+                            if search == answer_body.get('number_answer'):
                                 result.append(answer_set)
                                 break
-                        except ValueError:
-                            pass
-                    case 'email_field':
-                        if search in answer_body.get('email_field'):
-                            result.append(answer_set)
-                            break
-                    case 'link':
-                        if search in answer_body.get('link'):
-                            result.append(answer_set)
-                            break
-                    case 'optional':
-                        option_texts = [option.get('text') for option in answer_body.get('selected_options')]
-                        find = False
-                        for text in option_texts:
-                            if search in text:
-                                find = True
+                        case 'integer_range':
+                            try:
+                                if int(search) == answer_body.get('integer_range'):
+                                    result.append(answer_set)
+                                    break
+                            except ValueError:
+                                pass
+                        case 'integer_selective':
+                            try:
+                                if int(search) == answer_body.get('integer_selective'):
+                                    result.append(answer_set)
+                                    break
+                            except ValueError:
+                                pass
+                        case 'email_field':
+                            if search in answer_body.get('email_field'):
+                                result.append(answer_set)
                                 break
-                        if find:
-                            result.append(answer_set)
-                            break
-                    case 'drop_down':
-                        option_texts = [option.get('text') for option in answer_body.get('selected_options')]
-                        find = False
-                        for text in option_texts:
-                            if search in text:
-                                find = True
+                        case 'link':
+                            if search in answer_body.get('link'):
+                                result.append(answer_set)
                                 break
-                        if find:
-                            result.append(answer_set)
-                            break
-                    case 'sort':
-                        option_texts = [option.get('text') for option in answer_body.get('sorted_options')]
-                        find = False
-                        for text in option_texts:
-                            if search in text:
-                                find = True
+                        case 'optional':
+                            option_texts = [option.get('text') for option in answer_body.get('selected_options')]
+                            find = False
+                            for text in option_texts:
+                                if search in text:
+                                    find = True
+                                    break
+                            if find:
+                                result.append(answer_set)
                                 break
-                        if find:
-                            result.append(answer_set)
-                            break
-        serializer = AnswerSetSerializer(result, many=True)
+                        case 'drop_down':
+                            option_texts = [option.get('text') for option in answer_body.get('selected_options')]
+                            find = False
+                            for text in option_texts:
+                                if search in text:
+                                    find = True
+                                    break
+                            if find:
+                                result.append(answer_set)
+                                break
+                        case 'sort':
+                            option_texts = [option.get('text') for option in answer_body.get('sorted_options')]
+                            find = False
+                            for text in option_texts:
+                                if search in text:
+                                    find = True
+                                    break
+                            if find:
+                                result.append(answer_set)
+                                break
+        serializer = AnswerSetSerializer(result, many=True, context={'questionnaire_uuid': questionnaire_uuid})
         return Response(serializer.data)
 
     def get_queryset(self):
