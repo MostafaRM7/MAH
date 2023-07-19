@@ -322,7 +322,7 @@ class AnswerSerializer(serializers.ModelSerializer):
         question_type = question.question_type
         if answer_set.answers.filter(question=question).exists():
             answer_set.answers.filter(question=question).delete()
-        if question_type in OPTION_QUESTIONS:
+        if question_type in OPTION_QUESTIONS and validated_data.get('answer') is not None:
             match question_type:
                 case 'optional':
                     answer = validated_data.pop('answer').get('selected_options')
