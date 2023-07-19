@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from question_app.models import Answer, Option, DropDownOption, SortOption, AnswerSet
+from question_app.models import Answer,AnswerSet
 
 
 class AnswerSerializer(serializers.ModelSerializer):
