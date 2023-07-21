@@ -6,25 +6,27 @@ from .models import Questionnaire
 class IsQuestionnaireOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         uuid = view.kwargs.get('uuid')
-        if uuid:
-            return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
-        else:
-            if request.method == 'POST':
-                return request.user.is_authenticated
+        if request.user.is_authenticated:
+            if uuid:
+                return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
             else:
-                return request.user.is_staff
+                if request.method == 'POST':
+                    return request.user.is_authenticated
+                else:
+                    return request.user.is_staff
 
 
 class IsQuestionOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         question_id = view.kwargs.get('pk')
         uuid = view.kwargs.get('questionnaire_uuid')
-        if question_id:
-            if request.user.is_authenticated:
-                return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
-        else:
-            if request.user.is_authenticated:
-                return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+        if request.user.is_authenticated:
+            if question_id:
+                if request.user.is_authenticated:
+                    return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+            else:
+                if request.user.is_authenticated:
+                    return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
 
 
 class ChangePlacementForOwnerOrStaff(BasePermission):
@@ -40,11 +42,12 @@ class AnonPOSTOrOwner(BasePermission):
     def has_permission(self, request, view):
         answer_set_id = view.kwargs.get('pk')
         uuid = view.kwargs.get('questionnaire_uuid')
-        if answer_set_id:
-            if request.user.is_authenticated and request.method != 'POST':
-                return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
-            else:
-                return True
+        if request.user.is_authenticated:
+            if answer_set_id:
+                if request.user.is_authenticated and request.method != 'POST':
+                    return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                else:
+                    return True
         else:
             if request.method == 'POST':
                 return True
