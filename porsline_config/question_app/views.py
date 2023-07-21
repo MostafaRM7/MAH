@@ -290,11 +290,10 @@ class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
 
 
 class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
-                       viewsets.mixins.ListModelMixin,
                        viewsets.mixins.RetrieveModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = AnswerSetSerializer
-    permission_classes = (AnonPOSTOrOwner,)
+    permission_classes = (AllowAny,)
 
     @action(methods=['post'], detail=True, permission_classes=[AnonPOSTOrOwner], url_path='add-answer')
     @transaction.atomic()
