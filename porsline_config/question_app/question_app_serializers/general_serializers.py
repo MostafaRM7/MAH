@@ -62,7 +62,7 @@ class PublicQuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('is_active', 'progress_bar', 'show_question_in_pages','questions', 'welcome_page', 'thanks_page')
+        fields = ('uuid', 'is_active', 'progress_bar', 'show_question_in_pages','questions', 'welcome_page', 'thanks_page')
 
 
 class QuestionnaireSerializer(serializers.ModelSerializer):
