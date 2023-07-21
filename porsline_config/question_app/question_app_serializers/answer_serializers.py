@@ -320,7 +320,12 @@ class AnswerSerializer(serializers.ModelSerializer):
         answer_set = self.context.get('answer_set')
         question = validated_data.get('question')
         question_type = question.question_type
-        if answer_set.answers.filter(question=question).exists():
+        answered_before = answer_set.answers.filter(question=question)
+        if answered_before.exists():
+            if question_type == 'file' and validated_data.get('file') is None:
+                if question.is_required:
+                    if answered_before.first().file:
+                        return answered_before.first()
             answer_set.answers.filter(question=question).delete()
         if question_type in OPTION_QUESTIONS and validated_data.get('answer') is not None:
             match question_type:
