@@ -50,8 +50,14 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.is_active and instance.pub_date <= timezone.now().date() and (
-                instance.end_date is None or instance.end_date >= timezone.now().date):
+        if instance.is_active and instance.pub_date <= timezone.now().date():
+            if instance.end_date:
+                if instance.end_date >= timezone.now().date():
+                    serializer = self.get_serializer(instance)
+                    return Response(serializer.data)
+                else:
+                    return Response({"detail": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
+                                    status.HTTP_403_FORBIDDEN)
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
         else:
