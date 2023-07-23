@@ -22,19 +22,20 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     """
         This a retrieve only viewset for showing a questionnaire to everyone
     """
-    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions').filter(
-        Q(is_delete=False,
-          folder__isnull=False,
-          pub_date__lte=timezone.now(),
-          end_date__isnull=False,
-          end_date__gte=timezone.now(),
-          is_active=True)
-        | Q(is_delete=False,
-            folder__isnull=False,
-            pub_date__lte=timezone.now(),
-            end_date__isnull=True,
-            is_active=True)
-    )
+    # queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions').filter(
+    #     Q(is_delete=False,
+    #       folder__isnull=False,
+    #       pub_date__lte=timezone.now(),
+    #       end_date__isnull=False,
+    #       end_date__gte=timezone.now(),
+    #       is_active=True)
+    #     | Q(is_delete=False,
+    #         folder__isnull=False,
+    #         pub_date__lte=timezone.now(),
+    #         end_date__isnull=True,
+    #         is_active=True)
+    # )
+    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions').all()
     serializer_class = PublicQuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (AllowAny,)
@@ -46,6 +47,16 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
             return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
 
         super(PublicQuestionnaireViewSet, self).initial(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.is_active and instance.pub_date <= timezone.now() and (
+                instance.end_date is None or instance.end_date >= timezone.now()):
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        else:
+            return Response({"detail": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
+                            status.HTTP_403_FORBIDDEN)
 
 
 class QuestionnaireViewSet(viewsets.ModelViewSet):
