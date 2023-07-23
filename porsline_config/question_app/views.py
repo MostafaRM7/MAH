@@ -50,8 +50,8 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.is_active and instance.pub_date <= timezone.now() and (
-                instance.end_date is None or instance.end_date >= timezone.now()):
+        if instance.is_active and instance.pub_date <= timezone.now().date() and (
+                instance.end_date is None or instance.end_date >= timezone.now().date):
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
         else:
