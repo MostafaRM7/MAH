@@ -34,7 +34,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             case 'link':
                 result['answer'] = instance.answer.get('link') if instance.answer else None
             case 'file':
-                result['answer'] = instance.file.url if instance.file is not None else None
+                result['answer'] = instance.file.url if instance.file.url is not None else None
         return result
 
 
