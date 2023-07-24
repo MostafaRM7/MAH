@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from .general_serializers import *
 from ..models import *
 from .. import utils
@@ -367,7 +368,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 
     @transaction.atomic()
     def create(self, validated_data):
-        questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
+        questionnaire = get_object_or_404(Questionnaire, uuid=self.context.get('questionnaire_uuid'))
         answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire)
         return answer_set
 
