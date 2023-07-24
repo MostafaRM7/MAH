@@ -241,6 +241,21 @@ class AnswerSerializer(serializers.ModelSerializer):
                         {question.id: 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
+        elif question.question_type == "email_field":
+            if answer is not None:
+                answer = answer.get('email_field')
+                if answer is not None:
+                    if not utils.validate_email(answer):
+                        raise serializers.ValidationError(
+                            {question.id: 'پاسخ در قالب ایمیل نیست'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
+                else:
+                    raise serializers.ValidationError(
+                        {
+                            question.id: 'از email_field برای پاسخ استفاده کنید'
+                        }
+                    )
         elif question.question_type == "number_answer":
             number_answer_question: NumberAnswerQuestion = question.numberanswerquestion
             max_value = number_answer_question.max
