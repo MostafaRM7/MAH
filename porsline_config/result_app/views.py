@@ -128,7 +128,7 @@ class PlotAPIView(APIView):
                         match question.question_type:
                             # AVG
                             case 'integer_range':
-                                answer_list = [answer.answer.get('integer_range') for answer in answers]
+                                answer_list = [answer.answer.get('integer_range') for answer in answers if answer.answer]
                                 to_serializer = {
                                     'question_id': question.id,
                                     'question': question.title,
@@ -142,7 +142,7 @@ class PlotAPIView(APIView):
                                 result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             # AVG
                             case 'integer_selective':
-                                answer_list = [answer.answer.get('integer_selective') for answer in answers]
+                                answer_list = [answer.answer.get('integer_selective') for answer in answers if answer.answer]
                                 to_serializer = {
                                     'question_id': question.id,
                                     'question': question.title,
@@ -156,7 +156,7 @@ class PlotAPIView(APIView):
                                 result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             # AVG
                             case 'number_answer':
-                                answer_list = [answer.answer.get('number_answer') for answer in answers]
+                                answer_list = [answer.answer.get('number_answer') for answer in answers if answer.answer]
                                 to_serializer = {
                                     'question_id': question.id,
                                     'question': question.title,
@@ -177,9 +177,10 @@ class PlotAPIView(APIView):
                                 options_count = {option_id: 0 for option_id in option_ids}
                                 option_percent = {option_id: 0 for option_id in option_ids}
                                 for answer in answers:
-                                    answer_body = answer.answer.get('selected_options')
-                                    for option in answer_body:
-                                        options_count[option.get('id')] += 1
+                                    if answer.answer:
+                                        answer_body = answer.answer.get('selected_options')
+                                        for option in answer_body:
+                                            options_count[option.get('id')] += 1
                                 total = sum(options_count.values()) if sum(options_count.values()) != 0 else 1
                                 for option_id, count in options_count.items():
                                     option_percent[option_id] = count / total * 100
@@ -201,9 +202,10 @@ class PlotAPIView(APIView):
                                 options_count = {option_id: 0 for option_id in option_ids}
                                 option_percent = {option_id: 0 for option_id in option_ids}
                                 for answer in answers:
-                                    answer_body = answer.answer.get('selected_options')
-                                    for option in answer_body:
-                                        options_count[option.get('id')] += 1
+                                    if answer.answer:
+                                        answer_body = answer.answer.get('selected_options')
+                                        for option in answer_body:
+                                            options_count[option.get('id')] += 1
                                 total = sum(options_count.values()) if sum(options_count.values()) != 0 else 1
                                 for option_id, count in options_count.items():
                                     option_percent[option_id] = count / total * 100
