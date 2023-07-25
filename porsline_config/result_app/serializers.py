@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from question_app.models import Answer,AnswerSet
+from question_app.models import Answer, AnswerSet
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -50,3 +50,23 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['questionnaire'] = self.context.get('questionnaire_uuid')
         return representation
+
+
+class ChoiceQuestionPlotSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
+    question = serializers.CharField()
+    question_type = serializers.CharField()
+    options = serializers.JSONField()
+    counts = serializers.JSONField()
+    percentages = serializers.JSONField()
+
+
+class NumberQuestionPlotSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
+    question = serializers.CharField()
+    question_type = serializers.CharField()
+    average = serializers.FloatField()
+    median = serializers.FloatField()
+    max = serializers.FloatField()
+    min = serializers.FloatField()
+    count = serializers.IntegerField()

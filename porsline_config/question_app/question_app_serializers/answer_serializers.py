@@ -55,7 +55,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             options = optional_question.options.all()
             options_ids = [option.id for option in options]
             if answer is not None:
-                selections = answer.get('selected_options')
+                selections = set(answer.get('selected_options'))
                 if selections:
                     selected_count = len(selections)
                     for selection in selections:
@@ -122,7 +122,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             options = drop_down_question.options.all()
             options_ids = [option.id for option in options]
             if answer is not None:
-                selections = answer.get('selected_options')
+                selections = set(answer.get('selected_options'))
                 if selections:
                     selected_count = len(selections)
                     for selection in selections:
