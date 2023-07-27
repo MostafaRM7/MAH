@@ -154,7 +154,7 @@ class PlotAPIView(APIView):
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
                                     }
-                                    result.append(NumberQuestionPlotSerializer(to_serializer).data)
+                                    result.append(NumberQuestionPlotSerializer(to_serializer, context={'integer_selective': True, 'shape': question.integerselectivequestion.shape}).data)
                             # AVG
                             case 'number_answer':
                                 answer_list = [answer.answer.get('number_answer') for answer in answers if answer.answer]

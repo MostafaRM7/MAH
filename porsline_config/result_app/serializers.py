@@ -70,3 +70,9 @@ class NumberQuestionPlotSerializer(serializers.Serializer):
     max = serializers.FloatField()
     min = serializers.FloatField()
     count = serializers.IntegerField()
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if self.context.get('integer_selective'):
+            representation['shape'] = self.context.get('shape')
+        return representation
