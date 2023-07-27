@@ -114,6 +114,7 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class PlotAPIView(APIView):
+    permission_classes = [IsQuestionnaireOwner]
     def get(self, request, questionnaire_uuid, *args, **kwargs):
         questionnaire = get_object_or_404(Questionnaire, uuid=questionnaire_uuid)
         questions = questionnaire.questions.filter(

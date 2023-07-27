@@ -94,6 +94,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         folder = data.get('folder')
+
         request = self.context.get('request')
         pub_date = data.get('pub_date')
         end_date = data.get('end_date')
