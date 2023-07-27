@@ -143,31 +143,33 @@ class PlotAPIView(APIView):
                             # AVG
                             case 'integer_selective':
                                 answer_list = [answer.answer.get('integer_selective') for answer in answers if answer.answer]
-                                to_serializer = {
-                                    'question_id': question.id,
-                                    'question': question.title,
-                                    'question_type': question.question_type,
-                                    'average': sum(answer_list) / len(answer_list),
-                                    'min': min(answer_list),
-                                    'max': max(answer_list),
-                                    'count': len(answer_list),
-                                    'median': statistics.median(answer_list),
-                                }
-                                result.append(NumberQuestionPlotSerializer(to_serializer).data)
+                                if len(answer_list) != 0:
+                                    to_serializer = {
+                                        'question_id': question.id,
+                                        'question': question.title,
+                                        'question_type': question.question_type,
+                                        'average': sum(answer_list) / len(answer_list),
+                                        'min': min(answer_list),
+                                        'max': max(answer_list),
+                                        'count': len(answer_list),
+                                        'median': statistics.median(answer_list),
+                                    }
+                                    result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             # AVG
                             case 'number_answer':
                                 answer_list = [answer.answer.get('number_answer') for answer in answers if answer.answer]
-                                to_serializer = {
-                                    'question_id': question.id,
-                                    'question': question.title,
-                                    'question_type': question.question_type,
-                                    'average': sum(answer_list) / len(answer_list),
-                                    'min': min(answer_list),
-                                    'max': max(answer_list),
-                                    'count': len(answer_list),
-                                    'median': statistics.median(answer_list),
-                                }
-                                result.append(NumberQuestionPlotSerializer(to_serializer).data)
+                                if len(answer_list) != 0:
+                                    to_serializer = {
+                                        'question_id': question.id,
+                                        'question': question.title,
+                                        'question_type': question.question_type,
+                                        'average': sum(answer_list) / len(answer_list),
+                                        'min': min(answer_list),
+                                        'max': max(answer_list),
+                                        'count': len(answer_list),
+                                        'median': statistics.median(answer_list),
+                                    }
+                                    result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             # PERCENT
                             case 'optional':
                                 question = question.optionalquestion
