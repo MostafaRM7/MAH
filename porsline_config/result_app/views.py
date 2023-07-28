@@ -183,7 +183,7 @@ class PlotAPIView(APIView):
                                     if answer.answer:
                                         answer_body = answer.answer.get('selected_options')
                                         for option in answer_body:
-                                            if option in option_ids:
+                                            if option.get('id') in option_ids:
                                                 options_count[option.get('id')] += 1
                                 total = sum(options_count.values()) if sum(options_count.values()) != 0 else 1
                                 for option_id, count in options_count.items():
@@ -209,7 +209,7 @@ class PlotAPIView(APIView):
                                     if answer.answer:
                                         answer_body = answer.answer.get('selected_options')
                                         for option in answer_body:
-                                            if option in option_ids:
+                                            if option.get('id') in option_ids:
                                                 options_count[option.get('id')] += 1
                                 total = sum(options_count.values()) if sum(options_count.values()) != 0 else 1
                                 for option_id, count in options_count.items():
