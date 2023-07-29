@@ -70,6 +70,7 @@ class NumberQuestionPlotSerializer(serializers.Serializer):
     max = serializers.FloatField()
     min = serializers.FloatField()
     count = serializers.IntegerField()
+    counts = serializers.JSONField()
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
