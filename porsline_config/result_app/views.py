@@ -1,4 +1,5 @@
 import statistics
+from collections import Counter
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
@@ -129,22 +130,22 @@ class PlotAPIView(APIView):
                     answers = question.answers.filter(answer_set__in=answer_sets)
                     if answers.exists():
                         match question.question_type:
-                            # AVG
                             case 'integer_range':
                                 answer_list = [answer.answer.get('integer_range') for answer in answers if
                                                answer.answer]
-                                to_serializer = {
-                                    'question_id': question.id,
-                                    'question': question.title,
-                                    'question_type': question.question_type,
-                                    'average': sum(answer_list) / len(answer_list),
-                                    'min': min(answer_list),
-                                    'max': max(answer_list),
-                                    'count': len(answer_list),
-                                    'median': statistics.median(answer_list),
-                                }
-                                result.append(NumberQuestionPlotSerializer(to_serializer).data)
-                            # AVG
+                                if len(answer_list) != 0:
+                                    to_serializer = {
+                                        'question_id': question.id,
+                                        'question': question.title,
+                                        'question_type': question.question_type,
+                                        'average': sum(answer_list) / len(answer_list),
+                                        'min': min(answer_list),
+                                        'max': max(answer_list),
+                                        'count': len(answer_list),
+                                        'median': statistics.median(answer_list),
+                                        'counts': Counter(answer_list)
+                                    }
+                                    result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             case 'integer_selective':
                                 answer_list = [answer.answer.get('integer_selective') for answer in answers if
                                                answer.answer]
@@ -158,6 +159,7 @@ class PlotAPIView(APIView):
                                         'max': max(answer_list),
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
+                                        'counts': Counter(answer_list)
                                     }
                                     result.append(NumberQuestionPlotSerializer(to_serializer,
                                                                                context={'integer_selective': True,
@@ -176,6 +178,7 @@ class PlotAPIView(APIView):
                                         'max': max(answer_list),
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
+                                        'counts': Counter(answer_list)
                                     }
                                     result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             # PERCENT
