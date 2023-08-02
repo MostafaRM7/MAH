@@ -1,4 +1,5 @@
 import statistics
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -115,6 +116,7 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
 
 class PlotAPIView(APIView):
     permission_classes = [IsQuestionnaireOwner]
+
     def get(self, request, questionnaire_uuid, *args, **kwargs):
         questionnaire = get_object_or_404(Questionnaire, uuid=questionnaire_uuid)
         questions = questionnaire.questions.filter(
@@ -129,7 +131,8 @@ class PlotAPIView(APIView):
                         match question.question_type:
                             # AVG
                             case 'integer_range':
-                                answer_list = [answer.answer.get('integer_range') for answer in answers if answer.answer]
+                                answer_list = [answer.answer.get('integer_range') for answer in answers if
+                                               answer.answer]
                                 to_serializer = {
                                     'question_id': question.id,
                                     'question': question.title,
@@ -143,7 +146,8 @@ class PlotAPIView(APIView):
                                 result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             # AVG
                             case 'integer_selective':
-                                answer_list = [answer.answer.get('integer_selective') for answer in answers if answer.answer]
+                                answer_list = [answer.answer.get('integer_selective') for answer in answers if
+                                               answer.answer]
                                 if len(answer_list) != 0:
                                     to_serializer = {
                                         'question_id': question.id,
@@ -155,10 +159,13 @@ class PlotAPIView(APIView):
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
                                     }
-                                    result.append(NumberQuestionPlotSerializer(to_serializer, context={'integer_selective': True, 'shape': question.integerselectivequestion.shape}).data)
+                                    result.append(NumberQuestionPlotSerializer(to_serializer,
+                                                                               context={'integer_selective': True,
+                                                                                        'shape': question.integerselectivequestion.shape}).data)
                             # AVG
                             case 'number_answer':
-                                answer_list = [answer.answer.get('number_answer') for answer in answers if answer.answer]
+                                answer_list = [answer.answer.get('number_answer') for answer in answers if
+                                               answer.answer]
                                 if len(answer_list) != 0:
                                     to_serializer = {
                                         'question_id': question.id,
