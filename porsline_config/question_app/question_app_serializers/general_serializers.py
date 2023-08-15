@@ -141,7 +141,7 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('id', 'name', 'uuid', 'pub_date', 'answer_count')
+        fields = ('id', 'name', 'uuid', 'pub_date', 'answer_count', 'is_active')
 
     def get_answer_count(self, obj):
         return obj.answer_sets.count()
