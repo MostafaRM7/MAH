@@ -62,13 +62,15 @@ class PublicQuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('uuid', 'is_active', 'progress_bar', 'show_question_in_pages','questions', 'welcome_page', 'thanks_page')
+        fields = (
+            'uuid', 'is_active', 'progress_bar', 'show_question_in_pages', 'questions', 'welcome_page', 'thanks_page')
 
 
 class QuestionnaireSerializer(serializers.ModelSerializer):
     welcome_page = WelcomePageSerializer(read_only=True)
     thanks_page = ThanksPageSerializer(read_only=True)
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
+
     # is_active = serializers.SerializerMethodField(method_name='get_is_active')
 
     # def get_is_active(self, obj):
@@ -135,6 +137,11 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
 
 
 class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
+    answer_count = serializers.SerializerMethodField(method_name='get_answer_count')
+
     class Meta:
         model = Questionnaire
-        fields = ('id', 'name', 'uuid')
+        fields = ('id', 'name', 'uuid', 'pub_date', 'answer_count')
+
+    def get_answer_count(self, obj):
+        return obj.answer_sets.count()
