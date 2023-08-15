@@ -1,6 +1,7 @@
 import re
-import jdatetime
 from datetime import datetime
+
+import jdatetime
 
 
 def is_georgian_date(date):
@@ -54,3 +55,12 @@ def is_numeric(string):
 def validate_email(email):
     pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
     return bool(re.match(pattern, email))
+
+
+def option_in_html_tag_validator(options_list: list, option_text):
+    regex_pattern = fr'<[^<>]*\b{option_text}\b[^<>]*>'
+    options_string = ' '.join(options_list)
+
+    if re.search(regex_pattern, options_string):
+        return True
+    return False

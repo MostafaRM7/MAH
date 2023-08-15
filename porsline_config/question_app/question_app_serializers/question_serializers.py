@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework import status
 from ..models import *
 from porsline_config import settings
+from ..utils import option_in_html_tag_validator
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -173,7 +174,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             )
         elif additional_options:
             if nothing_selected:
-                if 'هیچ کدام' not in option_names:
+                if option_in_html_tag_validator(option_names, 'هیچ کدام'):
                     raise serializers.ValidationError(
                         {
                             'additional_options':
@@ -189,7 +190,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                             }
                         )
             if all_options:
-                if 'همه گزینه ها' not in option_names:
+                if option_in_html_tag_validator(option_names, 'همه گزینه ها'):
                     raise serializers.ValidationError(
                         {
                             'nothing_selected':
