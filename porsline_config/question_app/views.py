@@ -75,6 +75,16 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
 
+    @action(detail=True, methods=['get'], url_path='search-questions', permission_classes=(IsQuestionOwnerOrReadOnly,))
+    def search_in_questions(self, request, *args, **kwargs):
+        search = request.query_params.get('search')
+        if search:
+            obj = self.get_object()
+            result = obj.questions.filter(Q(title__icontains=search) | Q(question_text__icontains=search))
+            return Response(NoGroupQuestionSerializer(result, many=True).data)
+        else:
+            return Response([])
+
     def initial(self, request, *args, **kwargs):
         if kwargs.get('uuid'):
             try:

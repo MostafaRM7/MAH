@@ -71,28 +71,17 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
     thanks_page = ThanksPageSerializer(read_only=True)
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
 
-    # is_active = serializers.SerializerMethodField(method_name='get_is_active')
-
-    # def get_is_active(self, obj):
-    #     if obj.end_date and obj.pub_date:
-    #         if obj.pub_date <= timezone.now().date() <= obj.end_date:
-    #             return True
-    #     elif obj.pub_date and not obj.end_date:
-    #         if obj.pub_date <= timezone.now().date():
-    #             return True
-    #     elif obj.end_date and not obj.pub_date:
-    #         if timezone.now().date() <= obj.end_date:
-    #             return True
-    #     elif obj.pub_date is None and obj.end_date is None:
-    #         return True
-    #     return False
-
     class Meta:
         model = Questionnaire
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'timer', 'show_question_in_pages', 'progress_bar',
             'folder', 'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page')
         read_only_fields = ('owner', 'questions', 'welcome_page', 'thanks_page')
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['folder'] = instance.folder.name if instance.folder else None
+        return ret
 
     def validate(self, data):
         folder = data.get('folder')
