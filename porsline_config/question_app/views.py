@@ -85,6 +85,16 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         else:
             return Response([])
 
+    @action(detail=True, methods=['delete'], url_path='delete-question',
+            permission_classes=(IsQuestionOwnerOrReadOnly,))
+    def delete_question(self, request, *args, **kwargs):
+        question_id = request.query_params.get('id')
+        if question_id is None:
+            return Response({"detail": "لطفا آی دی سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        question = get_object_or_404(Question, id=question_id, questionnaire=self.get_object())
+        question.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def initial(self, request, *args, **kwargs):
         if kwargs.get('uuid'):
             try:
