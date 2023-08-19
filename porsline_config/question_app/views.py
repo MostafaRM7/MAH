@@ -91,6 +91,10 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         question_id = request.query_params.get('id')
         if question_id is None:
             return Response({"detail": "لطفا آی دی سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            question_id = int(question_id)
+        except ValueError:
+            return Response({"detail": "آی دی سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
         question = get_object_or_404(Question, id=question_id, questionnaire=self.get_object())
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
