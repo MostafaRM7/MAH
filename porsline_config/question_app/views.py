@@ -75,7 +75,7 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
 
-    @action(detail=True, methods=['get'], url_path='search-questions', permission_classes=(IsQuestionOwnerOrReadOnly,))
+    @action(detail=True, methods=['get'], url_path='search-questions', permission_classes=(IsQuestionnaireOwnerOrReadOnly,))
     def search_in_questions(self, request, *args, **kwargs):
         search = request.query_params.get('search')
         if search:
@@ -86,7 +86,7 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
             return Response([])
 
     @action(detail=True, methods=['delete'], url_path='delete-question',
-            permission_classes=(IsQuestionOwnerOrReadOnly,))
+            permission_classes=(IsQuestionnaireOwnerOrReadOnly,))
     def delete_question(self, request, *args, **kwargs):
         question_id = request.query_params.get('id')
         if question_id is None:
