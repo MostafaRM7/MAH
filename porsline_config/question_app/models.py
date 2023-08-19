@@ -22,7 +22,7 @@ class Questionnaire(models.Model):
     pub_date = models.DateField(null=True, blank=True, verbose_name='تاریخ انتشار')
     end_date = models.DateField(null=True, blank=True, verbose_name='تاریخ پایان')
     timer = models.DurationField(null=True, blank=True, verbose_name='تایمر')
-    previous_button = models.BooleanField(verbose_name='نمایش دکمه قبلی')
+    previous_button = models.BooleanField(default=False, verbose_name='نمایش دکمه قبلی')
     show_question_in_pages = models.BooleanField(default=True, verbose_name='نشان دادن سوال ها در صفحات مجزا')
     progress_bar = models.BooleanField(default=True, verbose_name='نشان دادن نوار پیشرفت')
     folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, related_name='questionnaires', null=True, blank=True,

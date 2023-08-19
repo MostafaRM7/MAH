@@ -118,6 +118,10 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {'folder': 'یک پوشه انتخاب کنید'}
                 )
+            # elif request.method == 'PATCH' and self.instance.folder is None:
+            #     raise serializers.ValidationError(
+            #         {'folder': 'پوشه ای انتخاب نشده است'}
+            #     )
 
         return data
 
