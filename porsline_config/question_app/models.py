@@ -103,7 +103,7 @@ class OptionalQuestion(Question):
         super(OptionalQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class Option(models.Model):
@@ -127,7 +127,7 @@ class DropDownQuestion(Question):
         super(DropDownQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class DropDownOption(models.Model):
@@ -147,7 +147,7 @@ class SortQuestion(Question):
         super(SortQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class SortOption(models.Model):
@@ -186,12 +186,14 @@ class TextAnswerQuestion(Question):
         super(TextAnswerQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class NumberAnswerQuestion(Question):
     min = models.IntegerField(null=True, blank=True, verbose_name='حداقل مقدار')
     max = models.IntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
+    accept_negative = models.BooleanField(default=True, verbose_name='جواب می تواند منفی باشد')
+    accept_float = models.BooleanField(default=True, verbose_name='جواب می تواند اعشاری باشد')
 
     def save(self, *args, **kwargs):
         self.is_required = False
@@ -199,7 +201,7 @@ class NumberAnswerQuestion(Question):
         super(NumberAnswerQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class IntegerRangeQuestion(Question):
@@ -220,7 +222,7 @@ class IntegerRangeQuestion(Question):
         super(IntegerRangeQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class IntegerSelectiveQuestion(Question):
@@ -242,7 +244,7 @@ class IntegerSelectiveQuestion(Question):
         super(IntegerSelectiveQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class PictureFieldQuestion(Question):
@@ -252,7 +254,7 @@ class PictureFieldQuestion(Question):
         super(PictureFieldQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class EmailFieldQuestion(Question):
@@ -261,7 +263,7 @@ class EmailFieldQuestion(Question):
         super(EmailFieldQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class LinkQuestion(Question):
@@ -271,7 +273,7 @@ class LinkQuestion(Question):
         super(LinkQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class FileQuestion(Question):
@@ -282,7 +284,7 @@ class FileQuestion(Question):
         super(FileQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class AnswerSet(models.Model):
@@ -344,7 +346,7 @@ class NoAnswerQuestion(Question):
         super(NoAnswerQuestion, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.question_text
+        return self.title
 
 
 class WelcomePage(models.Model):

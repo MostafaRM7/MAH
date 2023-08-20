@@ -260,19 +260,36 @@ class AnswerSerializer(serializers.ModelSerializer):
             number_answer_question: NumberAnswerQuestion = question.numberanswerquestion
             max_value = number_answer_question.max
             min_value = number_answer_question.min
+            accept_negative = number_answer_question.accept_negative
+            accept_float = number_answer_question.accept_float
             if answer is not None:
                 answer = answer.get('number_answer')
                 if answer is not None:
                     if max_value is not None and min_value is not None:
-                        if int(answer) > max_value:
+                        try:
+                            if float(answer) > max_value:
+                                raise serializers.ValidationError(
+                                    {question.id: f'پاسخ بزرگتر از {max_value}است'},
+                                    status.HTTP_400_BAD_REQUEST
+                                )
+                            if float(answer) < min_value:
+                                raise serializers.ValidationError(
+                                    {question.id: f'پاسخ کوچکتر از {min_value}است'},
+                                    status.HTTP_400_BAD_REQUEST
+                                )
+                            if not accept_float:
+                                if isinstance(answer, float):
+                                    raise serializers.ValidationError(
+                                        {question.id: 'پاسخ نمی تواند اعشاری باشد'}
+                                    )
+                            if not accept_negative:
+                                if float(answer) < 0:
+                                    raise serializers.ValidationError(
+                                        {question.id: 'پاسخ نمی تواند منفی باشد'}
+                                    )
+                        except ValueError:
                             raise serializers.ValidationError(
-                                {question.id: f'پاسخ بزرگتر از {max_value}است'},
-                                status.HTTP_400_BAD_REQUEST
-                            )
-                        if int(answer) < min_value:
-                            raise serializers.ValidationError(
-                                {question.id: f'پاسخ کوچکتر از {min_value}است'},
-                                status.HTTP_400_BAD_REQUEST
+                                {question.id: 'پاسخ باید عدد باشد'}
                             )
                 else:
                     raise serializers.ValidationError(
@@ -294,15 +311,20 @@ class AnswerSerializer(serializers.ModelSerializer):
                 answer = answer.get('integer_range')
                 if answer is not None:
                     if max_value is not None and min_value is not None:
-                        if int(answer) > max_value:
+                        try:
+                            if int(answer) > max_value:
+                                raise serializers.ValidationError(
+                                    {question.id: f'پاسخ بزرگتر از {max_value}است'},
+                                    status.HTTP_400_BAD_REQUEST
+                                )
+                            if int(answer) < min_value:
+                                raise serializers.ValidationError(
+                                    {question.id: f'پاسخ کوچکتر از {min_value}است'},
+                                    status.HTTP_400_BAD_REQUEST
+                                )
+                        except ValueError:
                             raise serializers.ValidationError(
-                                {question.id: f'پاسخ بزرگتر از {max_value}است'},
-                                status.HTTP_400_BAD_REQUEST
-                            )
-                        if int(answer) < min_value:
-                            raise serializers.ValidationError(
-                                {question.id: f'پاسخ کوچکتر از {min_value}است'},
-                                status.HTTP_400_BAD_REQUEST
+                                {question.id: 'پاسخ باید عدد باشد'}
                             )
                 else:
                     raise serializers.ValidationError(

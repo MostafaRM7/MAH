@@ -426,7 +426,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
-            'show_number', 'media', 'double_picture_size', 'min', 'max')
+            'show_number', 'media', 'double_picture_size', 'min', 'max', 'accept_negative', 'accept_float')
         read_only_fields = ('question_type', 'questionnaire')
 
     def to_representation(self, instance):
