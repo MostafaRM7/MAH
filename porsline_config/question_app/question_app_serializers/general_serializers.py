@@ -99,7 +99,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         folder = data.get('folder')
-
+        name = data.get('name')
         request = self.context.get('request')
         pub_date = data.get('pub_date')
         end_date = data.get('end_date')
@@ -125,15 +125,20 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
                     {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
                     status.HTTP_400_BAD_REQUEST
                 )
+            if Questionnaire.objects.filter(folder=folder, name=name).exists():
+                raise serializers.ValidationError(
+                    {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
         else:
             if request.method != 'PATCH':
                 raise serializers.ValidationError(
                     {'folder': 'یک پوشه انتخاب کنید'}
                 )
-            # elif request.method == 'PATCH' and self.instance.folder is None:
-            #     raise serializers.ValidationError(
-            #         {'folder': 'پوشه ای انتخاب نشده است'}
-            #     )
+            elif request.method == 'PATCH' and self.instance.folder is None:
+                raise serializers.ValidationError(
+                    {'folder': 'یک پوشه انتخاب کنید'}
+                )
 
         return data
 

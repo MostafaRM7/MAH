@@ -19,6 +19,15 @@ class FolderSerializer(serializers.ModelSerializer):
         return general_serializers.NoQuestionQuestionnaireSerializer(instance.questionnaires.filter(is_delete=False),
                                                                      many=True, read_only=True).data
 
+    def validate(self, data):
+        name = data.get('name')
+        if name is not None:
+            if Folder.objects.filter(name=name, owner=self.context.get('request').user).exists():
+                raise serializers.ValidationError(
+                    {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},
+                )
+        return data
+
     class Meta:
         model = Folder
         fields = ('id', 'name', 'questionnaires', 'owner')
