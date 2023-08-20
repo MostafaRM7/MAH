@@ -101,7 +101,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = OptionalQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'show_number', 'media', 'double_picture_size', 'multiple_choice', 'is_vertical',
             'is_random_options',
             'max_selected_options',
@@ -252,7 +252,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DropDownQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size', 'multiple_choice', 'is_alphabetic_order',
             'is_random_options',
@@ -340,7 +340,7 @@ class SortQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SortQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size', 'is_random_options', 'options')
         read_only_fields = ('question_type', 'questionnaire')
@@ -387,7 +387,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TextAnswerQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size', 'show_number', 'answer_template', 'pattern', 'min', 'max')
         read_only_fields = ('question_type', 'questionnaire')
@@ -424,7 +424,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = NumberAnswerQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size', 'min', 'max')
         read_only_fields = ('question_type', 'questionnaire')
@@ -456,7 +456,7 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = IntegerSelectiveQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size', 'shape', 'max'
         )
@@ -478,7 +478,7 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = IntegerRangeQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size', 'min', 'max', 'min_label', 'mid_label', 'max_label'
         )
@@ -516,7 +516,7 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PictureFieldQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size',)
         read_only_fields = ('question_type', 'questionnaire')
@@ -537,7 +537,7 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmailFieldQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size',)
         read_only_fields = ('question_type', 'questionnaire')
@@ -558,7 +558,7 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = LinkQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size',)
         read_only_fields = ('question_type', 'questionnaire')
@@ -580,7 +580,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required',
             'show_number', 'media', 'double_picture_size', 'max_volume')
         read_only_fields = ('question_type', 'questionnaire')
@@ -611,7 +611,7 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionGroup
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
             'show_number', 'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text',
             'child_questions'
         )
@@ -633,7 +633,7 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = NoAnswerQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'question_text', 'placement', 'group', 'is_required',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
             'show_number', 'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text'
         )
         read_only_fields = ('question_type', 'questionnaire')

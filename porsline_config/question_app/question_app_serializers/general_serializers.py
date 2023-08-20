@@ -5,11 +5,17 @@ from django.utils import timezone
 
 
 class WelcomePageSerializer(serializers.ModelSerializer):
+    question_type = serializers.SerializerMethodField(method_name='get_question_type')
+
     class Meta:
         model = WelcomePage
         fields = (
-            'id', 'title', 'description', 'media', 'button_text', 'button_shape', 'is_solid_button', 'questionnaire')
+            'id', 'title', 'description', 'question_type', 'media', 'button_text', 'button_shape', 'is_solid_button',
+            'questionnaire')
         read_only_fields = ('questionnaire',)
+
+    def get_question_type(self, obj):
+        return 'welcome_page'
 
     def validate(self, data):
         """
@@ -30,12 +36,18 @@ class WelcomePageSerializer(serializers.ModelSerializer):
 
 
 class ThanksPageSerializer(serializers.ModelSerializer):
+    question_type = serializers.SerializerMethodField(method_name='get_question_type')
+
     class Meta:
         model = ThanksPage
         fields = (
-            'id', 'title', 'description', 'media', 'share_link', 'instagram', 'telegram', 'whatsapp', 'eitaa', 'sorush',
+            'id', 'title', 'description', 'question_type', 'media', 'share_link', 'instagram', 'telegram', 'whatsapp',
+            'eitaa', 'sorush',
             'questionnaire')
         read_only_fields = ('questionnaire',)
+
+    def get_question_type(self, obj):
+        return 'thanks_page'
 
     def validate(self, data):
         """

@@ -62,7 +62,7 @@ class Question(models.Model):
     title = models.CharField(max_length=255, verbose_name='عنوان')
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions',
                                       verbose_name='پرسشنامه')
-    question_text = models.TextField(verbose_name='متن سوال', null=True, blank=True)
+    description = models.TextField(verbose_name='متن سوال', null=True, blank=True)
     question_type = models.CharField(max_length=50, choices=QUESTION_TYPES, editable=False, verbose_name='نوع سوال')
     is_required = models.BooleanField(default=False, verbose_name='اجباری/عیراجباری')
     media = models.FileField(upload_to='question_media/%Y/%m/%d', null=True, blank=True,
