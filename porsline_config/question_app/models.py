@@ -236,12 +236,16 @@ class IntegerSelectiveQuestion(Question):
     HEART = 'H'
     STAR = 'S'
     LIKE = 'L'
+    DISLIKE = 'D'
+    SMILE = 'SM'
     CHECK_MARK = 'C'
     STYLE_CHOICES = [
         (HEART, 'Heart'),
         (STAR, 'Star'),
         (LIKE, 'Like'),
         (CHECK_MARK, 'Check Mark'),
+        (DISLIKE, 'Dislike'),
+        (SMILE, 'Smile'),
     ]
     shape = models.CharField(choices=STYLE_CHOICES, default=STAR, max_length=2, verbose_name='شکل دکمه')
     max = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
@@ -266,6 +270,7 @@ class PictureFieldQuestion(Question):
 
 class EmailFieldQuestion(Question):
     URL_PREFIX = 'email-questions'
+
     def save(self, *args, **kwargs):
         self.question_type = 'email_field'
         super(EmailFieldQuestion, self).save(*args, **kwargs)
@@ -276,6 +281,7 @@ class EmailFieldQuestion(Question):
 
 class LinkQuestion(Question):
     URL_PREFIX = 'link-questions'
+
     def save(self, *args, **kwargs):
         self.question_type = 'link'
         super(LinkQuestion, self).save(*args, **kwargs)
