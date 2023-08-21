@@ -16,6 +16,7 @@ class WelcomePageSerializer(serializers.ModelSerializer):
 
     def get_url_prefix(self, obj):
         return self.Meta.model.URL_PREFIX
+
     def get_question_type(self, obj):
         return 'welcome_page'
 

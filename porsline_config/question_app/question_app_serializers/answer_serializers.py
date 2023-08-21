@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from .general_serializers import *
 from ..models import *
-from .. import utils
+from .. import validators
 import datetime
 
 
@@ -188,43 +188,43 @@ class AnswerSerializer(serializers.ModelSerializer):
                                 status.HTTP_400_BAD_REQUEST
                             )
                     if pattern == TextAnswerQuestion.JALALI_DATE:
-                        if not utils.is_jalali_date(answer):
+                        if not validators.is_jalali_date(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ در قالب تاریخ شمسی نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == TextAnswerQuestion.GEORGIAN_DATE:
-                        if not utils.is_georgian_date(answer):
+                        if not validators.is_georgian_date(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ در قالب تاریخ میلادی نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == TextAnswerQuestion.MOBILE_NUMBER:
-                        if not utils.validate_mobile_number(answer):
+                        if not validators.validate_mobile_number(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ در قالب شماره موبایل نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == TextAnswerQuestion.PHONE_NUMBER:
-                        if not utils.validate_city_phone_number(answer):
+                        if not validators.validate_city_phone_number(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ در قالب شماره تلفن ثابت نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == TextAnswerQuestion.NUMBER_CHARACTERS:
-                        if not utils.is_numeric(answer):
+                        if not validators.is_numeric(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ باید فقط عددی باشد'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == TextAnswerQuestion.PERSIAN_LETTERS:
-                        if not utils.is_persian(answer):
+                        if not validators.is_persian(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ باید فقط از حروف فارسی تشکیل شده باشد'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                     elif pattern == TextAnswerQuestion.ENGLISH_LETTERS:
-                        if not utils.is_english(answer):
+                        if not validators.is_english(answer):
                             raise serializers.ValidationError(
                                 {question.id: 'پاسخ باید فقط از حروف لاتین تشکیل شده باشد'},
                                 status.HTTP_400_BAD_REQUEST
@@ -245,7 +245,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             if answer is not None:
                 answer = answer.get('email_field')
                 if answer is not None:
-                    if not utils.validate_email(answer):
+                    if not validators.validate_email(answer):
                         raise serializers.ValidationError(
                             {question.id: 'پاسخ در قالب ایمیل نیست'},
                             status.HTTP_400_BAD_REQUEST

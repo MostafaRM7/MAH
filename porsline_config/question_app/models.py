@@ -94,10 +94,11 @@ class OptionalQuestion(Question):
     additional_options = models.BooleanField(default=False, verbose_name='گزینه های اضافی')
     max_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر گزینه انتخابی')
     min_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداقل گزینه انتخابی')
-    all_options = models.BooleanField(default=False, null=True, blank=True, verbose_name='انتخاب همه گزینه ها')
-    nothing_selected = models.BooleanField(default=False, null=True, blank=True, verbose_name='هیچ کدام')
-    is_vertical = models.BooleanField(default=False, null=True, blank=True, verbose_name='نمایش عمودی گزینه ها')
-    is_random_options = models.BooleanField(default=False, null=True, blank=True, verbose_name='ترتیب تصادفی گزینه ها')
+    all_options = models.BooleanField(default=False, verbose_name='انتخاب همه گزینه ها')
+    nothing_selected = models.BooleanField(default=False, verbose_name='هیچ کدام')
+    other_options = models.BooleanField(default=False, verbose_name='گزینه های دیگر')
+    is_vertical = models.BooleanField(default=False, verbose_name='نمایش عمودی گزینه ها')
+    is_random_options = models.BooleanField(default=False, verbose_name='ترتیب تصادفی گزینه ها')
 
     def save(self, *args, **kwargs):
         self.question_type = 'optional'

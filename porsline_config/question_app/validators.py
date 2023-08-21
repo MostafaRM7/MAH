@@ -58,9 +58,9 @@ def validate_email(email):
 
 
 def option_in_html_tag_validator(options_list: list, option_text):
-    regex_pattern = fr'<[^<>]*\b{option_text}\b[^<>]*>'
-    options_string = ' '.join(options_list)
-
-    if re.search(regex_pattern, options_string):
-        return True
+    print(options_list)
+    for option in options_list:
+        no_tag = re.sub(r'<[^>]+>', '', option)
+        if no_tag == option_text:
+            return True
     return False
