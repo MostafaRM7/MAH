@@ -89,6 +89,7 @@ class Question(models.Model):
 
 
 class OptionalQuestion(Question):
+    URL_PREFIX = 'optional-questions'
     multiple_choice = models.BooleanField(default=False, verbose_name='چند انتخابی')
     additional_options = models.BooleanField(default=False, verbose_name='گزینه های اضافی')
     max_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر گزینه انتخابی')
@@ -116,6 +117,7 @@ class Option(models.Model):
 
 
 class DropDownQuestion(Question):
+    URL_PREFIX = 'dropdown-questions'
     multiple_choice = models.BooleanField(default=False, verbose_name='چند انتخابی')
     max_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر گزینه انتخابی')
     min_selected_options = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداقل گزینه انتخابی')
@@ -140,6 +142,7 @@ class DropDownOption(models.Model):
 
 
 class SortQuestion(Question):
+    URL_PREFIX = 'sort-questions'
     is_random_options = models.BooleanField(default=False, verbose_name='ترتیب تصادفی گزینه ها')
 
     def save(self, *args, **kwargs):
@@ -157,6 +160,7 @@ class SortOption(models.Model):
 
 
 class TextAnswerQuestion(Question):
+    URL_PREFIX = 'textanswer-questions'
     FREE = 'free'
     JALALI_DATE = 'jalali_date'
     GEORGIAN_DATE = 'georgian_date'
@@ -190,6 +194,7 @@ class TextAnswerQuestion(Question):
 
 
 class NumberAnswerQuestion(Question):
+    URL_PREFIX = 'numberanswer-questions'
     min = models.IntegerField(null=True, blank=True, verbose_name='حداقل مقدار')
     max = models.IntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
     accept_negative = models.BooleanField(default=True, verbose_name='جواب می تواند منفی باشد')
@@ -205,6 +210,7 @@ class NumberAnswerQuestion(Question):
 
 
 class IntegerRangeQuestion(Question):
+    URL_PREFIX = 'integerrange-questions'
     ZERO_CHOICE = 0
     ONE_CHOICE = 1
     MIN_CHOICES = [
@@ -226,6 +232,7 @@ class IntegerRangeQuestion(Question):
 
 
 class IntegerSelectiveQuestion(Question):
+    URL_PREFIX = 'integerselective-questions'
     HEART = 'H'
     STAR = 'S'
     LIKE = 'L'
@@ -258,6 +265,7 @@ class PictureFieldQuestion(Question):
 
 
 class EmailFieldQuestion(Question):
+    URL_PREFIX = 'email-questions'
     def save(self, *args, **kwargs):
         self.question_type = 'email_field'
         super(EmailFieldQuestion, self).save(*args, **kwargs)
@@ -267,7 +275,7 @@ class EmailFieldQuestion(Question):
 
 
 class LinkQuestion(Question):
-
+    URL_PREFIX = 'link-questions'
     def save(self, *args, **kwargs):
         self.question_type = 'link'
         super(LinkQuestion, self).save(*args, **kwargs)
@@ -277,6 +285,7 @@ class LinkQuestion(Question):
 
 
 class FileQuestion(Question):
+    URL_PREFIX = 'file-questions'
     max_volume = models.PositiveIntegerField(default=30, verbose_name='حداکثر حجم')
 
     def save(self, *args, **kwargs):
@@ -309,6 +318,7 @@ class Answer(models.Model):
 
 
 class QuestionGroup(Question):
+    URL_PREFIX = 'question-groups'
     SHARP = 'sharp'
     ROUND = 'round'
     OVAL = 'oval'
@@ -328,6 +338,7 @@ class QuestionGroup(Question):
 
 
 class NoAnswerQuestion(Question):
+    URL_PREFIX = 'noanswer-questions'
     SHARP = 'sharp'
     ROUND = 'round'
     OVAL = 'oval'
@@ -350,6 +361,7 @@ class NoAnswerQuestion(Question):
 
 
 class WelcomePage(models.Model):
+    URL_PREFIX = 'welcome-pages'
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
                                 'mkv', 'webm']
     SHARP = 'sharp'
@@ -373,6 +385,7 @@ class WelcomePage(models.Model):
 
 
 class ThanksPage(models.Model):
+    URL_PREFIX = 'thanks-pages'
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
                                 'mkv', 'webm']
     title = models.CharField(max_length=255, verbose_name='عنوان')

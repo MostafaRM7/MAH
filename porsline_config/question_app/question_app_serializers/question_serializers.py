@@ -96,17 +96,22 @@ class OptionSerializer(serializers.ModelSerializer):
 
 
 class OptionalQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
     options = OptionSerializer(many=True)
 
     class Meta:
         model = OptionalQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'show_number', 'media', 'double_picture_size', 'multiple_choice', 'is_vertical',
+            'is_required', 'url_prefix', 'show_number', 'media', 'double_picture_size', 'multiple_choice',
+            'is_vertical',
             'is_random_options',
             'max_selected_options',
             'min_selected_options', 'show_number', 'additional_options', 'all_options', 'nothing_selected', 'options')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -247,17 +252,21 @@ class DropDownOptionSerializer(serializers.ModelSerializer):
 
 
 class DropDownQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
     options = DropDownOptionSerializer(many=True)
 
     class Meta:
         model = DropDownQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size', 'multiple_choice', 'is_alphabetic_order',
             'is_random_options',
             'max_selected_options', 'min_selected_options', 'options')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -335,15 +344,19 @@ class SortOptionSerializer(serializers.ModelSerializer):
 
 
 class SortQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
     options = SortOptionSerializer(many=True)
 
     class Meta:
         model = SortQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size', 'is_random_options', 'options')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -384,13 +397,18 @@ class SortQuestionSerializer(serializers.ModelSerializer):
 
 
 class TextAnswerQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
+
     class Meta:
         model = TextAnswerQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size', 'show_number', 'answer_template', 'pattern', 'min', 'max')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -421,13 +439,18 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
 
 
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
+
     class Meta:
         model = NumberAnswerQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size', 'min', 'max', 'accept_negative', 'accept_float')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -453,14 +476,19 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
+
     class Meta:
         model = IntegerSelectiveQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size', 'shape', 'max'
         )
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -475,14 +503,19 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
+
     class Meta:
         model = IntegerRangeQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size', 'min', 'max', 'min_label', 'mid_label', 'max_label'
         )
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -534,13 +567,18 @@ class PictureFieldQuestionSerializer(serializers.ModelSerializer):
 
 
 class EmailFieldQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
+
     class Meta:
         model = EmailFieldQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size',)
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -555,13 +593,18 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
+
     class Meta:
         model = LinkQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size',)
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -577,13 +620,18 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
+
     class Meta:
         model = FileQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required',
+            'is_required', 'url_prefix',
             'show_number', 'media', 'double_picture_size', 'max_volume')
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def validate_max_volume(self, value):
         if value > 30:
@@ -606,16 +654,21 @@ class FileQuestionSerializer(serializers.ModelSerializer):
 
 
 class QuestionGroupSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
     child_questions = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = QuestionGroup
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
+            'url_prefix',
             'show_number', 'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text',
             'child_questions'
         )
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
@@ -630,13 +683,19 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
 
 
 class NoAnswerQuestionSerializer(serializers.ModelSerializer):
+    url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
+
     class Meta:
         model = NoAnswerQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
+            'url_prefix',
             'show_number', 'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text'
         )
         read_only_fields = ('question_type', 'questionnaire')
+
+    def get_url_prefix(self, obj):
+        return self.Meta.model.URL_PREFIX
 
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')

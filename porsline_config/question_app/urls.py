@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework_nested import routers
 from . import views
+from .models import *
 
 router = routers.SimpleRouter()
 router.register('', views.PublicQuestionnaireViewSet)
@@ -9,26 +10,26 @@ base_router = routers.DefaultRouter()
 base_router.register('questionnaires', views.QuestionnaireViewSet)
 
 questionnaire_router = routers.NestedDefaultRouter(base_router, 'questionnaires', lookup='questionnaire')
-questionnaire_router.register('welcome-pages', views.WelcomePageViewSet, basename='welcome_pages')
-questionnaire_router.register('thanks-pages', views.ThanksPageViewSet, basename='thanks_pages')
+questionnaire_router.register(WelcomePage.URL_PREFIX, views.WelcomePageViewSet, basename='welcome_pages')
+questionnaire_router.register(ThanksPage.URL_PREFIX, views.ThanksPageViewSet, basename='thanks_pages')
 questionnaire_router.register('answer-sets', views.AnswerSetViewSet, basename='answer_sets')
-questionnaire_router.register('optional-questions', views.OptionalQuestionViewSet, basename='optional_questions')
-questionnaire_router.register('dropdown-questions', views.DropDownQuestionViewSet, basename='dropdown_questions')
-questionnaire_router.register('sort-questions', views.SortQuestionViewSet, basename='sort_questions')
-questionnaire_router.register('textanswer-questions', views.TextAnswerQuestionViewSet, basename='textanswer_questions')
-questionnaire_router.register('numberanswer-questions', views.NumberAnswerQuestionViewSet,
+questionnaire_router.register(OptionalQuestion.URL_PREFIX, views.OptionalQuestionViewSet, basename='optional_questions')
+questionnaire_router.register(DropDownQuestion.URL_PREFIX, views.DropDownQuestionViewSet, basename='dropdown_questions')
+questionnaire_router.register(SortQuestion.URL_PREFIX, views.SortQuestionViewSet, basename='sort_questions')
+questionnaire_router.register(TextAnswerQuestion.URL_PREFIX, views.TextAnswerQuestionViewSet, basename='textanswer_questions')
+questionnaire_router.register(NumberAnswerQuestion.URL_PREFIX, views.NumberAnswerQuestionViewSet,
                               basename='numberanswer_questions')
-questionnaire_router.register('integerrange-questions', views.IntegerRangeQuestionViewSet,
+questionnaire_router.register(IntegerRangeQuestion.URL_PREFIX, views.IntegerRangeQuestionViewSet,
                               basename='integerrange_questions')
-questionnaire_router.register('integerselective-questions', views.IntegerSelectiveQuestionViewSet,
+questionnaire_router.register(IntegerRangeQuestion.URL_PREFIX, views.IntegerSelectiveQuestionViewSet,
                               basename='integerselective_qustions')
 questionnaire_router.register('picture-questions', views.PictureFieldQuestionViewSet,
                               basename='picture_qustions')
-questionnaire_router.register('email-questions', views.EmailFieldQuestionViewSet, basename='email_questions')
-questionnaire_router.register('link-questions', views.LinkQuestionViewSet, basename='link_questions')
-questionnaire_router.register('file-questions', views.FileQuestionViewSet, basename='file_questions')
-questionnaire_router.register('question-groups', views.QuestionGroupViewSet, basename='question_groups')
-questionnaire_router.register('noanswer-questions', views.NoAnswerQuestionViewSet, basename='noanswer_questions')
+questionnaire_router.register(EmailFieldQuestion.URL_PREFIX, views.EmailFieldQuestionViewSet, basename='email_questions')
+questionnaire_router.register(LinkQuestion.URL_PREFIX, views.LinkQuestionViewSet, basename='link_questions')
+questionnaire_router.register(FileQuestion.URL_PREFIX, views.FileQuestionViewSet, basename='file_questions')
+questionnaire_router.register(QuestionGroup.URL_PREFIX, views.QuestionGroupViewSet, basename='question_groups')
+questionnaire_router.register(NoAnswerQuestion.URL_PREFIX, views.NoAnswerQuestionViewSet, basename='noanswer_questions')
 
 urlpatterns = [
     path('search-questionnaires/', views.SearchQuestionnaire.as_view(),
