@@ -171,6 +171,14 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                     },
                     status.HTTP_400_BAD_REQUEST
                 )
+        else:
+            if min_selected_options or max_selected_options:
+                raise serializers.ValidationError(
+                    {
+                        'question': 'سوالی که چند انتخابی نیست نمی تواند حداقل و حداکثر گزینه انتخابی داشته باشد'
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
         if not additional_options and (nothing_selected or all_options or other_options):
             raise serializers.ValidationError(
                 {
@@ -296,6 +304,8 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         max_selected_options = data.get('max_selected_options')
         min_selected_options = data.get('min_selected_options')
+        print(min_selected_options)
+        print(max_selected_options)
         multiple_choice = data.get('multiple_choice')
         if multiple_choice:
             if max_selected_options is None or min_selected_options is None:
@@ -306,6 +316,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
                     status.HTTP_400_BAD_REQUEST
                 )
             elif max_selected_options == 0 or min_selected_options == 0:
+                print(2)
                 raise serializers.ValidationError(
                     {
                         'question': 'لطفا حداقل و حداکثر گزینه انتخابی نمی تواند صفر باشد'
@@ -313,6 +324,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
                     status.HTTP_400_BAD_REQUEST
                 )
             elif min_selected_options is not None and max_selected_options is not None:
+                print(1)
                 if min_selected_options > max_selected_options:
                     raise serializers.ValidationError(
                         {
@@ -320,6 +332,14 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
                         },
                         status.HTTP_400_BAD_REQUEST
                     )
+        else:
+            if min_selected_options or max_selected_options:
+                raise serializers.ValidationError(
+                    {
+                        'question': 'سوالی که چند انتخابی نیست نمی تواند حداقل و حداکثر گزینه انتخابی داشته باشد'
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
         return data
 
     @transaction.atomic()
