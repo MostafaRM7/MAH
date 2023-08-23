@@ -21,7 +21,7 @@ questionnaire_router.register(NumberAnswerQuestion.URL_PREFIX, views.NumberAnswe
                               basename='numberanswer_questions')
 questionnaire_router.register(IntegerRangeQuestion.URL_PREFIX, views.IntegerRangeQuestionViewSet,
                               basename='integerrange_questions')
-questionnaire_router.register(IntegerRangeQuestion.URL_PREFIX, views.IntegerSelectiveQuestionViewSet,
+questionnaire_router.register(IntegerSelectiveQuestion.URL_PREFIX, views.IntegerSelectiveQuestionViewSet,
                               basename='integerselective_qustions')
 questionnaire_router.register('picture-questions', views.PictureFieldQuestionViewSet,
                               basename='picture_qustions')
