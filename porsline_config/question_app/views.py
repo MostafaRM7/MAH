@@ -80,7 +80,7 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         search = request.query_params.get('search')
         if search:
             obj = self.get_object()
-            result = obj.questions.filter(Q(title__icontains=search) | Q(question_text__icontains=search))
+            result = obj.questions.filter(Q(title__icontains=search) | Q(description__icontains=search))
             return Response(NoGroupQuestionSerializer(result, many=True).data)
         else:
             return Response([])
