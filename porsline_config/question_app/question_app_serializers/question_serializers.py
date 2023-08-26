@@ -665,7 +665,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'url_prefix',
-            'show_number', 'media', 'double_picture_size', 'max_volume')
+            'show_number', 'media', 'double_picture_size', 'max_volume', 'volume_unit')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):

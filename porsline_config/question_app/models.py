@@ -292,8 +292,15 @@ class LinkQuestion(Question):
 
 
 class FileQuestion(Question):
+    mega_byte = 'mb'
+    kilo_byte = 'kb'
+    UNIT_CHOICES = (
+        (mega_byte, 'MB'),
+        (kilo_byte, 'KB'),
+    )
     URL_PREFIX = 'file-questions'
     max_volume = models.PositiveIntegerField(default=30, verbose_name='حداکثر حجم')
+    volume_unit = models.CharField(max_length=3, default=mega_byte, choices=UNIT_CHOICES, verbose_name='واحد حجم')
 
     def save(self, *args, **kwargs):
         self.question_type = 'file'
