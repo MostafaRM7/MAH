@@ -21,13 +21,14 @@ class FolderSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         name = data.get('name')
+        request = self.context.get('request')
         if name is not None:
-            if self.context.request.method == 'POST':
-                if Folder.objects.filter(name=name, owner=self.context.get('request').user).exists():
+            if request.method == 'POST':
+                if Folder.objects.filter(name=name, owner=request.user).exists():
                     raise serializers.ValidationError(
                         {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},
                     )
-            elif self.context.request.method in ['PUT', 'PATCH']:
+            elif request.method in ['PUT', 'PATCH']:
                 if Folder.objects.filter(name=name, owner=self.context.get('request').user).exclude(self.instance).exists():
                     raise serializers.ValidationError(
                         {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},

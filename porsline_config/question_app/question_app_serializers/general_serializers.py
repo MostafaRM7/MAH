@@ -128,11 +128,19 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
                     {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
                     status.HTTP_400_BAD_REQUEST
                 )
-            if Questionnaire.objects.filter(folder=folder, name=name).exists():
-                raise serializers.ValidationError(
-                    {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
-                    status.HTTP_400_BAD_REQUEST
-                )
+            if name is not None:
+                if request.method == 'POST':
+                    if Questionnaire.objects.filter(folder=folder, name=name).exists():
+                        raise serializers.ValidationError(
+                            {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
+                elif request.method in ['PUT', 'PATCH']:
+                    if Questionnaire.objects.filter(folder=folder, name=name).exclude(self.instance).exists():
+                        raise serializers.ValidationError(
+                            {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
         else:
             if request.method != 'PATCH':
                 raise serializers.ValidationError(
