@@ -107,14 +107,12 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         pub_date = data.get('pub_date')
         end_date = data.get('end_date')
         if pub_date:
-            print(pub_date)
-            print(timezone.now().date())
-            if pub_date < timezone.now().date():
+            if pub_date < timezone.now():
                 raise serializers.ValidationError(
                     {'pub_date': 'تاریخ شروع پرسشنامه نمی تواند قبل از زمان حال باشد'}
                 )
             if end_date:
-                if end_date < timezone.now().date():
+                if end_date < timezone.now():
                     raise serializers.ValidationError(
                         {'end_date': 'تاریخ پایان پرسشنامه نمی تواند قبل از زمان حال باشد'}
                     )
@@ -155,7 +153,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Questionnaire.objects.create(owner=self.context.get('request').user,
-                                            pub_date=validated_data.pop('pub_date', timezone.now().date()),
+                                            pub_date=validated_data.pop('pub_date', timezone.now()),
                                             **validated_data)
 
 
