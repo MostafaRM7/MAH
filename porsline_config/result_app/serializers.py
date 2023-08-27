@@ -17,10 +17,15 @@ class AnswerSerializer(serializers.ModelSerializer):
         match instance.question.question_type:
             case 'sort':
                 result['answer'] = instance.answer.get('sorted_options') if instance.answer else None
-            case 'optional':
-                result['answer'] = instance.answer.get('selected_options') if instance.answer else None
             case 'drop_down':
                 result['answer'] = instance.answer.get('selected_options') if instance.answer else None
+            case 'optional':
+                options = instance.answer.get('selected_options') if instance.answer else None
+                other_text = instance.answer.get('other_text') if instance.answer else None
+                result['answer'] = {
+                    'options': options,
+                    'other_text': other_text
+                }
             case 'text_answer':
                 result['answer'] = instance.answer.get('text_answer') if instance.answer else None
             case 'number_answer':

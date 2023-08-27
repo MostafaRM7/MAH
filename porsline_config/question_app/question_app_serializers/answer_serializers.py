@@ -64,6 +64,11 @@ class AnswerSerializer(serializers.ModelSerializer):
                                 {question.id: 'گزینه انتخاب شده مربوط به این سوال نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
+                        if 'سایر' not in [option.text for option in options] and answer.get('other_text'):
+                            raise serializers.ValidationError(
+                                {question.id: 'گزینه سایر در گزینه ها نیست لطفا متنی وارد نکنید'},
+                                status.HTTP_400_BAD_REQUEST
+                            )
                         for option in options:
                             if option.id == selection:
                                 if option.text == 'هیچ کدام':
@@ -76,6 +81,17 @@ class AnswerSerializer(serializers.ModelSerializer):
                                     if selected_count > 1:
                                         raise serializers.ValidationError(
                                             {question.id: 'همه گزینه ها نمی تواند با سایر گزینه ها انتخاب شود'},
+                                            status.HTTP_400_BAD_REQUEST
+                                        )
+                                elif option.text == 'سایر':
+                                    if selected_count > 1:
+                                        raise serializers.ValidationError(
+                                            {question.id: 'سایر نمی تواند با سایر گزینه ها انتخاب شود'},
+                                            status.HTTP_400_BAD_REQUEST
+                                        )
+                                    if not answer.get('other_text'):
+                                        raise serializers.ValidationError(
+                                            {question.id: 'در صورت انتخاب گزینه سایر باید متنی وارد کنید'},
                                             status.HTTP_400_BAD_REQUEST
                                         )
 
@@ -369,9 +385,14 @@ class AnswerSerializer(serializers.ModelSerializer):
         if question_type in OPTION_QUESTIONS and validated_data.get('answer') is not None:
             match question_type:
                 case 'optional':
-                    answer = validated_data.pop('answer').get('selected_options')
-                    options = Option.objects.filter(id__in=answer)
+                    answer = validated_data.pop('answer')
+                    selected_options = answer.get('selected_options')
+                    options = Option.objects.filter(id__in=selected_options)
                     json_answer = {'selected_options': list(options.values('id', 'text'))}
+                    if question.optionalquestion.other_options:
+                        other_option = answer.get('other_text')
+                        if other_option is not None:
+                            json_answer['other_text'] = other_option
                     return Answer.objects.create(answer_set=self.context.get('answer_set'), answer=json_answer,
                                                  **validated_data)
                 case 'sort':
