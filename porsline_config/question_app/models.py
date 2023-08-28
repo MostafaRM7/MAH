@@ -333,17 +333,17 @@ class Answer(models.Model):
 
 class QuestionGroup(Question):
     URL_PREFIX = 'question-groups'
-    SHARP = 'sharp'
-    ROUND = 'round'
-    OVAL = 'oval'
-    BUTTON_SHAPES = (
-        (SHARP, 'Sharp corners'),
-        (ROUND, 'Round corners'),
-        (OVAL, 'Oval')
-    )
-    button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND, verbose_name='شکل دکمه')
-    is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')
-    button_text = models.CharField(max_length=100, verbose_name='متن دکمه')
+    # SHARP = 'sharp'
+    # ROUND = 'round'
+    # OVAL = 'oval'
+    # BUTTON_SHAPES = (
+    #     (SHARP, 'Sharp corners'),
+    #     (ROUND, 'Round corners'),
+    #     (OVAL, 'Oval')
+    # )
+    # button_shape = models.CharField(max_length=6, choices=BUTTON_SHAPES, default=ROUND, verbose_name='شکل دکمه')
+    # is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')
+    # button_text = models.CharField(max_length=100, verbose_name='متن دکمه')
 
     def save(self, *args, **kwargs):
         self.is_required = False

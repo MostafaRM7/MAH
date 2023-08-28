@@ -699,9 +699,7 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
         model = QuestionGroup
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
-            'url_prefix',
-            'show_number', 'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text',
-            'child_questions'
+            'url_prefix', 'show_number', 'media', 'double_picture_size', 'child_questions'
         )
         read_only_fields = ('question_type', 'questionnaire')
 
