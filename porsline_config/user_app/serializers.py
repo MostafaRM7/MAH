@@ -29,7 +29,7 @@ class FolderSerializer(serializers.ModelSerializer):
                         {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},
                     )
             elif request.method in ['PUT', 'PATCH']:
-                if Folder.objects.filter(name=name, owner=self.context.get('request').user).exclude(self.instance).exists():
+                if Folder.objects.filter(name=name, owner=self.context.get('request').user).exclude(pk=self.instance.id).exists():
                     raise serializers.ValidationError(
                         {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},
                     )
