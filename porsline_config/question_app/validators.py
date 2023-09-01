@@ -64,3 +64,7 @@ def option_in_html_tag_validator(options_list: list, option_text):
         if no_tag == option_text:
             return True
     return False
+
+
+def tag_remover(string):
+    return re.sub(r'<[^>]+>', '', string)

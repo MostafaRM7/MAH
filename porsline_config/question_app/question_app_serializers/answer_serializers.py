@@ -3,6 +3,7 @@ from .general_serializers import *
 from ..models import *
 from .. import validators
 import datetime
+from question_app.validators import tag_remover
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -64,26 +65,26 @@ class AnswerSerializer(serializers.ModelSerializer):
                                 {question.id: 'گزینه انتخاب شده مربوط به این سوال نیست'},
                                 status.HTTP_400_BAD_REQUEST
                             )
-                        if 'سایر' not in [option.text for option in options] and answer.get('other_text'):
+                        if 'سایر' not in [tag_remover(option.text) for option in options] and answer.get('other_text'):
                             raise serializers.ValidationError(
                                 {question.id: 'گزینه سایر در گزینه ها نیست لطفا متنی وارد نکنید'},
                                 status.HTTP_400_BAD_REQUEST
                             )
                         for option in options:
                             if option.id == selection:
-                                if option.text == 'هیچ کدام':
+                                if tag_remover(option.text) == 'هیچ کدام':
                                     if selected_count > 1:
                                         raise serializers.ValidationError(
                                             {question.id: 'هیچ کدام نمی تواند با سایر گزینه ها انتخاب شود'},
                                             status.HTTP_400_BAD_REQUEST
                                         )
-                                elif option.text == 'همه گزینه ها':
+                                elif tag_remover(option.text) == 'همه گزینه ها':
                                     if selected_count > 1:
                                         raise serializers.ValidationError(
                                             {question.id: 'همه گزینه ها نمی تواند با سایر گزینه ها انتخاب شود'},
                                             status.HTTP_400_BAD_REQUEST
                                         )
-                                elif option.text == 'سایر':
+                                elif tag_remover(option.text) == 'سایر':
                                     if selected_count > 1:
                                         raise serializers.ValidationError(
                                             {question.id: 'سایر نمی تواند با سایر گزینه ها انتخاب شود'},
