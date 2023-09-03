@@ -107,19 +107,32 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         pub_date = data.get('pub_date')
         end_date = data.get('end_date')
         if pub_date:
-            if pub_date < timezone.now():
-                raise serializers.ValidationError(
-                    {'pub_date': 'تاریخ شروع پرسشنامه نمی تواند قبل از زمان حال باشد'}
-                )
-            if end_date:
+            if request.method == 'POST':
+                if pub_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {'pub_date': 'تاریخ شروع پرسشنامه نمی تواند قبل از زمان حال باشد'}
+                    )
+            elif request.method in ['PUT', 'PATCH']:
+                if pub_date != self.instance.pub_date and pub_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {'pub_date': 'نمی توانید تاریخ شروع پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ شروع قبلی یا تاریخی پس از زمان حال است'}
+                    )
+        if end_date:
+            if request.method == 'POST':
                 if end_date < timezone.now():
                     raise serializers.ValidationError(
                         {'end_date': 'تاریخ پایان پرسشنامه نمی تواند قبل از زمان حال باشد'}
                     )
-                if end_date < pub_date:
+            elif request.method in ['PUT', 'PATCH']:
+                if end_date != self.instance.end_date and end_date < timezone.now():
                     raise serializers.ValidationError(
-                        {'date': 'تاریخ شروع پرسشنامه نمی تواند بعد از تاریخ پایان باشد'}
+                        {'end_date': 'نمی توانید تاریخ پایان پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ پایان قبلی یا تاریخی پس از زمان حال است'}
                     )
+        if end_date and pub_date:
+            if end_date < pub_date:
+                raise serializers.ValidationError(
+                    {'date': 'تاریخ شروع پرسشنامه نمی تواند بعد از تاریخ پایان باشد'}
+                )
         if folder is not None:
             if request.user != folder.owner:
                 raise serializers.ValidationError(
