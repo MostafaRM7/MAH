@@ -332,6 +332,7 @@ class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
 
 class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                        viewsets.mixins.RetrieveModelMixin,
+                       viewsets.mixins.DestroyModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = AnswerSetSerializer
     permission_classes = (AllowAny,)
