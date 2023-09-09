@@ -86,6 +86,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
     welcome_page = WelcomePageSerializer(read_only=True)
     thanks_page = ThanksPageSerializer(read_only=True)
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
+    answer_count = serializers.SerializerMethodField(method_name='get_answer_set_count')
 
     class Meta:
         model = Questionnaire
@@ -99,6 +100,9 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         ret['folder'] = instance.folder.name if instance.folder else None
         return ret
+
+    def get_answer_set_count(self, obj):
+        return obj.answer_sets.count()
 
     def validate(self, data):
         folder = data.get('folder')
@@ -115,7 +119,8 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
             elif request.method in ['PUT', 'PATCH']:
                 if pub_date != self.instance.pub_date and pub_date < timezone.now():
                     raise serializers.ValidationError(
-                        {'pub_date': 'نمی توانید تاریخ شروع پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ شروع قبلی یا تاریخی پس از زمان حال است'}
+                        {
+                            'pub_date': 'نمی توانید تاریخ شروع پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ شروع قبلی یا تاریخی پس از زمان حال است'}
                     )
         if end_date:
             if request.method == 'POST':
@@ -126,7 +131,8 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
             elif request.method in ['PUT', 'PATCH']:
                 if end_date != self.instance.end_date and end_date < timezone.now():
                     raise serializers.ValidationError(
-                        {'end_date': 'نمی توانید تاریخ پایان پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ پایان قبلی یا تاریخی پس از زمان حال است'}
+                        {
+                            'end_date': 'نمی توانید تاریخ پایان پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ پایان قبلی یا تاریخی پس از زمان حال است'}
                     )
         if end_date and pub_date:
             if end_date < pub_date:
