@@ -91,7 +91,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
     class Meta:
         model = Questionnaire
         fields = (
-            'id', 'name', 'is_active', 'previous_button', 'pub_date', 'end_date', 'timer', 'show_question_in_pages',
+            'id', 'name', 'is_active', 'answer_count', 'previous_button', 'pub_date', 'end_date', 'timer', 'show_question_in_pages',
             'progress_bar',
             'folder', 'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page')
         read_only_fields = ('owner', 'questions', 'welcome_page', 'thanks_page')
