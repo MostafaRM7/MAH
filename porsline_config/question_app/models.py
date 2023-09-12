@@ -65,6 +65,7 @@ class Question(models.Model):
     description = models.TextField(verbose_name='متن سوال', null=True, blank=True)
     question_type = models.CharField(max_length=50, choices=QUESTION_TYPES, editable=False, verbose_name='نوع سوال')
     is_required = models.BooleanField(default=False, verbose_name='اجباری/عیراجباری')
+    is_finalized = models.BooleanField(default=False, verbose_name='نهایی شده/نشده')
     media = models.FileField(upload_to='question_media/%Y/%m/%d', null=True, blank=True,
                              validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)],
                              verbose_name='تصویر یا فیلم')
