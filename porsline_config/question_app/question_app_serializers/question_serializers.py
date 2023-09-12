@@ -109,7 +109,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             'max_selected_options',
             'min_selected_options', 'show_number', 'additional_options', 'all_options', 'nothing_selected',
             'other_options', 'options')
-        read_only_fields = ('question_type 'is_finalized',', 'questionnaire')
+        read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
         return self.Meta.model.URL_PREFIX
@@ -724,7 +724,7 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = NoAnswerQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required', 'is_finalized',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required', 'is_finalized', 'is_finalized',
             'url_prefix',
             'show_number', 'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text'
         )
