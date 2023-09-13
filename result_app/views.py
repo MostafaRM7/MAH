@@ -138,11 +138,15 @@ class PlotAPIView(APIView):
                                         'question_id': question.id,
                                         'question': question.title,
                                         'question_type': question.question_type,
+                                        'max': question.integerrangequestion.max,
                                         'average': sum(answer_list) / len(answer_list),
-                                        'min': min(answer_list),
-                                        'max': max(answer_list),
+                                        'minimum_answer': min(answer_list),
+                                        'maximum_answer': max(answer_list),
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
+                                        'variance': statistics.variance(answer_list),
+                                        'standard_deviation': statistics.stdev(answer_list),
+                                        'mode': statistics.mode(answer_list),
                                         'counts': Counter(answer_list)
                                     }
                                     result.append(NumberQuestionPlotSerializer(to_serializer).data)
@@ -154,11 +158,15 @@ class PlotAPIView(APIView):
                                         'question_id': question.id,
                                         'question': question.title,
                                         'question_type': question.question_type,
+                                        'max': question.integerselectivequestion.max,
                                         'average': sum(answer_list) / len(answer_list),
-                                        'min': min(answer_list),
-                                        'max': max(answer_list),
+                                        'minimum_answer': min(answer_list),
+                                        'maximum_answer': max(answer_list),
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
+                                        'variance': statistics.variance(answer_list),
+                                        'standard_deviation': statistics.stdev(answer_list),
+                                        'mode': statistics.mode(answer_list),
                                         'counts': Counter(answer_list)
                                     }
                                     result.append(NumberQuestionPlotSerializer(to_serializer,
@@ -173,11 +181,15 @@ class PlotAPIView(APIView):
                                         'question_id': question.id,
                                         'question': question.title,
                                         'question_type': question.question_type,
+                                        'max': question.numberanswerquestion.max,
                                         'average': sum(answer_list) / len(answer_list),
-                                        'min': min(answer_list),
-                                        'max': max(answer_list),
+                                        'minimum_answer': min(answer_list),
+                                        'maximum_answer': max(answer_list),
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
+                                        'variance': statistics.variance(answer_list),
+                                        'standard_deviation': statistics.stdev(answer_list),
+                                        'mode': statistics.mode(answer_list),
                                         'counts': Counter(answer_list)
                                     }
                                     result.append(NumberQuestionPlotSerializer(to_serializer).data)
