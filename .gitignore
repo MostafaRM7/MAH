@@ -32,3 +32,6 @@ pip-selfcheck.json
 .idea/
 /porsline_config/question_app/migrations/
 /porsline_config/user_app/migrations/
+/json_templates/
+/.pytest_cache/
+/question_app/tests/.pytest_cache/
