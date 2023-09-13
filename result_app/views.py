@@ -144,7 +144,7 @@ class PlotAPIView(APIView):
                                         'maximum_answer': max(answer_list),
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
-                                        'variance': statistics.variance(answer_list),
+                                        'variance': statistics.variance(answer_list) if len(answer_list) > 1 else 0,
                                         'standard_deviation': statistics.stdev(answer_list),
                                         'mode': statistics.mode(answer_list),
                                         'counts': Counter(answer_list)
@@ -164,7 +164,7 @@ class PlotAPIView(APIView):
                                         'maximum_answer': max(answer_list),
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
-                                        'variance': statistics.variance(answer_list),
+                                        'variance': statistics.variance(answer_list) if len(answer_list) > 1 else 0,
                                         'standard_deviation': statistics.stdev(answer_list),
                                         'mode': statistics.mode(answer_list),
                                         'counts': Counter(answer_list)
@@ -187,7 +187,7 @@ class PlotAPIView(APIView):
                                         'maximum_answer': max(answer_list),
                                         'count': len(answer_list),
                                         'median': statistics.median(answer_list),
-                                        'variance': statistics.variance(answer_list),
+                                        'variance': statistics.variance(answer_list) if len(answer_list) > 1 else 0,
                                         'standard_deviation': statistics.stdev(answer_list),
                                         'mode': statistics.mode(answer_list),
                                         'counts': Counter(answer_list)
