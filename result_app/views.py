@@ -134,41 +134,75 @@ class PlotAPIView(APIView):
                                 answer_list = [answer.answer.get('integer_range') for answer in answers if
                                                answer.answer]
                                 if len(answer_list) != 0:
-                                    to_serializer = {
-                                        'question_id': question.id,
-                                        'question': question.title,
-                                        'question_type': question.question_type,
-                                        'max': question.integerrangequestion.max,
-                                        'average': sum(answer_list) / len(answer_list),
-                                        'minimum_answer': min(answer_list),
-                                        'maximum_answer': max(answer_list),
-                                        'count': len(answer_list),
-                                        'median': statistics.median(answer_list),
-                                        'variance': statistics.variance(answer_list) if len(answer_list) > 1 else 0,
-                                        'standard_deviation': statistics.stdev(answer_list),
-                                        'mode': statistics.mode(answer_list),
-                                        'counts': Counter(answer_list)
-                                    }
+                                    if len(answer_list) > 1:
+                                        to_serializer = {
+                                            'question_id': question.id,
+                                            'question': question.title,
+                                            'question_type': question.question_type,
+                                            'max': question.integerrangequestion.max,
+                                            'average': sum(answer_list) / len(answer_list),
+                                            'minimum_answer': min(answer_list),
+                                            'maximum_answer': max(answer_list),
+                                            'count': len(answer_list),
+                                            'median': statistics.median(answer_list),
+                                            'variance': statistics.variance(answer_list),
+                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'mode': statistics.mode(answer_list),
+                                            'counts': Counter(answer_list)
+                                        }
+                                    else:
+                                        to_serializer = {
+                                            'question_id': question.id,
+                                            'question': question.title,
+                                            'question_type': question.question_type,
+                                            'max': question.integerrangequestion.max,
+                                            'average': sum(answer_list) / len(answer_list),
+                                            'minimum_answer': min(answer_list),
+                                            'maximum_answer': max(answer_list),
+                                            'count': len(answer_list),
+                                            'median': statistics.median(answer_list),
+                                            'variance': 0,
+                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'mode': statistics.mode(answer_list),
+                                            'counts': Counter(answer_list)
+                                        }
                                     result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             case 'integer_selective':
                                 answer_list = [answer.answer.get('integer_selective') for answer in answers if
                                                answer.answer]
                                 if len(answer_list) != 0:
-                                    to_serializer = {
-                                        'question_id': question.id,
-                                        'question': question.title,
-                                        'question_type': question.question_type,
-                                        'max': question.integerselectivequestion.max,
-                                        'average': sum(answer_list) / len(answer_list),
-                                        'minimum_answer': min(answer_list),
-                                        'maximum_answer': max(answer_list),
-                                        'count': len(answer_list),
-                                        'median': statistics.median(answer_list),
-                                        'variance': statistics.variance(answer_list) if len(answer_list) > 1 else 0,
-                                        'standard_deviation': statistics.stdev(answer_list),
-                                        'mode': statistics.mode(answer_list),
-                                        'counts': Counter(answer_list)
-                                    }
+                                    if len(answer_list) > 1:
+                                        to_serializer = {
+                                            'question_id': question.id,
+                                            'question': question.title,
+                                            'question_type': question.question_type,
+                                            'max': question.integerrangequestion.max,
+                                            'average': sum(answer_list) / len(answer_list),
+                                            'minimum_answer': min(answer_list),
+                                            'maximum_answer': max(answer_list),
+                                            'count': len(answer_list),
+                                            'median': statistics.median(answer_list),
+                                            'variance': statistics.variance(answer_list),
+                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'mode': statistics.mode(answer_list),
+                                            'counts': Counter(answer_list)
+                                        }
+                                    else:
+                                        to_serializer = {
+                                            'question_id': question.id,
+                                            'question': question.title,
+                                            'question_type': question.question_type,
+                                            'max': question.integerrangequestion.max,
+                                            'average': sum(answer_list) / len(answer_list),
+                                            'minimum_answer': min(answer_list),
+                                            'maximum_answer': max(answer_list),
+                                            'count': len(answer_list),
+                                            'median': statistics.median(answer_list),
+                                            'variance': 0,
+                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'mode': statistics.mode(answer_list),
+                                            'counts': Counter(answer_list)
+                                        }
                                     result.append(NumberQuestionPlotSerializer(to_serializer,
                                                                                context={'integer_selective': True,
                                                                                         'shape': question.integerselectivequestion.shape}).data)
@@ -177,21 +211,38 @@ class PlotAPIView(APIView):
                                 answer_list = [answer.answer.get('number_answer') for answer in answers if
                                                answer.answer]
                                 if len(answer_list) != 0:
-                                    to_serializer = {
-                                        'question_id': question.id,
-                                        'question': question.title,
-                                        'question_type': question.question_type,
-                                        'max': question.numberanswerquestion.max,
-                                        'average': sum(answer_list) / len(answer_list),
-                                        'minimum_answer': min(answer_list),
-                                        'maximum_answer': max(answer_list),
-                                        'count': len(answer_list),
-                                        'median': statistics.median(answer_list),
-                                        'variance': statistics.variance(answer_list) if len(answer_list) > 1 else 0,
-                                        'standard_deviation': statistics.stdev(answer_list),
-                                        'mode': statistics.mode(answer_list),
-                                        'counts': Counter(answer_list)
-                                    }
+                                    if len(answer_list) > 1:
+                                        to_serializer = {
+                                            'question_id': question.id,
+                                            'question': question.title,
+                                            'question_type': question.question_type,
+                                            'max': question.integerrangequestion.max,
+                                            'average': sum(answer_list) / len(answer_list),
+                                            'minimum_answer': min(answer_list),
+                                            'maximum_answer': max(answer_list),
+                                            'count': len(answer_list),
+                                            'median': statistics.median(answer_list),
+                                            'variance': statistics.variance(answer_list),
+                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'mode': statistics.mode(answer_list),
+                                            'counts': Counter(answer_list)
+                                        }
+                                    else:
+                                        to_serializer = {
+                                            'question_id': question.id,
+                                            'question': question.title,
+                                            'question_type': question.question_type,
+                                            'max': question.integerrangequestion.max,
+                                            'average': sum(answer_list) / len(answer_list),
+                                            'minimum_answer': min(answer_list),
+                                            'maximum_answer': max(answer_list),
+                                            'count': len(answer_list),
+                                            'median': statistics.median(answer_list),
+                                            'variance': 0,
+                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'mode': statistics.mode(answer_list),
+                                            'counts': Counter(answer_list)
+                                        }
                                     result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             # PERCENT
                             case 'optional':
