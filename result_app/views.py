@@ -42,35 +42,50 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
                 if answer_body:
                     match question_type:
                         case 'text_answer':
-                            if search in answer_body.get('text_answer'):
-                                result.append(answer_set)
-                                break
+                            look_up = answer_body.get('text_answer')
+                            if look_up:
+                                if search in look_up:
+                                    result.append(answer_set)
+                                    break
                         case 'number_answer':
-                            if search == answer_body.get('number_answer'):
-                                result.append(answer_set)
-                                break
+                            look_up = answer_body.get('number_answer')
+                            if look_up:
+                                try:
+                                    if int(search) == look_up:
+                                        result.append(answer_set)
+                                        break
+                                except ValueError:
+                                    pass
                         case 'integer_range':
-                            try:
-                                if int(search) == answer_body.get('integer_range'):
-                                    result.append(answer_set)
-                                    break
-                            except ValueError:
-                                pass
+                            look_up = answer_body.get('integer_range')
+                            if look_up:
+                                try:
+                                    if int(search) == look_up:
+                                        result.append(answer_set)
+                                        break
+                                except ValueError:
+                                    pass
                         case 'integer_selective':
-                            try:
-                                if int(search) == answer_body.get('integer_selective'):
+                            look_up = answer_body.get('integer_selective')
+                            if look_up:
+                                try:
+                                    if int(search) == look_up:
+                                        result.append(answer_set)
+                                        break
+                                except ValueError:
+                                    pass
+                        case 'email_field':
+                            look_up = answer_body.get('email_field')
+                            if look_up:
+                                if search in look_up:
                                     result.append(answer_set)
                                     break
-                            except ValueError:
-                                pass
-                        case 'email_field':
-                            if search in answer_body.get('email_field'):
-                                result.append(answer_set)
-                                break
                         case 'link':
-                            if search in answer_body.get('link'):
-                                result.append(answer_set)
-                                break
+                            look_up = answer_body.get('link')
+                            if look_up:
+                                if search in look_up:
+                                    result.append(answer_set)
+                                    break
                         case 'optional':
                             option_texts = [option.get('text') for option in answer_body.get('selected_options')]
                             find = False
