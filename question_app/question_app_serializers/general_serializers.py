@@ -1,3 +1,4 @@
+from . import answer_serializers
 from .question_serializers import *
 from ..models import *
 from rest_framework import serializers, status
@@ -102,7 +103,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         return ret
 
     def get_answer_set_count(self, obj):
-        return obj.answer_sets.count()
+        return obj.answer_sets.filter(answers__isnull=False).count()
 
     def validate(self, data):
         folder = data.get('folder')
@@ -185,7 +186,7 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'uuid', 'pub_date', 'answer_count', 'question_count', 'is_active')
 
     def get_answer_count(self, obj):
-        return obj.answer_sets.count()
+        return obj.answer_sets.filter(answers__isnull=False).count()
 
     def get_question_count(self, obj):
         return obj.questions.count()
