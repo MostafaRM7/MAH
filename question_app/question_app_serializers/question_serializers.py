@@ -103,7 +103,8 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         model = OptionalQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'show_number', 'media', 'double_picture_size', 'multiple_choice',
+            'is_required', 'is_finalized', 'url_prefix', 'show_number', 'media', 'double_picture_size',
+            'multiple_choice',
             'is_vertical',
             'is_random_options',
             'max_selected_options',
@@ -238,7 +239,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                         )
         return data
 
-    @transaction.atomic()
+    @transaction.atomic
     def create(self, validated_data):
         options_data = validated_data.pop('options')
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
@@ -247,7 +248,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         Option.objects.bulk_create(options)
         return optional_question
 
-    @transaction.atomic()
+    @transaction.atomic
     def update(self, instance, validated_data):
         options_data = validated_data.pop('options', None)
         if options_data is not None:
@@ -342,7 +343,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
                 )
         return data
 
-    @transaction.atomic()
+    @transaction.atomic
     def create(self, validated_data):
         options_data = validated_data.pop('options')
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
@@ -351,7 +352,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         DropDownOption.objects.bulk_create(options)
         return drop_down_question
 
-    @transaction.atomic()
+    @transaction.atomic
     def update(self, instance, validated_data):
         options_data = validated_data.pop('options', None)
         if options_data is not None:
@@ -698,7 +699,8 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionGroup
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required', 'is_finalized',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
+            'is_finalized',
             'url_prefix', 'show_number', 'media', 'double_picture_size', 'child_questions'
         )
         read_only_fields = ('question_type', 'questionnaire')
@@ -724,7 +726,8 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = NoAnswerQuestion
         fields = (
-            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required', 'is_finalized', 'is_finalized',
+            'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
+            'is_finalized', 'is_finalized',
             'url_prefix',
             'show_number', 'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text'
         )
