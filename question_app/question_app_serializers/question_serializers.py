@@ -196,14 +196,14 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                                 'گزینه با نام هیچ کدام را اضافه کنید'
                         }
                     )
-                # else:
-                #     if min_selected_options > 1:
-                #         raise serializers.ValidationError(
-                #             {
-                #                 'min_selected_options':
-                #                     'هنگامی که گزینه هیچ کدام فعال است کمترین تعداد انتخاب شده باید ۱ یا بیشتر باشد '
-                #             }
-                #         )
+                else:
+                    if min_selected_options > 1:
+                        raise serializers.ValidationError(
+                            {
+                                'min_selected_options':
+                                    'هنگامی که هیچ کدام فعال است کمترین تعداد انتخاب شده باید ۱ یا کمتر باشد '
+                            }
+                        )
             if all_options:
                 if not option_in_html_tag_validator(option_names, 'همه گزینه ها'):
                     raise serializers.ValidationError(
@@ -212,14 +212,14 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                                 'گزینه با نام همه گزینه ها را اضافه کنید'
                         }
                     )
-                # else:
-                #     if min_selected_options > 1:
-                #         raise serializers.ValidationError(
-                #             {
-                #                 'min_selected_options':
-                #                     'هنگامی که گزینه همه گزینه ها فعال است کمترین تعداد انتخاب شده باید ۱ یا بیشتر باشد '
-                #             }
-                #         )
+                else:
+                    if min_selected_options > 1:
+                        raise serializers.ValidationError(
+                            {
+                                'min_selected_options':
+                                    'هنگامی که همه گزینه ها فعال است کمترین تعداد انتخاب شده باید ۱ یا کمتر باشد '
+                            }
+                        )
             if other_options:
                 if not option_in_html_tag_validator(option_names, 'سایر'):
                     raise serializers.ValidationError(
@@ -228,14 +228,14 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                                 'گزینه با نام سایر را اضافه کنید'
                         }
                     )
-                # else:
-                #     if min_selected_options > 1:
-                #         raise serializers.ValidationError(
-                #             {
-                #                 'min_selected_options':
-                #                     'هنگامی که گزینه سایر فعال است کمترین تعداد انتخاب شده باید ۱ یا بیشتر باشد '
-                #             }
-                #         )
+                else:
+                    if min_selected_options > 1:
+                        raise serializers.ValidationError(
+                            {
+                                'min_selected_options':
+                                    'هنگامی که سایر فعال است کمترین تعداد انتخاب شده باید ۱ یا کمتر باشد '
+                            }
+                        )
         return data
 
     @transaction.atomic()
