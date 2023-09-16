@@ -315,5 +315,5 @@ class PlotAPIView(APIView):
             else:
                 return Response({'message': 'پرسشنامه مورد نظر پاسخی ندارد'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'message': 'در این پرسشنامه سوالی که بتوان برای آن نمودار کشید وجود ندارد'},
+            return Response([],
                             status=status.HTTP_400_BAD_REQUEST)
