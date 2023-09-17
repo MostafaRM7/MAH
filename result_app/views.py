@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from question_app.models import AnswerSet, Questionnaire
 from result_app.filtersets import AnswerSetFilterSet
 from result_app.serializers import AnswerSetSerializer
+from porsline_config.paginators import MainPagination
 from .permissions import IsQuestionnaireOwner
 from .serializers import NumberQuestionPlotSerializer, ChoiceQuestionPlotSerializer
 
@@ -24,6 +25,7 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsQuestionnaireOwner]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AnswerSetFilterSet
+    pagination_class = MainPagination
 
     @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwner],
             filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
