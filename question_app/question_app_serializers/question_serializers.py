@@ -501,12 +501,23 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         max_value = data.get('max')
         min_value = data.get('min')
+        accept_negative = data.get('accept_negative')
         if max_value is not None and min_value is not None:
             if max_value < min_value:
                 raise serializers.ValidationError(
                     {'max': 'مقدار حداقل مقدار نمی تواند از حداکثر مقدار بیشتر باشد'},
                     status.HTTP_400_BAD_REQUEST
                 )
+            if accept_negative:
+                for num in range(min_value, max_value):
+                    flag = False
+                    if num < 0:
+                        flag = True
+                    if flag:
+                        raise serializers.ValidationError(
+                            {'accept_negative': 'وقتی سوال عدد منفی قبول می کند بازه اعداد قابل قبول باید شامل اعداد منفی باشد'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
         return data
 
     def create(self, validated_data):
