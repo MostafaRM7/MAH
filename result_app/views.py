@@ -179,7 +179,7 @@ class PlotAPIView(APIView):
                                             'count': len(answer_list),
                                             'median': statistics.median(answer_list),
                                             'variance': 0,
-                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'standard_deviation': 0,
                                             'mode': statistics.mode(answer_list),
                                             'counts': Counter(answer_list)
                                         }
@@ -216,7 +216,7 @@ class PlotAPIView(APIView):
                                             'count': len(answer_list),
                                             'median': statistics.median(answer_list),
                                             'variance': 0,
-                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'standard_deviation': 0,
                                             'mode': statistics.mode(answer_list),
                                             'counts': Counter(answer_list)
                                         }
@@ -256,7 +256,7 @@ class PlotAPIView(APIView):
                                             'count': len(answer_list),
                                             'median': statistics.median(answer_list),
                                             'variance': 0,
-                                            'standard_deviation': statistics.stdev(answer_list),
+                                            'standard_deviation': 0,
                                             'mode': statistics.mode(answer_list),
                                             'counts': Counter(answer_list)
                                         }
