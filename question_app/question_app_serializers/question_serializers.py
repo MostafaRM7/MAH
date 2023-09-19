@@ -511,7 +511,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
             if accept_negative:
                 for num in range(min_value, max_value):
                     flag = False
-                    if num < 0:
+                    if num > 0:
                         flag = True
                     if flag:
                         raise serializers.ValidationError(
