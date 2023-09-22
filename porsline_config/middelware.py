@@ -1,20 +1,35 @@
-import pycountry
-from ipware import get_client_ip
+import geoip2.database
+import geoip2.errors
 from django.http import HttpResponseForbidden
 
 
 class BlockIPMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
+        self.geoip_reader = geoip2.database.Reader('../GeoLite2.mmdb')
 
     def __call__(self, request):
-        client_ip, _ = get_client_ip(request)
-        if client_ip:
-            try:
-                country_code = pycountry.countries.get(alpha_2='IR').alpha_2  # Change 'IR' to the desired country code
-                ip_country_code = pycountry.countries.get(alpha_2=client_ip.upper()).alpha_2
-                if ip_country_code != country_code:
-                    return HttpResponseForbidden("<h1>Forbidden</h1>")
-            except (AttributeError, KeyError):
-                pass  # Country code not found for the client IP
-        return self.get_response(request)
+        # Get the client's IP address
+        client_ip = self.get_client_ip(request)
+
+        # Check if the IP address belongs to Iran (country code 'IR')
+        if self.is_iranian_ip(client_ip):
+            return self.get_response(request)
+
+        # If the IP address is not from Iran, deny access
+        return HttpResponseForbidden("Access denied. Only Iranian IPs are allowed.")
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+    def is_iranian_ip(self, ip):
+        try:
+            response = self.geoip_reader.country(ip)
+            return response.country.iso_code == 'IR'
+        except geoip2.errors.AddressNotFoundError:
+            return False
