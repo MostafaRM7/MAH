@@ -1,6 +1,6 @@
 import geoip2.database
 import geoip2.errors
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpRequest
 
 
 class BlockIPMiddleware:
@@ -8,16 +8,18 @@ class BlockIPMiddleware:
         self.get_response = get_response
         self.geoip_reader = geoip2.database.Reader('GeoLite2.mmdb')
 
-    def __call__(self, request):
+    def __call__(self, request: HttpRequest):
         # Get the client's IP address
         client_ip = self.get_client_ip(request)
+
+        request.country = self.get_user_country(client_ip)
 
         # Check if the IP address belongs to Iran (country code 'IR')
         if self.is_iranian_ip(client_ip):
             return self.get_response(request)
 
         # If the IP address is not from Iran, deny access
-        return HttpResponseForbidden("We are sorry, access denied from your current location")
+        return HttpResponseForbidden(f"We are sorry, access denied from your current location {self.get_user_country(client_ip)}")
 
     def get_client_ip(self, request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -33,3 +35,10 @@ class BlockIPMiddleware:
             return response.country.iso_code == 'IR'
         except geoip2.errors.AddressNotFoundError:
             return False
+
+    def get_user_country(self, ip):
+        try:
+            response = self.geoip_reader.country(ip)
+            return response.country.iso_code
+        except geoip2.errors.AddressNotFoundError:
+            return None
