@@ -46,11 +46,13 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_filters',
     'corsheaders',
+    'django_geoip'
 ]
 
 MIDDLEWARE = [
 
     'django.middleware.security.SecurityMiddleware',
+    'porsline_config.middelware.BlockIPMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
