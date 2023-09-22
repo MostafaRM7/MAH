@@ -39,6 +39,6 @@ class BlockIPMiddleware:
     def get_user_country(self, ip):
         try:
             response = self.geoip_reader.country(ip)
-            return response.country.iso_code
+            return response.country.name
         except geoip2.errors.AddressNotFoundError:
             return None
