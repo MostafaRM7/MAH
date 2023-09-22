@@ -6,7 +6,8 @@ from django.http import HttpResponseForbidden, HttpRequest
 class BlockIPMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.geoip_reader = geoip2.database.Reader('GeoLite2-City.mmdb')
+        self.db = geoip2.database.Reader('GeoLite2-City.mmdb')
+        # self.country_reader = geoip2.database.Reader('GeoLite2-Country.mmdb')
 
     def __call__(self, request: HttpRequest):
         # Get the client's IP address
@@ -31,14 +32,14 @@ class BlockIPMiddleware:
 
     def is_iranian_ip(self, ip):
         try:
-            response = self.geoip_reader.country(ip)
+            response = self.db.city(ip)
             return response.country.iso_code == 'IR'
         except geoip2.errors.AddressNotFoundError:
             return False
 
     def get_user_location(self, ip):
         try:
-            response = self.geoip_reader.city(ip)
+            response = self.db.city(ip)
             return {
                 'city': response.city.name,
                 'country': response.country.name,
