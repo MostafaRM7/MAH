@@ -19,7 +19,7 @@ class BlockIPMiddleware:
             return self.get_response(request)
 
         # If the IP address is not from Iran, deny access
-        return HttpResponseForbidden(f"We are sorry, access denied from your current location {self.get_user_country(client_ip)}")
+        return HttpResponseForbidden(f"We are sorry, access denied from your current location {self.get_user_country(client_ip).get('name')}")
 
     def get_client_ip(self, request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -39,6 +39,9 @@ class BlockIPMiddleware:
     def get_user_country(self, ip):
         try:
             response = self.geoip_reader.country(ip)
-            return response.country.name
+            return {
+                'iso_code': response.country.iso_code,
+                'name': response.country.name
+            }
         except geoip2.errors.AddressNotFoundError:
             return None
