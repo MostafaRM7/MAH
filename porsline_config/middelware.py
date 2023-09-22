@@ -6,7 +6,7 @@ from django.http import HttpResponseForbidden
 class BlockIPMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.geoip_reader = geoip2.database.Reader('../GeoLite2.mmdb')
+        self.geoip_reader = geoip2.database.Reader('GeoLite2.mmdb')
 
     def __call__(self, request):
         # Get the client's IP address
