@@ -1,6 +1,7 @@
+from porsline_config import settings
+
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from django.db import transaction
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin
@@ -78,10 +79,16 @@ class OTPCheckViewSet(CreateModelMixin, GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         headers = self.get_success_headers(serializer.data)
-        return Response({'access': serializer.data.get('access'), 'refresh': serializer.data.get('refresh')},
-                        status=status.HTTP_201_CREATED, headers=headers)
+        access = serializer.data.get('access')
+        refresh = serializer.data.get('refresh')
+        response = Response({'access': access, 'refresh': refresh},
+                            status=status.HTTP_201_CREATED, headers=headers)
+        response.set_cookie('access_token', access, secure=False, httponly=True,
+                            expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
+        response.set_cookie('refresh_token', refresh, secure=False, httponly=True,
+                            expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
+        return response
 
 
 class RefreshTokenViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = RefreshTokenSerializer
-
