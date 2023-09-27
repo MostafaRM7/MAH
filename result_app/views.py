@@ -148,8 +148,7 @@ class PlotAPIView(APIView):
                     if answers.exists():
                         match question.question_type:
                             case 'integer_range':
-                                answer_list = [answer.answer.get('integer_range') for answer in answers if
-                                               answer.answer]
+                                answer_list = [answer.answer.get('integer_range') for answer in answers if answer.answer is not None and (isinstance(answer.answer.get('integer_range'), int) or isinstance(answer.answer.get('integer_range'), float))]
                                 if len(answer_list) != 0:
                                     if len(answer_list) > 1:
                                         to_serializer = {
@@ -185,8 +184,7 @@ class PlotAPIView(APIView):
                                         }
                                     result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             case 'integer_selective':
-                                answer_list = [answer.answer.get('integer_selective') for answer in answers if
-                                               answer.answer]
+                                answer_list = [answer.answer.get('integer_selective') for answer in answers if answer.answer is not None and (isinstance(answer.answer.get('integer_selective'), int) or isinstance(answer.answer.get('integer_selective'), float))]
                                 if len(answer_list) != 0:
                                     if len(answer_list) > 1:
                                         to_serializer = {
@@ -225,8 +223,7 @@ class PlotAPIView(APIView):
                                                                                         'shape': question.integerselectivequestion.shape}).data)
                             # AVG
                             case 'number_answer':
-                                answer_list = [answer.answer.get('number_answer') for answer in answers if
-                                               answer.answer]
+                                answer_list = [answer.answer.get('number_answer') for answer in answers if answer.answer is not None and (isinstance(answer.answer.get('number_answer'), int) or isinstance(answer.answer.get('number_answer'), float))]
                                 if len(answer_list) != 0:
                                     if len(answer_list) > 1:
                                         to_serializer = {
