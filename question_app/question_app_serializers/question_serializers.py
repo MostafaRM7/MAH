@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework import status
 from ..models import *
 from porsline_config import settings
-from ..validators import option_in_html_tag_validator
+from ..validators import option_in_html_tag_validator, tag_remover
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -133,6 +133,14 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         other_options = data.get('other_options')
         if options:
             option_names = [option.get('text') for option in options]
+            for name in option_names:
+                if tag_remover(name).isspace() or tag_remover(name) is None:
+                    raise serializers.ValidationError(
+                        {
+                            'options': 'نام گزینه نمی تواند خالی باشد'
+                        },
+                        status.HTTP_400_BAD_REQUEST
+                    )
         else:
             option_names = []
         if multiple_choice:
