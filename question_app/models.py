@@ -30,6 +30,7 @@ class Questionnaire(models.Model):
     owner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL,
                               related_name='questionnaires', null=True, verbose_name='صاحب')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
+    show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
 
     def __str__(self):
         return self.name
@@ -70,7 +71,6 @@ class Question(models.Model):
                              validators=[FileExtensionValidator(ALLOWED_MEDIA_EXTENSIONS)],
                              verbose_name='تصویر یا فیلم')
     double_picture_size = models.BooleanField(default=False, verbose_name='اندازه تصویر دو برابر')
-    show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
     group = models.ForeignKey('QuestionGroup', on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='child_questions', verbose_name='گروه')
 
