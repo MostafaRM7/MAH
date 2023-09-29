@@ -312,7 +312,7 @@ class PlotAPIView(APIView):
                                 result.append(ChoiceQuestionPlotSerializer(to_serializer).data)
                 return Response(result, status=status.HTTP_200_OK)
             else:
-                return Response([], status=status.HTTP_400_BAD_REQUEST)
+                return Response([], status=status.HTTP_200_OK)
         else:
             return Response([],
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_200_OK)
