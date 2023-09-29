@@ -105,7 +105,23 @@ class LogoutView(APIView):
             refresh_token = request.data.get('refresh_token')
             token = RefreshToken(refresh_token)
             token.blacklist()
-            response = Response(status=status.HTTP_200_OK)
+            response = Response(status=status.HTTP_205_RESET_CONTENT)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            return response
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutAllView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            all_tokens = OutstandingToken.objects.filter(user=request.user)
+            for token in all_tokens:
+                BlacklistedToken.objects.get_or_create(token=token)
+            response = Response(status=status.HTTP_205_RESET_CONTENT)
             response.delete_cookie('access_token')
             response.delete_cookie('refresh_token')
             return response
