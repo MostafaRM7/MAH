@@ -1,7 +1,11 @@
+from rest_framework.views import APIView
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
 from porsline_config import settings
 
 from rest_framework import status
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin
@@ -91,5 +95,41 @@ class OTPCheckViewSet(CreateModelMixin, GenericViewSet):
         return response
 
 
-class RefreshTokenViewSet(CreateModelMixin, GenericViewSet):
+class LogoutView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = RefreshTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            print(request.COOKIES)
+            refresh_token = request.data.get('refresh_token')
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            response = Response(status=status.HTTP_200_OK)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            return response
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class RefreshTokenView(APIView):
+    serializer_class = RefreshTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.data.get('refresh')
+        token = OutstandingToken.objects.filter(token=refresh_token).first()
+        if BlacklistedToken.objects.filter(token=token).exists():
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            access = serializer.data.get('access')
+            refresh = serializer.data.get('refresh')
+            response = Response({'access': access, 'refresh': refresh},
+                                status=status.HTTP_201_CREATED)
+            response.set_cookie('access_token', access, secure=True, httponly=True,
+                                expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
+            response.set_cookie('refresh_token', refresh, secure=True, httponly=True,
+                                expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
+            return response

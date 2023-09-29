@@ -3,6 +3,7 @@ import re
 from django.utils import timezone
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from question_app.models import Folder
@@ -29,7 +30,8 @@ class FolderSerializer(serializers.ModelSerializer):
                         {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},
                     )
             elif request.method in ['PUT', 'PATCH']:
-                if Folder.objects.filter(name=name, owner=self.context.get('request').user).exclude(pk=self.instance.id).exists():
+                if Folder.objects.filter(name=name, owner=self.context.get('request').user).exclude(
+                        pk=self.instance.id).exists():
                     raise serializers.ValidationError(
                         {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},
                     )
@@ -118,11 +120,9 @@ class RefreshTokenSerializer(serializers.Serializer):
     access = serializers.ReadOnlyField()
 
     def create(self, validated_data):
-
+        # try:
         refresh = RefreshToken(validated_data.get('refresh'))
-
         data = {'access': str(refresh.access_token)}
-
         if api_settings.ROTATE_REFRESH_TOKENS:
             if api_settings.BLACKLIST_AFTER_ROTATION:
                 try:
@@ -135,5 +135,7 @@ class RefreshTokenSerializer(serializers.Serializer):
 
         validated_data['refresh'] = str(refresh)
         validated_data['access'] = data.get('access')
+        # except TokenError as e:
+        #     raise serializers.ValidationError(e.args[0])
 
         return validated_data
