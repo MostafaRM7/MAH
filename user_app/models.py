@@ -17,7 +17,7 @@ class User(AbstractUser):
                                     verbose_name='شماره تلفن همراه')
     username = None
     USERNAME_FIELD = 'phone_number'
-    role = models.CharField(max_length=1, choices=ROLE_CHOICES, verbose_name='نقش')
+    role = models.CharField(max_length=2, choices=ROLE_CHOICES, verbose_name='نقش')
 
 
 class OTPToken(models.Model):
@@ -40,7 +40,7 @@ class Profile(models.Model):
     )
     owner = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='profile',
                                  verbose_name='مالک')
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name='جنسیت')
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES, verbose_name='جنسیت')
     address = models.TextField(verbose_name='آدرس')
     birth_date = models.DateField(verbose_name='تاریخ تولد', null=True, blank=True)
     nationality = models.ForeignKey('Country', on_delete=models.CASCADE, verbose_name='ملیت')
@@ -70,7 +70,7 @@ class District(models.Model):
 class UserRoleApproveQueue(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='user_role_approve_queue',
                              verbose_name='کاربر')
-    role = models.CharField(max_length=1, choices=User.ROLE_CHOICES, verbose_name='نقش')
+    role = models.CharField(max_length=2, choices=User.ROLE_CHOICES, verbose_name='نقش')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
     approved_at = models.DateTimeField(null=True, blank=True, verbose_name='زمان تایید')
     is_approved = models.BooleanField(default=False, verbose_name='تایید شده')
@@ -104,14 +104,14 @@ class EducationalBackground(models.Model):
         ('b', 'کارشناسی'),
         ('m', 'کارشناسی ارشد'),
         ('p', 'دکتری'),
-    ),
+    )
     EDU_TYPE_CHOICES = (
         ('u', 'دانشگاهی'),
         ('h', 'حوزوی'),
-        ('o', 'سایر')
+        ('o', 'سایر'),
     )
-    degree = models.CharField(max_length=1, choices=DEGREE_CHOICES, verbose_name='مدرک')
-    edu_type = models.CharField(max_length=1, choices=EDU_TYPE_CHOICES, default='u', verbose_name='نوع مدرک')
+    degree = models.CharField(max_length=2, choices=DEGREE_CHOICES, verbose_name='مدرک')
+    edu_type = models.CharField(max_length=2, choices=EDU_TYPE_CHOICES, default='u', verbose_name='نوع مدرک')
     field = models.CharField(max_length=255, verbose_name='رشته')
     start_date = models.DateField(verbose_name='تاریخ شروع')
     end_date = models.DateField(verbose_name='تاریخ پایان')
