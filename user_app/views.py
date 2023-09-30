@@ -14,26 +14,21 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
 from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
     RefreshTokenSerializer
-from user_app.user_app_serializers.general_serializers import UserSerializer, FolderSerializer, ProfileSerializer, \
+from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
     CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer
-from .models import OTPToken, Country, Province, City, District
+from .models import OTPToken, Country, Province, City, District, Profile
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """
         A simple ViewSet for listing or retrieving the current user.
     """
-    serializer_class = UserSerializer
+    serializer_class = ProfileSerializer
     permission_classes = (permissions.IsAdminUser,)
 
     def get_queryset(self):
-        queryset = get_user_model().objects.all()
+        queryset = Profile.objects.prefetch_related('prefered_districts').all()
         return queryset
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update({'request': self.request})
-        return context
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):

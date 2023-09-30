@@ -1,10 +1,12 @@
+import re
+
 from django.utils import timezone
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from user_app.tasks import send_otp
-from user_app.models import OTPToken
+from user_app.models import OTPToken, Profile
 from porsline_config import settings
 
 
@@ -15,7 +17,7 @@ class GateWaySerializer(serializers.Serializer):
         otp = OTPToken.objects.filter(user__phone_number=validated_data.get('phone_number'))
         if otp.exists():
             otp.delete()
-        user = get_user_model().objects.get_or_create(phone_number=validated_data.get('phone_number'))
+        user = Profile.objects.get_or_create(phone_number=validated_data.get('phone_number'))
         otp = OTPToken.objects.create(user=user[0])
         print(otp.token)
         # send_otp.delay(otp.token, validated_data.get('phone_number'))

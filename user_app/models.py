@@ -43,11 +43,11 @@ class Profile(User):
         ('m', 'مرد'),
         ('f', 'زن'),
     )
-    gender = models.CharField(max_length=2, choices=GENDER_CHOICES, verbose_name='جنسیت')
-    address = models.TextField(verbose_name='آدرس')
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES, verbose_name='جنسیت', null=True, blank=True)
+    address = models.TextField(verbose_name='آدرس', null=True, blank=True)
     birth_date = models.DateField(verbose_name='تاریخ تولد', null=True, blank=True)
-    nationality = models.ForeignKey('Country', on_delete=models.CASCADE, verbose_name='ملیت')
-    province = models.ForeignKey('Province', on_delete=models.CASCADE, verbose_name='استان')
+    nationality = models.ForeignKey('Country', on_delete=models.CASCADE, verbose_name='ملیت', null=True, blank=True)
+    province = models.ForeignKey('Province', on_delete=models.CASCADE, verbose_name='استان', null=True, blank=True)
     prefered_districts = models.ManyToManyField('District', verbose_name='مناطق مورد علاقه', blank=True)
     avatar = models.ImageField(upload_to='avatars/', verbose_name='تصویر پروفایل', null=True, blank=True)
 
