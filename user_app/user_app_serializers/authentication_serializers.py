@@ -1,9 +1,6 @@
-import re
-
 from django.utils import timezone
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from user_app.tasks import send_otp

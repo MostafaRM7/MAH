@@ -12,9 +12,11 @@ from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
-from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, RefreshTokenSerializer
-from user_app.user_app_serializers.main_serializers import  UserSerializer, FolderSerializer
-from .models import OTPToken
+from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
+    RefreshTokenSerializer
+from user_app.user_app_serializers.general_serializers import UserSerializer, FolderSerializer, ProfileSerializer, \
+    CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer
+from .models import OTPToken, Country, Province, City, District
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -36,9 +38,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
         if request.method == 'GET':
-            serializer = UserSerializer(request.user)
+            serializer = ProfileSerializer(request.user.profile)
             return Response(serializer.data)
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        serializer = ProfileSerializer(request.user.profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -150,3 +152,27 @@ class RefreshTokenView(APIView):
             response.set_cookie('refresh_token', refresh, secure=True, httponly=True,
                                 expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
             return response
+
+
+class CountryViewSet(viewsets.ModelViewSet):
+    serializer_class = CountrySerializer
+    # permission_classes = (permissions.AllowAny,)
+    queryset = Country.objects.all()
+
+
+class ProvinceViewSet(viewsets.ModelViewSet):
+    serializer_class = ProvinceSerializer
+    # permission_classes = (permissions.AllowAny,)
+    queryset = Province.objects.all()
+
+
+class CityViewSet(viewsets.ModelViewSet):
+    serializer_class = CitySerializer
+    # permission_classes = (permissions.AllowAny,)
+    queryset = City.objects.all()
+
+
+class DistrictViewSet(viewsets.ModelViewSet):
+    serializer_class = DistrictSerializer
+    # permission_classes = (permissions.AllowAny,)
+    queryset = District.objects.all()

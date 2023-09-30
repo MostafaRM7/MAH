@@ -19,6 +19,11 @@ class User(AbstractUser):
     USERNAME_FIELD = 'phone_number'
     role = models.CharField(max_length=2, choices=ROLE_CHOICES, verbose_name='نقش')
 
+    def __str__(self):
+        if self.first_name and self.last_name:
+            return f'{self.first_name} {self.last_name}'
+        return self.phone_number
+
 
 class OTPToken(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='otp_token',
@@ -33,38 +38,49 @@ class OTPToken(models.Model):
         return f'{self.user} - {self.token}'
 
 
-class Profile(models.Model):
+class Profile(User):
     GENDER_CHOICES = (
         ('m', 'مرد'),
         ('f', 'زن'),
     )
-    owner = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='profile',
-                                 verbose_name='مالک')
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES, verbose_name='جنسیت')
     address = models.TextField(verbose_name='آدرس')
     birth_date = models.DateField(verbose_name='تاریخ تولد', null=True, blank=True)
     nationality = models.ForeignKey('Country', on_delete=models.CASCADE, verbose_name='ملیت')
     province = models.ForeignKey('Province', on_delete=models.CASCADE, verbose_name='استان')
     prefered_districts = models.ManyToManyField('District', verbose_name='مناطق مورد علاقه', blank=True)
+    avatar = models.ImageField(upload_to='avatars/', verbose_name='تصویر پروفایل', null=True, blank=True)
 
 
 class Country(models.Model):
     name = models.CharField(max_length=50, verbose_name='نام کشور', unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Province(models.Model):
     name = models.CharField(max_length=50, verbose_name='نام استان', unique=True)
     country = models.ForeignKey(Country, on_delete=models.CASCADE, verbose_name='کشور')
 
+    def __str__(self):
+        return f'{self.name} - {self.country}'
+
 
 class City(models.Model):
     name = models.CharField(max_length=50, verbose_name='نام شهر', unique=True)
     province = models.ForeignKey(Province, on_delete=models.CASCADE, verbose_name='استان')
 
+    def __str__(self):
+        return f'{self.name} - {self.province}'
+
 
 class District(models.Model):
     name = models.CharField(max_length=50, verbose_name='نام منطقه')
     city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name='شهر')
+
+    def __str__(self):
+        return f'{self.name} - {self.city}'
 
 
 class UserRoleApproveQueue(models.Model):
@@ -83,6 +99,9 @@ class Resume(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, verbose_name='پروفایل')
     linkedin = models.URLField(verbose_name='لینکدین', null=True, blank=True)
     file = models.FileField(upload_to='resume', verbose_name='فایل رزومه', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.profile} - {self.file}'
 
 
 class WorkBackground(models.Model):
@@ -118,6 +137,9 @@ class EducationalBackground(models.Model):
     resume = models.ForeignKey('Resume', on_delete=models.CASCADE, verbose_name='رزومه',
                                related_name='educational_backgrounds')
 
+    def __str__(self):
+        return f'{self.resume} - {self.field}'
+
 
 class Skill(models.Model):
     LEVEL_CHOICES = (
@@ -150,3 +172,6 @@ class ResearchHistory(models.Model):
     field = models.CharField(max_length=255, verbose_name='زمینه')
     resume = models.ForeignKey('Resume', on_delete=models.CASCADE, verbose_name='رزومه',
                                related_name='research_histories')
+
+    def __str__(self):
+        return f'{self.resume} - {self.field}'
