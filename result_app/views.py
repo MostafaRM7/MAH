@@ -118,8 +118,15 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
                             if find:
                                 result.append(answer_set)
                                 break
-        serializer = AnswerSetSerializer(result, many=True, context={'questionnaire_uuid': questionnaire_uuid})
-        return Response(serializer.data)
+
+        page = self.paginate_queryset(result)
+        if page is not None:
+            serializer = AnswerSetSerializer(page, many=True,
+                                             context={'questionnaire_uuid': questionnaire_uuid})
+            return self.get_paginated_response(serializer.data)
+
+        # serializer = AnswerSetSerializer(result, many=True, context={'questionnaire_uuid': questionnaire_uuid})
+        # return Response(serializer.data)
 
     def get_queryset(self):
         queryset = AnswerSet.objects.prefetch_related('answers__question', 'answers').filter(

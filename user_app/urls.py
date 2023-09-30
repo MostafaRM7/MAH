@@ -13,6 +13,7 @@ urlpatterns = [
     path('auth/verify-token/', TokenVerifyView.as_view(), name='token-verify'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('auth/logout-all/', LogoutAllView.as_view(), name='logout-all'),
-    path('auth/refresh-token/', RefreshTokenView.as_view(), name='refresh-token'),
+    path('auth/refresh-token/', RefreshTokenView.as_view(), name='refresh-token')
+
 ]
 
