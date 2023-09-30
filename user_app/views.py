@@ -12,7 +12,8 @@ from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
-from .serializers import UserSerializer, FolderSerializer, GateWaySerializer, OTPCheckSerializer, RefreshTokenSerializer
+from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, RefreshTokenSerializer
+from user_app.user_app_serializers.main_serializers import  UserSerializer, FolderSerializer
 from .models import OTPToken
 
 
