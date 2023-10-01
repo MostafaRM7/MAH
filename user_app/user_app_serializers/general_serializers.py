@@ -4,6 +4,7 @@ from rest_framework import serializers
 from question_app.models import Folder
 from question_app.question_app_serializers import general_serializers
 from user_app.models import Profile, Country, Province, City, District
+from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
 
 class FolderSerializer(serializers.ModelSerializer):
@@ -45,11 +46,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    resume = ResumeSerializer(read_only=True)
+
     class Meta:
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
-            'address', 'nationality', 'province', 'prefered_districts')
+            'address', 'nationality', 'province', 'prefered_districts', 'resume')
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -86,7 +89,6 @@ class CitySerializer(serializers.ModelSerializer):
 
 
 class DistrictSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = District
         fields = ('id', 'name', 'city')

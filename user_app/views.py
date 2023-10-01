@@ -1,10 +1,10 @@
+from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
 from porsline_config import settings
 
 from rest_framework import status
-from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import permissions
 from rest_framework import viewsets
@@ -27,7 +27,8 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAdminUser,)
 
     def get_queryset(self):
-        queryset = Profile.objects.prefetch_related('prefered_districts').all()
+        queryset = Profile.objects.prefetch_related('prefered_districts').select_related('resume', 'nationality',
+                                                                                         'province').all()
         return queryset
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
@@ -39,6 +40,17 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated], url_path='add-district')
+    def add_district(self, request):
+        profile = request.user.profile
+        districts = request.data.get('districts')
+        if districts:
+            print(type(districts))
+            district_objects = [get_object_or_404(District, id=d) for d in districts]
+            for d in district_objects:
+                profile.prefered_districts.add(d)
+            return Response(ProfileSerializer(profile).data)
 
 
 class FolderViewSet(viewsets.ModelViewSet):
@@ -151,23 +163,23 @@ class RefreshTokenView(APIView):
 
 class CountryViewSet(viewsets.ModelViewSet):
     serializer_class = CountrySerializer
-    # permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAdminUser,)
     queryset = Country.objects.all()
 
 
 class ProvinceViewSet(viewsets.ModelViewSet):
     serializer_class = ProvinceSerializer
-    # permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAdminUser,)
     queryset = Province.objects.all()
 
 
 class CityViewSet(viewsets.ModelViewSet):
     serializer_class = CitySerializer
-    # permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAdminUser,)
     queryset = City.objects.all()
 
 
 class DistrictViewSet(viewsets.ModelViewSet):
     serializer_class = DistrictSerializer
-    # permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAdminUser,)
     queryset = District.objects.all()

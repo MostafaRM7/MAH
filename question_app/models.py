@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
+from user_app.models import Profile
+
 
 class Folder(models.Model):
     owner = models.ForeignKey(get_user_model(), default=None, null=True, on_delete=models.SET_NULL,
@@ -27,7 +29,7 @@ class Questionnaire(models.Model):
     progress_bar = models.BooleanField(default=True, verbose_name='نشان دادن نوار پیشرفت')
     folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, related_name='questionnaires', null=True, blank=True,
                                verbose_name='پوشه')
-    owner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL,
+    owner = models.ForeignKey(Profile, on_delete=models.SET_NULL,
                               related_name='questionnaires', null=True, verbose_name='صاحب')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
     show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
