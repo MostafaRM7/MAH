@@ -16,7 +16,10 @@ from user_app.user_app_serializers.authentication_serializers import GateWaySeri
     RefreshTokenSerializer
 from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
     CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer
-from .models import OTPToken, Country, Province, City, District, Profile
+from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
+    Skill, EducationalBackground, Resume
+from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
+    ResearchHistorySerializer, SkillSerializer, EducationalBackgroundSerializer, ResumeSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -27,8 +30,11 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAdminUser,)
 
     def get_queryset(self):
-        queryset = Profile.objects.prefetch_related('prefered_districts').select_related('resume', 'nationality',
-                                                                                         'province').all()
+        queryset = Profile.objects.prefetch_related('prefered_districts', 'resume__skills', 'resume__achievements',
+                                                    'resume__work_backgrounds', 'resume__educational_backgrounds',
+                                                    'resume__research_histories').select_related('resume',
+                                                                                                 'nationality',
+                                                                                                 'province').all()
         return queryset
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
@@ -183,3 +189,85 @@ class DistrictViewSet(viewsets.ModelViewSet):
     serializer_class = DistrictSerializer
     permission_classes = (permissions.IsAdminUser,)
     queryset = District.objects.all()
+
+
+class WorkBackgorundViewSet(viewsets.ModelViewSet):
+    serializer_class = WorkBackgroundSerializer
+
+    # permission_classes = None
+
+    def get_queryset(self):
+        return WorkBackground.objects.filter(resume_id=self.kwargs['resume_pk'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'resume_pk': self.kwargs['resume_pk']})
+        return context
+
+
+class ResearchHistoryViewSet(viewsets.ModelViewSet):
+    serializer_class = ResearchHistorySerializer
+
+    # permission_classes = None
+
+    def get_queryset(self):
+        return ResearchHistory.objects.filter(resume_id=self.kwargs['resume_pk'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'resume_pk': self.kwargs['resume_pk']})
+        return context
+
+
+class SkillViewSet(viewsets.ModelViewSet):
+    serializer_class = SkillSerializer
+
+    # permission_classes = None
+    def get_queryset(self):
+        return Skill.objects.filter(resume_id=self.kwargs['resume_pk'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'resume_pk': self.kwargs['resume_pk']})
+        return context
+
+
+class EducationalBackgroundViewSet(viewsets.ModelViewSet):
+    serializer_class = EducationalBackgroundSerializer
+
+    # permission_classes = None
+    def get_queryset(self):
+        return EducationalBackground.objects.filter(resume_id=self.kwargs['resume_pk'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'resume_pk': self.kwargs['resume_pk']})
+        return context
+
+
+class AchievementViewSet(viewsets.ModelViewSet):
+    serializer_class = AchievementSerializer
+
+    # permission_classes = None
+
+    def get_queryset(self):
+        return Achievement.objects.filter(resume_id=self.kwargs['resume_pk'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'resume_pk': self.kwargs['resume_pk']})
+        return context
+
+
+class ResumeViewSet(viewsets.ModelViewSet):
+    serializer_class = ResumeSerializer
+
+    # permission_classes = None
+
+    def get_queryset(self):
+        return Resume.objects.filter(owner_id=self.kwargs['user_pk'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'user_pk': self.kwargs['user_pk']})
+        return context

@@ -136,6 +136,7 @@ class EducationalBackground(models.Model):
     end_date = models.DateField(verbose_name='تاریخ پایان')
     resume = models.ForeignKey('Resume', on_delete=models.CASCADE, verbose_name='رزومه',
                                related_name='educational_backgrounds')
+    university = models.CharField(max_length=255, verbose_name='مرکز آموزشی')
 
     def __str__(self):
         return f'{self.resume} - {self.field}'

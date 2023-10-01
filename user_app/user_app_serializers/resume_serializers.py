@@ -5,31 +5,51 @@ from user_app.models import Resume, ResearchHistory, Achievement, Skill, Educati
 class WorkBackgroundSerializer(ModelSerializer):
     class Meta:
         model = WorkBackground
-        fields = ('company', 'position', 'start_date', 'end_date')
+        fields = ('id', 'company', 'position', 'start_date', 'end_date')
+
+    def create(self, validated_data):
+        resume_pk = self.context.get('resume_pk')
+        return WorkBackground.objects.create(**validated_data, resume_id=resume_pk)
 
 
 class EducationalBackgroundSerializer(ModelSerializer):
     class Meta:
         model = EducationalBackground
-        fields = ('degree', 'edu_type', 'field', 'start_date', 'end_date')
+        fields = ('id', 'degree', 'edu_type', 'field', 'start_date', 'end_date', 'university')
+
+    def create(self, validated_data):
+        resume_pk = self.context.get('resume_pk')
+        return EducationalBackground.objects.create(**validated_data, resume_id=resume_pk)
 
 
 class SkillSerializer(ModelSerializer):
     class Meta:
         model = Skill
-        fields = ('field', 'level')
+        fields = ('id', 'field', 'level')
+
+    def create(self, validated_data):
+        resume_pk = self.context.get('resume_pk')
+        return Skill.objects.create(**validated_data, resume_id=resume_pk)
 
 
 class AchievementSerializer(ModelSerializer):
     class Meta:
         model = Achievement
-        fields = ('field', 'year')
+        fields = ('id', 'field', 'year')
+
+    def create(self, validated_data):
+        resume_pk = self.context.get('resume_pk')
+        return Achievement.objects.create(**validated_data, resume_id=resume_pk)
 
 
 class ResearchHistorySerializer(ModelSerializer):
     class Meta:
         model = ResearchHistory
-        fields = ('field', 'year', 'link')
+        fields = ('id', 'field', 'year', 'link')
+
+    def create(self, validated_data):
+        resume_pk = self.context.get('resume_pk')
+        return ResearchHistory.objects.create(**validated_data, resume_id=resume_pk)
 
 
 class ResumeSerializer(ModelSerializer):
@@ -41,5 +61,9 @@ class ResumeSerializer(ModelSerializer):
 
     class Meta:
         model = Resume
-        fields = ('linkedin', 'file', 'work_backgrounds', 'educational_backgrounds', 'skills', 'achievements',
+        fields = ('id', 'linkedin', 'file', 'work_backgrounds', 'educational_backgrounds', 'skills', 'achievements',
                   'research_histories')
+
+    def create(self, validated_data):
+        user_pk = self.context.get('user_pk')
+        return Resume.objects.create(**validated_data, owner_id=user_pk)
