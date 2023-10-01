@@ -193,8 +193,7 @@ class DistrictViewSet(viewsets.ModelViewSet):
 
 class WorkBackgorundViewSet(viewsets.ModelViewSet):
     serializer_class = WorkBackgroundSerializer
-
-    # permission_classes = None
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return WorkBackground.objects.filter(resume_id=self.kwargs['resume_pk'])
@@ -207,8 +206,7 @@ class WorkBackgorundViewSet(viewsets.ModelViewSet):
 
 class ResearchHistoryViewSet(viewsets.ModelViewSet):
     serializer_class = ResearchHistorySerializer
-
-    # permission_classes = None
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return ResearchHistory.objects.filter(resume_id=self.kwargs['resume_pk'])
@@ -221,8 +219,8 @@ class ResearchHistoryViewSet(viewsets.ModelViewSet):
 
 class SkillViewSet(viewsets.ModelViewSet):
     serializer_class = SkillSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
-    # permission_classes = None
     def get_queryset(self):
         return Skill.objects.filter(resume_id=self.kwargs['resume_pk'])
 
@@ -234,8 +232,8 @@ class SkillViewSet(viewsets.ModelViewSet):
 
 class EducationalBackgroundViewSet(viewsets.ModelViewSet):
     serializer_class = EducationalBackgroundSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
-    # permission_classes = None
     def get_queryset(self):
         return EducationalBackground.objects.filter(resume_id=self.kwargs['resume_pk'])
 
@@ -247,8 +245,7 @@ class EducationalBackgroundViewSet(viewsets.ModelViewSet):
 
 class AchievementViewSet(viewsets.ModelViewSet):
     serializer_class = AchievementSerializer
-
-    # permission_classes = None
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return Achievement.objects.filter(resume_id=self.kwargs['resume_pk'])
@@ -261,8 +258,7 @@ class AchievementViewSet(viewsets.ModelViewSet):
 
 class ResumeViewSet(viewsets.ModelViewSet):
     serializer_class = ResumeSerializer
-
-    # permission_classes = None
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return Resume.objects.filter(owner_id=self.kwargs['user_pk'])
