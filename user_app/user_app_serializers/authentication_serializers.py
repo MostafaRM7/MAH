@@ -78,23 +78,24 @@ class RefreshTokenSerializer(serializers.Serializer):
     refresh = serializers.CharField()
     access = serializers.ReadOnlyField()
 
-    def create(self, validated_data):
-        # try:
-        refresh = RefreshToken(validated_data.get('refresh'))
-        data = {'access': str(refresh.access_token)}
-        if api_settings.ROTATE_REFRESH_TOKENS:
-            if api_settings.BLACKLIST_AFTER_ROTATION:
-                try:
-                    refresh.blacklist()
-                except AttributeError:
-                    pass
-
-            refresh.set_jti()
-            refresh.set_exp()
-
-        validated_data['refresh'] = str(refresh)
-        validated_data['access'] = data.get('access')
-        # except TokenError as e:
-        #     raise serializers.ValidationError(e.args[0])
-
-        return validated_data
+    # def create(self, validated_data):
+    #     # try:
+    #     refresh = RefreshToken(validated_data.get('refresh'))
+    #     print(refresh)
+    #     print(refresh.access_token)
+    #     if api_settings.ROTATE_REFRESH_TOKENS:
+    #         if api_settings.BLACKLIST_AFTER_ROTATION:
+    #             try:
+    #                 refresh.blacklist()
+    #             except AttributeError:
+    #                 pass
+    #
+    #         refresh.set_jti()
+    #         refresh.set_exp()
+    #
+    #     validated_data['refresh'] = str(refresh)
+    #     validated_data['access'] = str(refresh.access_token)
+    #     # except TokenError as e:
+    #     #     raise serializers.ValidationError(e.args[0])
+    #
+    #     return validated_data

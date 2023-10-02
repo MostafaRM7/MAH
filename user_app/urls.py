@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenVerifyView
 from .views import UserViewSet, FolderViewSet, GateWayViewSet, OTPCheckViewSet, RefreshTokenView, LogoutView, \
-    LogoutAllView, CountryViewSet, ProvinceViewSet, CityViewSet, DistrictViewSet, ResumeViewSet, WorkBackgorundViewSet, \
+    LogoutAllView, CountryViewSet, ProvinceViewSet, CityViewSet, DistrictViewSet, ResumeViewSet, WorkBackgroundViewSet, \
     AchievementViewSet, SkillViewSet, EducationalBackgroundViewSet, ResearchHistoryViewSet
 
 base_router = routers.DefaultRouter()
@@ -20,7 +20,7 @@ user_router.register('resume', ResumeViewSet, basename='resume')
 
 resume_router = routers.NestedDefaultRouter(user_router, 'resume', lookup='resume')
 
-resume_router.register('work-backgrounds', WorkBackgorundViewSet, basename='work_backgrounds')
+resume_router.register('work-backgrounds', WorkBackgroundViewSet, basename='work_backgrounds')
 resume_router.register('achievements', AchievementViewSet, basename='achievements')
 resume_router.register('skills', SkillViewSet, basename='skills')
 resume_router.register('educational-backgrounds', EducationalBackgroundViewSet, basename='educational_backgrounds')

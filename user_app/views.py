@@ -12,6 +12,7 @@ from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
+from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly
 from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
     RefreshTokenSerializer
 from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
@@ -27,7 +28,7 @@ class UserViewSet(viewsets.ModelViewSet):
         A simple ViewSet for listing or retrieving the current user.
     """
     serializer_class = ProfileSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsUserOrReadOnly,)
 
     def get_queryset(self):
         queryset = Profile.objects.prefetch_related('prefered_districts', 'resume__skills', 'resume__achievements',
@@ -46,17 +47,6 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-
-    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated], url_path='add-district')
-    def add_district(self, request):
-        profile = request.user.profile
-        districts = request.data.get('districts')
-        if districts:
-            print(type(districts))
-            district_objects = [get_object_or_404(District, id=d) for d in districts]
-            for d in district_objects:
-                profile.prefered_districts.add(d)
-            return Response(ProfileSerializer(profile).data)
 
 
 class FolderViewSet(viewsets.ModelViewSet):
@@ -149,51 +139,52 @@ class RefreshTokenView(APIView):
     serializer_class = RefreshTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        refresh_token = request.data.get('refresh')
-        token = OutstandingToken.objects.filter(token=refresh_token).first()
+        refresh = request.data.get('refresh')
+        token = OutstandingToken.objects.filter(token=refresh).first()
         if BlacklistedToken.objects.filter(token=token).exists():
             return Response(status=status.HTTP_403_FORBIDDEN)
         else:
-            serializer = self.serializer_class(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            access = serializer.data.get('access')
-            refresh = serializer.data.get('refresh')
-            response = Response({'access': access, 'refresh': refresh},
-                                status=status.HTTP_201_CREATED)
-            response.set_cookie('access_token', access, secure=True, httponly=True,
+            print(request.data)
+            refresh_token = RefreshToken(refresh)
+            data = {
+                'refresh': str(refresh_token),
+                'access': str(refresh_token.access_token),
+            }
+            response = Response(data=data, status=status.HTTP_201_CREATED)
+            response.set_cookie('access_token', data['access'], secure=True, httponly=True,
                                 expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
-            response.set_cookie('refresh_token', refresh, secure=True, httponly=True,
+            response.set_cookie('refresh_token', data['refresh'], secure=True, httponly=True,
                                 expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
             return response
 
 
 class CountryViewSet(viewsets.ModelViewSet):
     serializer_class = CountrySerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Country.objects.all()
 
 
 class ProvinceViewSet(viewsets.ModelViewSet):
     serializer_class = ProvinceSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Province.objects.all()
 
 
 class CityViewSet(viewsets.ModelViewSet):
     serializer_class = CitySerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = City.objects.all()
 
 
 class DistrictViewSet(viewsets.ModelViewSet):
     serializer_class = DistrictSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = District.objects.all()
 
 
-class WorkBackgorundViewSet(viewsets.ModelViewSet):
+class WorkBackgroundViewSet(viewsets.ModelViewSet):
     serializer_class = WorkBackgroundSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsOwner,)
 
     def get_queryset(self):
         return WorkBackground.objects.filter(resume_id=self.kwargs['resume_pk'])
@@ -206,7 +197,7 @@ class WorkBackgorundViewSet(viewsets.ModelViewSet):
 
 class ResearchHistoryViewSet(viewsets.ModelViewSet):
     serializer_class = ResearchHistorySerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsOwner,)
 
     def get_queryset(self):
         return ResearchHistory.objects.filter(resume_id=self.kwargs['resume_pk'])
@@ -219,7 +210,7 @@ class ResearchHistoryViewSet(viewsets.ModelViewSet):
 
 class SkillViewSet(viewsets.ModelViewSet):
     serializer_class = SkillSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsOwner,)
 
     def get_queryset(self):
         return Skill.objects.filter(resume_id=self.kwargs['resume_pk'])
@@ -232,7 +223,7 @@ class SkillViewSet(viewsets.ModelViewSet):
 
 class EducationalBackgroundViewSet(viewsets.ModelViewSet):
     serializer_class = EducationalBackgroundSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsOwner,)
 
     def get_queryset(self):
         return EducationalBackground.objects.filter(resume_id=self.kwargs['resume_pk'])
@@ -245,7 +236,7 @@ class EducationalBackgroundViewSet(viewsets.ModelViewSet):
 
 class AchievementViewSet(viewsets.ModelViewSet):
     serializer_class = AchievementSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsOwner,)
 
     def get_queryset(self):
         return Achievement.objects.filter(resume_id=self.kwargs['resume_pk'])
@@ -258,7 +249,7 @@ class AchievementViewSet(viewsets.ModelViewSet):
 
 class ResumeViewSet(viewsets.ModelViewSet):
     serializer_class = ResumeSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (IsOwner,)
 
     def get_queryset(self):
         return Resume.objects.filter(owner_id=self.kwargs['user_pk'])
