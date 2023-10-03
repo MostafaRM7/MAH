@@ -94,7 +94,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         model = Questionnaire
         fields = (
             'id', 'name', 'is_active', 'answer_count', 'previous_button', 'pub_date', 'end_date', 'timer',
-            'show_question_in_pages',
+            'show_question_in_pages', 'created_at',
             'progress_bar', 'show_number',
             'folder', 'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page')
         read_only_fields = ('owner', 'questions', 'welcome_page', 'thanks_page')
@@ -185,7 +185,7 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('id', 'name', 'uuid', 'pub_date', 'answer_count', 'question_count', 'is_active')
+        fields = ('id', 'name', 'uuid', 'pub_date', 'created_at','answer_count', 'question_count', 'is_active')
 
     def get_answer_count(self, obj):
         return obj.answer_sets.exclude(answers=None).count()

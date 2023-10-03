@@ -33,6 +33,7 @@ class Questionnaire(models.Model):
                               related_name='questionnaires', null=True, verbose_name='صاحب')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
     show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', editable=False)
 
     def __str__(self):
         return self.name
