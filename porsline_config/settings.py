@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'question_app',
     'user_app',
+    'wallet_app',
     'debug_toolbar',
     'django_filters',
     'corsheaders',
