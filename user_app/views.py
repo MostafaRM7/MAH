@@ -167,19 +167,26 @@ class CountryViewSet(viewsets.ModelViewSet):
 class ProvinceViewSet(viewsets.ModelViewSet):
     serializer_class = ProvinceSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    queryset = Province.objects.all()
+
+    def get_queryset(self):
+        return Province.objects.filter(country_id=self.kwargs['country_pk'])
 
 
 class CityViewSet(viewsets.ModelViewSet):
     serializer_class = CitySerializer
     permission_classes = (IsAdminOrReadOnly,)
-    queryset = City.objects.all()
+
+    def get_queryset(self):
+        return City.objects.filter(province_id=self.kwargs['province_pk'])
 
 
 class DistrictViewSet(viewsets.ModelViewSet):
     serializer_class = DistrictSerializer
     permission_classes = (IsAdminOrReadOnly,)
     queryset = District.objects.all()
+
+    def get_queryset(self):
+        return District.objects.filter(city_id=self.kwargs['city_pk'])
 
 
 class WorkBackgroundViewSet(viewsets.ModelViewSet):

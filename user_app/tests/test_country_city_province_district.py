@@ -2,63 +2,51 @@ import pytest
 from model_bakery import baker
 from rest_framework import status
 
-from user_app.models import Profile
+from user_app.models import Profile, Country
 
 
 @pytest.mark.django_db
 class TestCountry:
-    def test_getting_getting_country(self, api_client, authenticate):
+    def test_getting_country(self, api_client, authenticate):
+        profile = baker.make(Profile)
+        authenticate(profile)
+
+        response = api_client.get(f'/user-api/countries/')
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_updating_country(self, api_client, authenticate):
         profile = baker.make(Profile, is_staff=True)
-        resume = baker.make('Resume', owner=profile)
         authenticate(profile)
+        country = baker.make(Country)
 
-        response = api_client.get(f'/user-api/users/{profile.id}/resume/{resume.id}/')
+        response = api_client.patch(f'/user-api/countries/{country.id}/', data={'name': 'آمریکا'}, format='json')
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data.get('id') == profile.id
+        assert response.data.get('name') == 'آمریکا'
 
-    def test_getting_resume_no_permission(self, api_client, authenticate):
-        profile = baker.make(Profile)
-        resume = baker.make('Resume', owner=profile)
-        authenticate(baker.make(Profile))
+    def test_updating_country_no_permission(self, api_client, authenticate):
+        profile = baker.make(Profile, is_staff=False)
+        authenticate(profile)
+        country = baker.make(Country)
 
-        response = api_client.get(f'/user-api/users/{profile.id}/resume/{resume.id}/')
+        response = api_client.patch(f'/user-api/countries/{country.id}/', data={'name': 'آمریکا'}, format='json')
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_updating_resume(self, api_client, authenticate):
-        profile = baker.make(Profile)
-        resume = baker.make('Resume', owner=profile)
+    def test_create_country(self, api_client, authenticate):
+        profile = baker.make(Profile, is_staff=True)
         authenticate(profile)
 
-        response = api_client.patch(f'/user-api/users/{profile.id}/resume/{resume.id}/', data={'linkedin': 'https://www.linkedin.com/in/'})
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data.get('linkedin') == 'https://www.linkedin.com/in/'
-
-    def test_updating_resume_no_permission(self, api_client, authenticate):
-        profile = baker.make(Profile)
-        resume = baker.make('Resume', owner=profile)
-        authenticate(baker.make(Profile))
-
-        response = api_client.patch(f'/user-api/users/{profile.id}/resume/{resume.id}/', data={'linkedin': 'https://www.linkedin.com/in/'})
-
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-
-    def test_create_resume(self, api_client, authenticate):
-        profile = baker.make(Profile)
-        authenticate(profile)
-
-        response = api_client.post(f'/user-api/users/{profile.id}/resume/', data={'linkedin': 'https://www.linkedin.com/in/'})
+        response = api_client.post(f'/user-api/countries/', data={'name': 'آمریکا'}, format='json')
 
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data.get('linkedin') == 'https://www.linkedin.com/in/'
 
-    def test_create_resume_no_permission(self, api_client, authenticate):
-        profile = baker.make(Profile)
-        authenticate(baker.make(Profile))
+    def test_create_country_no_permission(self, api_client, authenticate):
+        profile = baker.make(Profile, is_staff=False)
+        authenticate(profile)
 
-        response = api_client.post(f'/user-api/users/{profile.id}/resume/', data={'linkedin': 'https://www.linkedin.com/in/'})
+        response = api_client.post(f'/user-api/countries/', data={'name': 'آمریکا'}, format='json')
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
