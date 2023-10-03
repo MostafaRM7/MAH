@@ -107,7 +107,6 @@ class LogoutView(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            print(request.COOKIES)
             refresh_token = request.data.get('refresh_token')
             token = RefreshToken(refresh_token)
             token.blacklist()
@@ -171,6 +170,11 @@ class ProvinceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Province.objects.filter(country_id=self.kwargs['country_pk'])
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'country_pk': self.kwargs['country_pk']})
+        return context
+
 
 class CityViewSet(viewsets.ModelViewSet):
     serializer_class = CitySerializer
@@ -178,6 +182,11 @@ class CityViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return City.objects.filter(province_id=self.kwargs['province_pk'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'province_pk': self.kwargs['province_pk']})
+        return context
 
 
 class DistrictViewSet(viewsets.ModelViewSet):
@@ -187,6 +196,11 @@ class DistrictViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return District.objects.filter(city_id=self.kwargs['city_pk'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'city_pk': self.kwargs['city_pk']})
+        return context
 
 
 class WorkBackgroundViewSet(viewsets.ModelViewSet):

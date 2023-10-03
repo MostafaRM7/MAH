@@ -6,7 +6,10 @@ from .models import Profile
 class IsUserOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         print('has_permission')
-        user_id = int(view.kwargs.get('pk'))
+        try:
+            user_id = int(view.kwargs.get('pk')) if view.kwargs.get('pk') else None
+        except ValueError:
+            user_id = None
         print(user_id)
         if request.user.is_authenticated:
             if request.method in SAFE_METHODS and user_id:
@@ -21,7 +24,10 @@ class IsUserOrReadOnly(BasePermission):
 class IsOwner(BasePermission):
     def has_permission(self, request, view):
         print('has_permission')
-        user_id = int(view.kwargs.get('user_pk'))
+        try:
+            user_id = int(view.kwargs.get('pk')) if view.kwargs.get('pk') else None
+        except ValueError:
+            user_id = None
         print(user_id)
         if request.user.is_authenticated:
             if user_id:

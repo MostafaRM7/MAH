@@ -101,7 +101,7 @@ class Resume(models.Model):
     file = models.FileField(upload_to='resume', verbose_name='فایل رزومه', null=True, blank=True)
 
     def __str__(self):
-        return f'{self.profile} - {self.file}'
+        return f'{self.owner} - {self.file}'
 
 
 class WorkBackground(models.Model):

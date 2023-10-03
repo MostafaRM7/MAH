@@ -62,7 +62,6 @@ class CountrySerializer(serializers.ModelSerializer):
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
-    # country = CountrySerializer(read_only=True)
 
     class Meta:
         model = Province
@@ -72,6 +71,9 @@ class ProvinceSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['country'] = CountrySerializer(instance.country).data
         return representation
+
+    def create(self, validated_data):
+        return Province.objects.create(country_id=self.context.get('country_pk'), **validated_data)
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -87,6 +89,9 @@ class CitySerializer(serializers.ModelSerializer):
         representation['country'] = CountrySerializer(instance.province.country).data
         return representation
 
+    def create(self, validated_data):
+        return City.objects.create(province_id=self.context.get('province_pk'), **validated_data)
+
 
 class DistrictSerializer(serializers.ModelSerializer):
     class Meta:
@@ -99,3 +104,6 @@ class DistrictSerializer(serializers.ModelSerializer):
         representation['province'] = ProvinceSerializer(instance.city.province).data
         representation['country'] = CountrySerializer(instance.city.province.country).data
         return representation
+
+    def create(self, validated_data):
+        return District.objects.create(city_id=self.context.get('city_pk'), **validated_data)

@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from user_app.models import Resume, ResearchHistory, Achievement, Skill, EducationalBackground, WorkBackground
 
@@ -67,3 +68,10 @@ class ResumeSerializer(ModelSerializer):
     def create(self, validated_data):
         user_pk = self.context.get('user_pk')
         return Resume.objects.create(**validated_data, owner_id=user_pk)
+
+    def validate(self, data):
+        user_pk = self.context.get('user_pk')
+        if Resume.objects.filter(owner_id=user_pk).exists():
+            raise serializers.ValidationError(
+                {'resume': 'شما قبلا رزومه‌ای ثبت کرده‌اید'},
+            )
