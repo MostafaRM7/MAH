@@ -8,7 +8,7 @@ class IsQuestionnaireOwnerOrReadOnly(BasePermission):
         uuid = view.kwargs.get('uuid')
         if request.user.is_authenticated:
             if uuid:
-                return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
             else:
                 if request.method == 'POST':
                     return request.user.is_authenticated
@@ -23,10 +23,10 @@ class IsQuestionOwnerOrReadOnly(BasePermission):
         if request.user.is_authenticated:
             if question_id:
                 if request.user.is_authenticated:
-                    return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
             else:
                 if request.user.is_authenticated:
-                    return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
 
 
 class ChangePlacementForOwnerOrStaff(BasePermission):
@@ -34,7 +34,7 @@ class ChangePlacementForOwnerOrStaff(BasePermission):
         if request.method == 'POST':
             uuid = view.kwargs.get('questionnaire_uuid')
             if request.user.is_authenticated:
-                return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
         return False
 
 
@@ -45,7 +45,7 @@ class AnonPOSTOrOwner(BasePermission):
         if request.user.is_authenticated:
             if answer_set_id:
                 if request.user.is_authenticated and request.method != 'POST':
-                    return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
                 else:
                     return True
         else:
@@ -53,7 +53,7 @@ class AnonPOSTOrOwner(BasePermission):
                 return True
             else:
                 if request.user.is_authenticated:
-                    return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
 
 
 class IsPageOwnerOrReadOnly(BasePermission):
@@ -62,10 +62,10 @@ class IsPageOwnerOrReadOnly(BasePermission):
         uuid = view.kwargs.get('questionnaire_uuid')
         if page_id:
             if request.user.is_authenticated:
-                return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
         else:
             if request.method == 'POST':
                 return request.user.is_authenticated
             else:
                 if request.user.is_authenticated:
-                    return request.user.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
