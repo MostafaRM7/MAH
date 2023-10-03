@@ -9,7 +9,7 @@ class IsUserOrReadOnly(BasePermission):
         user_id = int(view.kwargs.get('pk'))
         print(user_id)
         if request.user.is_authenticated:
-            if request.method in SAFE_METHODS:
+            if request.method in SAFE_METHODS and user_id:
                 return True
             if user_id:
                 print(request.user.id)
