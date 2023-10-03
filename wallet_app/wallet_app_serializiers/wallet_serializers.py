@@ -49,7 +49,7 @@ class WithdrawSerializer(serializers.Serializer):
             raise serializers.ValidationError({'destination': 'حساب مقصد وجود ندارد.'})
         if amount > wallet.balance:
             raise serializers.ValidationError({'amount': 'موجودی کیف پول کافی نیست.'})
-        if destination == wallet:
+        if destination == str(wallet.uuid):
             raise serializers.ValidationError({'destination': 'حساب مبدا و مقصد نباید یکسان باشند.'})
         return data
 
