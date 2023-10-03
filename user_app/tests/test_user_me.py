@@ -3,11 +3,13 @@ from model_bakery import baker
 from django.contrib.auth import get_user_model
 from rest_framework import status
 
+from user_app.models import Profile
+
 
 @pytest.mark.django_db
 class TestUser:
     def test_getting_user(self, api_client, authenticate):
-        user = baker.make(get_user_model())
+        user = baker.make(Profile)
         authenticate(user)
 
         response = api_client.get('/user-api/users/me/')
@@ -16,7 +18,7 @@ class TestUser:
         assert response.data.get('id') == user.id
 
     def test_updating_user(self, api_client, authenticate):
-        user = baker.make(get_user_model())
+        user = baker.make(Profile)
         authenticate(user)
 
         response = api_client.patch('/user-api/users/me/', data={'phone_number': '09166361071'}, format='json')
