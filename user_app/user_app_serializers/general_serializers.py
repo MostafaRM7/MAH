@@ -66,6 +66,7 @@ class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
         fields = ('id', 'name', 'country')
+        read_only_fields = ('country',)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -82,6 +83,7 @@ class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
         fields = ('id', 'name', 'province')
+        read_only_fields = ('province',)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -97,6 +99,7 @@ class DistrictSerializer(serializers.ModelSerializer):
     class Meta:
         model = District
         fields = ('id', 'name', 'city')
+        read_only_fields = ('city',)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
