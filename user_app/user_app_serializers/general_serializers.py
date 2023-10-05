@@ -5,6 +5,7 @@ from question_app.models import Folder
 from question_app.question_app_serializers import general_serializers
 from user_app.models import Profile, Country, Province, City, District
 from user_app.user_app_serializers.resume_serializers import ResumeSerializer
+from wallet_app.models import Wallet
 
 
 class FolderSerializer(serializers.ModelSerializer):
@@ -47,12 +48,18 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     resume = ResumeSerializer(read_only=True)
+    wallet_uuid = serializers.SerializerMethodField(method_name='get_wallet_uuid')
 
     class Meta:
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
             'address', 'nationality', 'province', 'prefered_districts', 'resume')
+
+    def get_wallet_uuid(self, instance):
+        if Wallet.objects.filter(owner=instance).exists():
+            return instance.wallet.uuid
+        return None
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -62,7 +69,6 @@ class CountrySerializer(serializers.ModelSerializer):
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Province
         fields = ('id', 'name', 'country')
