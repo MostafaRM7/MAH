@@ -48,18 +48,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     resume = ResumeSerializer(read_only=True)
-    wallet_uuid = serializers.SerializerMethodField(method_name='get_wallet_uuid')
 
     class Meta:
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
             'address', 'nationality', 'province', 'prefered_districts', 'resume')
-
-    def get_wallet_uuid(self, instance):
-        if Wallet.objects.filter(owner=instance).exists():
-            return instance.wallet.uuid
-        return None
 
 
 class CountrySerializer(serializers.ModelSerializer):
