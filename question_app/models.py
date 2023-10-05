@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from user_app.models import Profile
+from user_app.models import Profile, District
 
 
 class Folder(models.Model):
@@ -38,12 +38,24 @@ class Questionnaire(models.Model):
     def __str__(self):
         return self.name
 
+    # TODO - add property for aggregating the level
+
     def delete(self, using=None, keep_parents=False):
         self.is_delete = True
         self.save()
 
+    @property
+    def level(self):
+        return sum([question.level for question in self.questions.all()])
+
 
 class Question(models.Model):
+    LEVEL_CHOICES = (
+        (1, 'آسان'),
+        (2, 'متوسط'),
+        (3, 'متوسط'),
+        (0, 'دسته بندی نشده')
+    )
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
                                 'mkv', 'webm']
     QUESTION_TYPES = (
@@ -61,7 +73,6 @@ class Question(models.Model):
         ('group', 'Group'),
         ('no_answer', 'No Answer')
     )
-
     placement = models.PositiveIntegerField(null=True, blank=True, verbose_name='جایگاه')
     title = models.CharField(max_length=255, verbose_name='عنوان')
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, related_name='questions',
@@ -76,6 +87,7 @@ class Question(models.Model):
     double_picture_size = models.BooleanField(default=False, verbose_name='اندازه تصویر دو برابر')
     group = models.ForeignKey('QuestionGroup', on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='child_questions', verbose_name='گروه')
+    level = models.PositiveIntegerField(verbose_name='سطح', choices=LEVEL_CHOICES, default=0)
 
     class Meta:
         ordering = ('placement',)
@@ -318,6 +330,8 @@ class AnswerSet(models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.PROTECT,
                                       related_name='answer_sets', verbose_name='پرسشنامه')
     answered_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان پاسخگویی')
+    answered_by = models.ForeignKey(Profile, on_delete=models.SET_NULL, related_name='answer_sets', null=True,
+                                    blank=True)
 
     def __str__(self):
         return f'{self.questionnaire} - AnswerSet'
@@ -337,6 +351,7 @@ class Answer(models.Model):
 
 class QuestionGroup(Question):
     URL_PREFIX = 'question-groups'
+
     # SHARP = 'sharp'
     # ROUND = 'round'
     # OVAL = 'oval'
@@ -419,3 +434,37 @@ class ThanksPage(models.Model):
     sorush = models.BooleanField(default=False, verbose_name='اشتراک در سروش')
     questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='thanks_page',
                                          verbose_name='پرسشنامه')
+
+
+class Interview(models.Model):
+    APPROVED = 'a'
+    PENDING = 'p'
+    REJECTED = 'r'
+    APPROVAL_STATUS = (
+        (APPROVED, 'تایید شده'),
+        (PENDING, 'در انتظار تایید'),
+        (REJECTED, 'رد شده')
+    )
+    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='interview', primary_key=True)
+    pay_per_answer = models.FloatField(verbose_name='پرداختی برای هر پاسخ')
+    interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان')
+    approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS, default=PENDING,
+                                       verbose_name='وضعیت تایید')
+    add_to_approve_queue = models.BooleanField(default=False, verbose_name='به صف تایید اضافه شود')
+    districts = models.ManyToManyField(District, related_name='interviews', verbose_name='مناطق')
+    goal = models.TextField(verbose_name='هدف', null=True, blank=True)
+    answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف')
+
+    def __str__(self):
+        return self.questionnaire.name
+
+    @property
+    def total_pay(self):
+        return self.pay_per_answer * self.answer_count_goal
+
+
+class Ticket(models.Model):
+    text = models.TextField(verbose_name='متن')
+    source = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='tickets', verbose_name='فرستنده')
+    destination = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='received_tickets')
+    is_read = models.BooleanField(default=False, verbose_name='خوانده شده')
