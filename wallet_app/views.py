@@ -1,40 +1,38 @@
+from rest_framework import permissions
 from rest_framework.decorators import action
-from rest_framework.mixins import UpdateModelMixin, RetrieveModelMixin, ListModelMixin, CreateModelMixin
+from rest_framework.mixins import UpdateModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from wallet_app.models import Wallet, Transaction
-from wallet_app.permissions import IsWalletOwner, IsTransactionOwner
-from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializer, TransactionSerializer, \
-    WithdrawSerializer
+from wallet_app.models import Wallet
+from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializer, WithdrawSerializer
 
 
 class WalletViewSet(UpdateModelMixin, CreateModelMixin, GenericViewSet):
     serializer_class = WalletSerializer
-    permission_classes = (IsWalletOwner,)
+    permission_classes = (permissions.IsAuthenticated,)
     lookup_field = 'uuid'
 
     def get_queryset(self):
-        return Wallet.objects.filter(owner=self.request.user.profile)
+        return Wallet.objects.prefetch_related('transactions', 'transactions__source', 'transactions__destination').filter(owner=self.request.user.profile)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'owner': self.request.user.profile})
         return context
 
-    @action(methods=['post'], detail=True, url_path='deposit', url_name='deposit')
-    def deposit(self, request, uuid):
-        wallet = self.get_object()
-        amount = request.data.get('amount')
-        wallet.balance += amount
-        wallet.save()
-        return self.retrieve(request, uuid)
+    # @action(methods=['post'], detail=True, url_path='deposit', url_name='deposit')
+    # def deposit(self, request, uuid):
+    #     wallet = self.get_object()
+    #     amount = request.data.get('amount')
+    #     wallet.balance += amount
+    #     wallet.save()
+    #     return self.retrieve(request, uuid)
 
-    @action(methods=['post'], detail=True, url_path='withdraw', url_name='withdraw',
+    @action(methods=['post'], detail=False, url_path='withdraw', url_name='withdraw',
             serializer_class=WithdrawSerializer)
-    def withdraw(self, request, uuid):
-        wallet = self.get_object()
-        serializer = WithdrawSerializer(data=request.data, context={'wallet': wallet})
+    def withdraw(self, request):
+        serializer = WithdrawSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -42,7 +40,7 @@ class WalletViewSet(UpdateModelMixin, CreateModelMixin, GenericViewSet):
     @action(methods=['get'], detail=False, url_path='my-wallet', url_name='my-wallet')
     def my_wallet(self, request):
         if Wallet.objects.filter(owner=request.user.profile).exists():
-            serializer = self.get_serializer(request.user.profile.wallet)
+            serializer = self.get_serializer(Wallet.objects.prefetch_related('transactions__source', 'transactions__destination').get(owner=request.user.profile))
             return Response(serializer.data)
         else:
             return Response({'detail': 'شما کیف پولی ندارید.'})
