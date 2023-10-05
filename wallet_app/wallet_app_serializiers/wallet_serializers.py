@@ -5,23 +5,6 @@ from rest_framework.serializers import ModelSerializer
 from wallet_app.models import Wallet, Transaction
 
 
-class WalletSerializer(ModelSerializer):
-    class Meta:
-        model = Wallet
-        fields = ['id', 'uuid', 'owner', 'balance', 'IBAN', 'card_number', 'created_at', 'last_transaction']
-        read_only_fields = ['uuid', 'owner', 'balance', 'created_at', 'last_transaction']
-
-    def create(self, validated_data):
-        owner = self.context.get('owner')
-        return Wallet.objects.create(owner=owner, **validated_data)
-
-    def validate(self, data):
-        profile = self.context.get('owner')
-        if Wallet.objects.filter(owner=profile).exists():
-            raise serializers.ValidationError({'detail': 'شما قبلا کیف پول ایجاد کرده اید.'})
-        return data
-
-
 class TransactionSerializer(ModelSerializer):
     class Meta:
         model = Transaction
@@ -35,6 +18,26 @@ class TransactionSerializer(ModelSerializer):
         representation['source'] = instance.source.uuid
         representation['destination'] = instance.destination.uuid
         return representation
+
+
+class WalletSerializer(ModelSerializer):
+    transactions = TransactionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Wallet
+        fields = ['id', 'uuid', 'owner', 'balance', 'IBAN', 'card_number', 'created_at', 'last_transaction',
+                  'transactions']
+        read_only_fields = ['uuid', 'owner', 'balance', 'created_at', 'last_transaction']
+
+    def create(self, validated_data):
+        owner = self.context.get('owner')
+        return Wallet.objects.create(owner=owner, **validated_data)
+
+    def validate(self, data):
+        profile = self.context.get('owner')
+        if profile.wallet:
+            raise serializers.ValidationError('شما قبلا کیف پول ایجاد کرده اید.')
+        return data
 
 
 class WithdrawSerializer(serializers.Serializer):
@@ -62,11 +65,20 @@ class WithdrawSerializer(serializers.Serializer):
         source.save()
         destination.balance += amount
         destination.save()
-        Transaction.objects.create(wallet=destination, source=source, destination=destination, amount=amount,
-                                   transaction_type='i')
-        return Transaction.objects.create(wallet=source, source=source, destination=destination, amount=amount,
-                                          transaction_type='o')
+        destination_transaction = Transaction.objects.create(wallet=destination, source=source, destination=destination,
+                                                             amount=amount,
+                                                             transaction_type='i')
+
+        source_transaction = Transaction.objects.create(wallet=source, source=source, destination=destination,
+                                                        amount=amount,
+                                                        transaction_type='o')
+        source.last_transaction = source_transaction
+        source.save()
+        destination.last_transaction = destination_transaction
+        destination.save()
+        return source_transaction
 
 
+# TODO - Connect to the bank API
 class DepositSerializer(serializers.Serializer):
     amount = serializers.FloatField()
