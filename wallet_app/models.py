@@ -28,7 +28,7 @@ class Transaction(models.Model):
         ('i', 'پرسشگری'),
         ('a', 'پاسخ دادن')
     )
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transaction', verbose_name='کیف پول ')
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions', verbose_name='کیف پول ')
     transaction_type = models.CharField(max_length=2, choices=TRANSACTION_TYPES, verbose_name='نوع تراکنش')
     reason = models.CharField(max_length=2, choices=REASON_CHOICES, verbose_name='دلیل')
     amount = models.FloatField(verbose_name='مقدار')

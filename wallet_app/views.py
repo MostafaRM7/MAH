@@ -1,4 +1,3 @@
-
 from rest_framework.decorators import action
 from rest_framework.mixins import UpdateModelMixin, RetrieveModelMixin, ListModelMixin, CreateModelMixin
 from rest_framework.response import Response
@@ -10,7 +9,7 @@ from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializ
     WithdrawSerializer
 
 
-class WalletViewSet(RetrieveModelMixin, UpdateModelMixin, CreateModelMixin, GenericViewSet):
+class WalletViewSet(UpdateModelMixin, CreateModelMixin, GenericViewSet):
     serializer_class = WalletSerializer
     permission_classes = (IsWalletOwner,)
     lookup_field = 'uuid'
@@ -40,11 +39,19 @@ class WalletViewSet(RetrieveModelMixin, UpdateModelMixin, CreateModelMixin, Gene
         serializer.save()
         return Response(serializer.data)
 
+    @action(methods=['get'], detail=False, url_path='my-wallet', url_name='my-wallet')
+    def my_wallet(self, request):
+        if Wallet.objects.filter(owner=request.user.profile).exists():
+            serializer = self.get_serializer(request.user.profile.wallet)
+            return Response(serializer.data)
+        else:
+            return Response({'detail': 'شما کیف پولی ندارید.'})
 
-class TransactionViewSet(ListModelMixin, GenericViewSet):
-    serializer_class = TransactionSerializer
-    permission_classes = (IsTransactionOwner,)
 
-    def get_queryset(self):
-        wallet_uuid = self.kwargs['wallet_uuid']
-        return Transaction.objects.filter(wallet__uuid=wallet_uuid)
+# class TransactionViewSet(ListModelMixin, GenericViewSet):
+#     serializer_class = TransactionSerializer
+#     permission_classes = (IsTransactionOwner,)
+#
+#     def get_queryset(self):
+#         wallet_uuid = self.kwargs['wallet_uuid']
+#         return Transaction.objects.filter(wallet__uuid=wallet_uuid)
