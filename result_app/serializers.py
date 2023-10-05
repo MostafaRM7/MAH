@@ -64,6 +64,8 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 class ChoiceQuestionPlotSerializer(serializers.Serializer):
     question_id = serializers.IntegerField()
     question = serializers.CharField()
+    group_title = serializers.CharField()
+    group_id = serializers.IntegerField()
     question_type = serializers.CharField()
     options = serializers.JSONField()
     counts = serializers.JSONField()
@@ -73,6 +75,8 @@ class ChoiceQuestionPlotSerializer(serializers.Serializer):
 class NumberQuestionPlotSerializer(serializers.Serializer):
     question_id = serializers.IntegerField()
     question = serializers.CharField()
+    group_title = serializers.CharField()
+    group_id = serializers.IntegerField()
     question_type = serializers.CharField()
     max = serializers.FloatField()
     average = serializers.FloatField()
