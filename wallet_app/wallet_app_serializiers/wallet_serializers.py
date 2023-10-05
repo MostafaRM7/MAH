@@ -47,18 +47,23 @@ class WithdrawSerializer(serializers.Serializer):
     def validate(self, data):
         amount = data.get('amount')
         destination = data.get('destination')
-        wallet = self.context.get('wallet')
-        if not Wallet.objects.filter(uuid=destination).exists():
-            raise serializers.ValidationError({'destination': 'حساب مقصد وجود ندارد.'})
-        if amount > wallet.balance:
-            raise serializers.ValidationError({'amount': 'موجودی کیف پول کافی نیست.'})
-        if destination == str(wallet.uuid):
-            raise serializers.ValidationError({'destination': 'حساب مبدا و مقصد نباید یکسان باشند.'})
+        if not Wallet.objects.filter(owner=self.context.get('request').user.profile).exists():
+            raise serializers.ValidationError({'detail': 'شما کیف پولی ندارید.'})
+        else:
+            wallet = self.context.get('request').user.profile.wallet
+            if amount <= 0:
+                raise serializers.ValidationError({'amount': 'مبلغ نمی تواند منفی یا صفر باشد.'})
+            if not Wallet.objects.filter(uuid=destination).exists():
+                raise serializers.ValidationError({'destination': 'حساب مقصد وجود ندارد.'})
+            if amount > wallet.balance:
+                raise serializers.ValidationError({'amount': 'موجودی کیف پول کافی نیست.'})
+            if destination == str(wallet.uuid):
+                raise serializers.ValidationError({'destination': 'حساب مبدا و مقصد نباید یکسان باشند.'})
         return data
 
     @transaction.atomic
     def create(self, validated_data):
-        source = self.context.get('wallet')
+        source = self.context.get('request').user.profile.wallet
         amount = validated_data.get('amount')
         destination = Wallet.objects.get(uuid=validated_data.get('destination'))
         source.balance -= amount
@@ -72,9 +77,9 @@ class WithdrawSerializer(serializers.Serializer):
         source_transaction = Transaction.objects.create(wallet=source, source=source, destination=destination,
                                                         amount=amount,
                                                         transaction_type='o')
-        source.last_transaction = source_transaction
+        source.last_transaction = source_transaction.created_at
         source.save()
-        destination.last_transaction = destination_transaction
+        destination.last_transaction = destination_transaction.created_at
         destination.save()
         return source_transaction
 
