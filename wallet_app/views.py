@@ -1,6 +1,6 @@
 
 from rest_framework.decorators import action
-from rest_framework.mixins import UpdateModelMixin, RetrieveModelMixin, ListModelMixin
+from rest_framework.mixins import UpdateModelMixin, RetrieveModelMixin, ListModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -10,7 +10,7 @@ from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializ
     WithdrawSerializer
 
 
-class WalletViewSet(RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
+class WalletViewSet(RetrieveModelMixin, UpdateModelMixin, CreateModelMixin, GenericViewSet):
     serializer_class = WalletSerializer
     permission_classes = (IsWalletOwner,)
     lookup_field = 'uuid'
