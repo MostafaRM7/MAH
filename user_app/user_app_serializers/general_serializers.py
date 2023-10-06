@@ -70,6 +70,11 @@ class ProfileSerializer(serializers.ModelSerializer):
                     {
                         'id': district.city.id,
                         'name': district.city.name
+                    },
+                'district':
+                    {
+                        'id': district.id,
+                        'name': district.name
                     }
             } for district in instance.prefered_districts.all()]
         return representation
