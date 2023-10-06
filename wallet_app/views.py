@@ -41,7 +41,13 @@ class WalletViewSet(CreateModelMixin, GenericViewSet):
     def my_wallet(self, request):
         if Wallet.objects.filter(owner=request.user.profile).exists():
             if request.method == 'GET':
-                serializer = self.get_serializer(Wallet.objects.prefetch_related('transactions__source', 'transactions__destination').get(owner=request.user.profile))
+                type_filter = request.query_params.get('type')
+                queryset = Wallet.objects.prefetch_related('transactions__source', 'transactions__destination').get(owner=request.user.profile)
+                if type_filter == 'income':
+                    queryset = queryset.transactions.filter(transaction_type='i')
+                elif type_filter == 'outcome':
+                    queryset = queryset.transactions.filter(transaction_type='o')
+                serializer = self.get_serializer(queryset, many=True)
                 return Response(serializer.data)
             elif request.method == 'PATCH':
                 wallet = Wallet.objects.get(owner=request.user.profile)
