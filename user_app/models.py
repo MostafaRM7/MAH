@@ -50,6 +50,7 @@ class Profile(User):
     province = models.ForeignKey('Province', on_delete=models.CASCADE, verbose_name='استان', null=True, blank=True)
     prefered_districts = models.ManyToManyField('District', verbose_name='مناطق مورد علاقه', blank=True)
     avatar = models.ImageField(upload_to='avatars/', verbose_name='تصویر پروفایل', null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='زمان آخرین بروزرسانی')
 
 
 class Country(models.Model):
