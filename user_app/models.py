@@ -61,7 +61,7 @@ class Country(models.Model):
 
 class Province(models.Model):
     name = models.CharField(max_length=50, verbose_name='نام استان', unique=True)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, verbose_name='کشور')
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, verbose_name='کشور', related_name='provinces')
 
     def __str__(self):
         return f'{self.name} - {self.country}'
@@ -69,7 +69,7 @@ class Province(models.Model):
 
 class City(models.Model):
     name = models.CharField(max_length=50, verbose_name='نام شهر', unique=True)
-    province = models.ForeignKey(Province, on_delete=models.CASCADE, verbose_name='استان')
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, verbose_name='استان', related_name='cities')
 
     def __str__(self):
         return f'{self.name} - {self.province}'
@@ -77,7 +77,7 @@ class City(models.Model):
 
 class District(models.Model):
     name = models.CharField(max_length=50, verbose_name='نام منطقه')
-    city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name='شهر')
+    city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name='شهر', related_name='districts')
 
     def __str__(self):
         return f'{self.name} - {self.city}'
