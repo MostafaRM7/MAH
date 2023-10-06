@@ -1,24 +1,22 @@
-from rest_framework.generics import get_object_or_404
-from rest_framework.views import APIView
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
-
-from porsline_config import settings
-
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import permissions
+from django.db.models import Q
+from rest_framework import status, permissions
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
-from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from porsline_config import settings
 from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
     RefreshTokenSerializer
 from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
     CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer, CountryNestedSerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
     Skill, EducationalBackground, Resume
+from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly
 from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
     ResearchHistorySerializer, SkillSerializer, EducationalBackgroundSerializer, ResumeSerializer
 
@@ -46,7 +44,8 @@ class UserViewSet(viewsets.ModelViewSet):
                                                  'resume__work_backgrounds', 'resume__educational_backgrounds',
                                                  'resume__research_histories').select_related('resume',
                                                                                               'nationality',
-                                                                                              'province').filter(id=request.user.profile.id).first())
+                                                                                              'province').filter(
+                    id=request.user.profile.id).first())
             return Response(serializer.data)
         serializer = ProfileSerializer(request.user.profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -209,9 +208,14 @@ class DistrictViewSet(viewsets.ModelViewSet):
 
 
 class CountryNestedAPIView(APIView):
+
     def get(self, request):
+        search = request.query_params.get('search', None)
         queryset = Country.objects.prefetch_related('provinces', 'provinces__cities',
                                                     'provinces__cities__districts').all()
+        if search:
+            queryset = queryset.filter(Q(name__icontains=search) | Q(provinces__name__icontains=search) | Q(
+                provinces__cities__name__icontains=search) | Q(provinces__cities__districts__name__icontains=search)).distinct()
         serializer = CountryNestedSerializer(queryset, many=True)
         return Response(serializer.data)
 
