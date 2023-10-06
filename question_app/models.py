@@ -436,7 +436,7 @@ class ThanksPage(models.Model):
                                          verbose_name='پرسشنامه')
 
 
-class Interview(models.Model):
+class Interview(Questionnaire):
     APPROVED = 'a'
     PENDING = 'p'
     REJECTED = 'r'
@@ -445,7 +445,6 @@ class Interview(models.Model):
         (PENDING, 'در انتظار تایید'),
         (REJECTED, 'رد شده')
     )
-    questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='interview', primary_key=True)
     pay_per_answer = models.FloatField(verbose_name='پرداختی برای هر پاسخ')
     interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان')
     approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS, default=PENDING,
@@ -456,7 +455,7 @@ class Interview(models.Model):
     answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف')
 
     def __str__(self):
-        return self.questionnaire.name
+        return self.name
 
     @property
     def total_pay(self):
