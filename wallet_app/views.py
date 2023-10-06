@@ -1,4 +1,4 @@
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.mixins import UpdateModelMixin, CreateModelMixin
 from rest_framework.response import Response
@@ -8,7 +8,7 @@ from wallet_app.models import Wallet
 from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializer, WithdrawSerializer
 
 
-class WalletViewSet(UpdateModelMixin, CreateModelMixin, GenericViewSet):
+class WalletViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = WalletSerializer
     permission_classes = (permissions.IsAuthenticated,)
     lookup_field = 'uuid'
@@ -37,13 +37,20 @@ class WalletViewSet(UpdateModelMixin, CreateModelMixin, GenericViewSet):
         serializer.save()
         return Response(serializer.data)
 
-    @action(methods=['get'], detail=False, url_path='my-wallet', url_name='my-wallet')
+    @action(methods=['get', 'patch'], detail=False, url_path='my-wallet', url_name='my-wallet')
     def my_wallet(self, request):
         if Wallet.objects.filter(owner=request.user.profile).exists():
-            serializer = self.get_serializer(Wallet.objects.prefetch_related('transactions__source', 'transactions__destination').get(owner=request.user.profile))
-            return Response(serializer.data)
+            if request.method == 'GET':
+                serializer = self.get_serializer(Wallet.objects.prefetch_related('transactions__source', 'transactions__destination').get(owner=request.user.profile))
+                return Response(serializer.data)
+            elif request.method == 'PATCH':
+                wallet = Wallet.objects.get(owner=request.user.profile)
+                serializer = self.get_serializer(wallet, data=request.data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
         else:
-            return Response({'detail': 'شما کیف پولی ندارید.'})
+            return Response({'detail': 'شما کیف پولی ندارید.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 # class TransactionViewSet(ListModelMixin, GenericViewSet):
