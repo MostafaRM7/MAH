@@ -338,12 +338,19 @@ class AnswerSet(models.Model):
 
 
 class Answer(models.Model):
+    LEVEL_CHOICES = (
+        (0, 'تعیین نشده'),
+        (1, 'ساده'),
+        (2, 'متوسط'),
+        (3, 'سخت'),
+    )
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers', verbose_name='سوال')
     answer_set = models.ForeignKey(AnswerSet, on_delete=models.CASCADE, related_name='answers',
                                    verbose_name='دسته جواب')
     answer = models.JSONField(verbose_name='جواب', null=True, blank=True)
     file = models.FileField(upload_to='answer_file/%Y/%m/%d', null=True, blank=True, verbose_name='فایل')
     answered_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان پاسخگویی')
+    level = models.PositiveIntegerField(default=0, choices=LEVEL_CHOICES, verbose_name='سطح')
 
     def __str__(self):
         return f'{self.answer_set} - {self.question}'

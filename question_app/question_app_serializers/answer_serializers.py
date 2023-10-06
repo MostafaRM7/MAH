@@ -9,7 +9,7 @@ from question_app.validators import tag_remover
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        fields = ('id', 'question', 'answer', 'file', 'answered_at')
+        fields = ('id', 'question', 'answer', 'file', 'answered_at', 'level')
         read_only_fields = ('answered_at',)
 
     def validate(self, data):
