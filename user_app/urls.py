@@ -3,7 +3,7 @@ from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenVerifyView
 from .views import UserViewSet, FolderViewSet, GateWayViewSet, OTPCheckViewSet, RefreshTokenView, LogoutView, \
     LogoutAllView, CountryViewSet, ProvinceViewSet, CityViewSet, DistrictViewSet, ResumeViewSet, WorkBackgroundViewSet, \
-    AchievementViewSet, SkillViewSet, EducationalBackgroundViewSet, ResearchHistoryViewSet
+    AchievementViewSet, SkillViewSet, EducationalBackgroundViewSet, ResearchHistoryViewSet, CountryNestedAPIView
 
 base_router = routers.DefaultRouter()
 base_router.register('users', UserViewSet, basename='users')
@@ -40,6 +40,7 @@ urlpatterns = [
     path('', include(country_router.urls)),
     path('', include(province_router.urls)),
     path('', include(city_router.urls)),
+    path('nested-countries/', CountryNestedAPIView.as_view(), name='nested-countries'),
     path('auth/verify-token/', TokenVerifyView.as_view(), name='token-verify'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('auth/logout-all/', LogoutAllView.as_view(), name='logout-all'),

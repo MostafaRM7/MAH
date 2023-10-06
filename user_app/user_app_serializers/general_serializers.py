@@ -110,3 +110,33 @@ class DistrictSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return District.objects.create(city_id=self.context.get('city_pk'), **validated_data)
+
+
+class DistrictNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = ('id', 'name')
+
+
+class CityNestedSerializer(serializers.ModelSerializer):
+    districts = DistrictNestedSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = City
+        fields = ('id', 'name')
+
+
+class ProvinceNestedSerializer(serializers.ModelSerializer):
+    cities = CityNestedSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Province
+        fields = ('id', 'name', 'cities')
+
+
+class CountryNestedSerializer(serializers.ModelSerializer):
+    provinces = ProvinceNestedSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Country
+        fields = ('id', 'name', 'provinces')

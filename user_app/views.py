@@ -16,7 +16,7 @@ from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly
 from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
     RefreshTokenSerializer
 from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
-    CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer
+    CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer, CountryNestedSerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
     Skill, EducationalBackground, Resume
 from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
@@ -201,6 +201,13 @@ class DistrictViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context.update({'city_pk': self.kwargs['city_pk']})
         return context
+
+
+class CountryNestedAPIView(APIView):
+    def get(self, request):
+        queryset = Country.objects.all()
+        serializer = CountryNestedSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class WorkBackgroundViewSet(viewsets.ModelViewSet):
