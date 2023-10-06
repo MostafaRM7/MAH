@@ -205,7 +205,7 @@ class DistrictViewSet(viewsets.ModelViewSet):
 
 class CountryNestedAPIView(APIView):
     def get(self, request):
-        queryset = Country.objects.all()
+        queryset = Country.objects.prefetch_related('provinces', 'provinces__cities', 'provinces__cities__districts').all()
         serializer = CountryNestedSerializer(queryset, many=True)
         return Response(serializer.data)
 
