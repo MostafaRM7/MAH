@@ -61,6 +61,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         representation['province'] = instance.province.name
         representation['prefered_districts'] = [
             {
+                'id': district.id,
+                'name': district.name,
                 'province':
                     {
                         'id': district.city.province.id,
