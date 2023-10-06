@@ -1,20 +1,19 @@
-from django_filters.rest_framework import DjangoFilterBackend
+from datetime import datetime
+
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from wallet_app.filtersets import WalletFilterSet
 from wallet_app.models import Wallet
 from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializer, WithdrawSerializer
+from .utils import is_valid_date
 
 
 class WalletViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = WalletSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = WalletFilterSet
     lookup_field = 'uuid'
 
     def get_queryset(self):
@@ -38,10 +37,24 @@ class WalletViewSet(CreateModelMixin, GenericViewSet):
     def my_wallet(self, request):
         if Wallet.objects.filter(owner=request.user.profile).exists():
             if request.method == 'GET':
-                serializer = self.get_serializer(self.filter_queryset(
-                    Wallet.objects.prefetch_related('transactions__source', 'transactions__destination')).get(
+                transaction_type = request.query_params.get('transaction_type')
+                transaction_start_date = request.query_params.get('transaction_created_at_from')
+                transaction_end_date = request.query_params.get('transaction_created_at_to')
+                transaction_date = request.query_params.get('transaction_created_at_exact')
+                serializer = self.get_serializer(
+                    Wallet.objects.prefetch_related('transactions__source', 'transactions__destination').get(
                         owner=request.user.profile))
+                if transaction_type and (transaction_type == 'o' or transaction_type == 'i'):
+                    serializer.context.update({'transaction_type': transaction_type})
+                if transaction_start_date and is_valid_date(transaction_start_date):
+                    serializer.context.update({'transaction_start_date': datetime.fromisoformat(transaction_start_date)})
+                if transaction_end_date and is_valid_date(transaction_end_date):
+                    serializer.context.update({'transaction_end_date': datetime.fromisoformat(transaction_end_date)})
+                if transaction_date and is_valid_date(transaction_date):
+                    serializer.context.update({'transaction_date': datetime.fromisoformat(transaction_date)})
+                print(serializer.context)
                 return Response(serializer.data)
+
             elif request.method == 'PATCH':
                 wallet = Wallet.objects.get(owner=request.user.profile)
                 serializer = self.get_serializer(wallet, data=request.data, partial=True)

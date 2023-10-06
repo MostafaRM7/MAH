@@ -41,9 +41,21 @@ class WalletSerializer(ModelSerializer):
 
     def get_transactions(self, instance: Wallet):
         type_filter = self.context.get('transaction_type')
+        transaction_start_date = self.context.get('transaction_start_date')
+        transaction_end_date = self.context.get('transaction_end_date')
+        transaction_date = self.context.get('transaction_date')
+
+        query_set = instance.transactions.all()
         if type_filter:
-            return TransactionSerializer(instance.transactions.filter(transaction_type=type_filter), many=True).data
-        return TransactionSerializer(instance.transactions.all(), many=True).data
+            query_set = query_set.filter(transaction_type=type_filter)
+        if transaction_start_date:
+            query_set = query_set.filter(created_at__gte=transaction_start_date)
+        if transaction_end_date:
+            query_set = query_set.filter(created_at__lte=transaction_end_date)
+        if transaction_date and not transaction_start_date and not transaction_end_date:
+            query_set = query_set.filter(created_at=transaction_date)
+
+        return TransactionSerializer(query_set, many=True).data
 
 
 class WithdrawSerializer(serializers.Serializer):
