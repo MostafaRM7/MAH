@@ -57,8 +57,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['nationality'] = instance.nationality.name
-        representation['province'] = instance.province.name
+        representation['nationality'] = instance.nationality.name if instance.nationality else None
+        representation['province'] = instance.province.name if instance.province else None
         if instance.prefered_district:
             representation['prefered_districts'] = [
                 {
