@@ -55,6 +55,25 @@ class ProfileSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
             'address', 'nationality', 'province', 'prefered_districts', 'resume')
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['nationality'] = instance.nationality.name
+        representation['province'] = instance.province.name
+        representation['prefered_districts'] = [
+            {
+                'province':
+                    {
+                        'id': district.city.province.id,
+                        'name': district.city.province.name
+                    },
+                'city':
+                    {
+                        'id': district.city.id,
+                        'name': district.city.name
+                    }
+            } for district in instance.prefered_districts.all()]
+        return representation
+
 
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:

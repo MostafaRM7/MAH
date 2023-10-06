@@ -25,7 +25,7 @@ from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, A
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-        A simple ViewSet for listing or retrieving the current user.
+        A ViewSet for listing users or retrieving the current user.
     """
     serializer_class = ProfileSerializer
     permission_classes = (IsUserOrReadOnly,)
@@ -41,7 +41,12 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
         if request.method == 'GET':
-            serializer = ProfileSerializer(request.user.profile)
+            serializer = ProfileSerializer(
+                Profile.objects.prefetch_related('prefered_districts', 'resume__skills', 'resume__achievements',
+                                                 'resume__work_backgrounds', 'resume__educational_backgrounds',
+                                                 'resume__research_histories').select_related('resume',
+                                                                                              'nationality',
+                                                                                              'province').filter(id=request.user.profile.id).first())
             return Response(serializer.data)
         serializer = ProfileSerializer(request.user.profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -205,7 +210,8 @@ class DistrictViewSet(viewsets.ModelViewSet):
 
 class CountryNestedAPIView(APIView):
     def get(self, request):
-        queryset = Country.objects.prefetch_related('provinces', 'provinces__cities', 'provinces__cities__districts').all()
+        queryset = Country.objects.prefetch_related('provinces', 'provinces__cities',
+                                                    'provinces__cities__districts').all()
         serializer = CountryNestedSerializer(queryset, many=True)
         return Response(serializer.data)
 
