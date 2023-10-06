@@ -123,7 +123,7 @@ class CityNestedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = City
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'districts')
 
 
 class ProvinceNestedSerializer(serializers.ModelSerializer):
