@@ -21,7 +21,7 @@ class TransactionSerializer(ModelSerializer):
 
 
 class WalletSerializer(ModelSerializer):
-    transactions = TransactionSerializer(many=True, read_only=True)
+    transactions = serializers.SerializerMethodField(method_name='get_transactions')
 
     class Meta:
         model = Wallet
@@ -38,6 +38,12 @@ class WalletSerializer(ModelSerializer):
         if Wallet.objects.filter(owner=profile).exists():
             raise serializers.ValidationError('شما قبلا کیف پول ایجاد کرده اید.')
         return data
+
+    def get_transactions(self, instance: Wallet):
+        type_filter = self.context.get('transaction_type')
+        if type_filter:
+            return TransactionSerializer(instance.transactions.filter(transaction_type=type_filter), many=True).data
+        return TransactionSerializer(instance.transactions.all(), many=True).data
 
 
 class WithdrawSerializer(serializers.Serializer):
