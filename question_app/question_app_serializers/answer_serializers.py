@@ -9,7 +9,7 @@ from question_app.validators import tag_remover
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        fields = ('id', 'question', 'answer', 'file', 'answered_at')
+        fields = ('id', 'question', 'answer', 'file', 'answered_at', 'level')
         read_only_fields = ('answered_at',)
 
     def validate(self, data):
@@ -422,13 +422,30 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerSet
-        fields = ('id', 'questionnaire', 'answered_at', 'answers')
-        read_only_fields = ('questionnaire', 'answered_at')
+        fields = ('id', 'questionnaire', 'answered_at', 'answers', 'answered_by')
+        read_only_fields = ('questionnaire', 'answered_at', 'answered_by')
+
+    def validate(self, data):
+        questionnaire = get_object_or_404(Questionnaire, uuid=self.context.get('questionnaire_uuid'))
+        if questionnaire.is_active and questionnaire.pub_date <= timezone.now():
+            if questionnaire.end_date:
+                if questionnaire.end_date < timezone.now():
+                    return serializers.ValidationError(
+                        {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
+                    )
+        else:
+            return serializers.ValidationError(
+                {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"})
+        return data
 
     @transaction.atomic()
     def create(self, validated_data):
+        user = self.context.get('request').user.profile
         questionnaire = get_object_or_404(Questionnaire, uuid=self.context.get('questionnaire_uuid'))
-        answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire)
+        if user.is_authenticated:
+            answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire, answered_by=user)
+        else:
+            answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire, answered_by=user)
         return answer_set
 
     def to_representation(self, instance):

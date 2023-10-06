@@ -59,21 +59,24 @@ class ProfileSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['nationality'] = instance.nationality.name
         representation['province'] = instance.province.name
-        representation['prefered_districts'] = [
-            {
-                'id': district.id,
-                'name': district.name,
-                'province':
-                    {
-                        'id': district.city.province.id,
-                        'name': district.city.province.name
-                    },
-                'city':
-                    {
-                        'id': district.city.id,
-                        'name': district.city.name
-                    }
-            } for district in instance.prefered_districts.all()]
+        if instance.prefered_district:
+            representation['prefered_districts'] = [
+                {
+                    'id': district.id,
+                    'name': district.name,
+                    'province':
+                        {
+                            'id': district.city.province.id,
+                            'name': district.city.province.name
+                        },
+                    'city':
+                        {
+                            'id': district.city.id,
+                            'name': district.city.name
+                        }
+                } for district in instance.prefered_districts.all()]
+        else:
+            representation['prefered_districts'] = []
         return representation
 
 
