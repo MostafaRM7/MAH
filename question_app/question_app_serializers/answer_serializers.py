@@ -440,7 +440,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 
     @transaction.atomic()
     def create(self, validated_data):
-        user = self.context.get('request').user.profile
+        user = self.context.get('request').user.profile if self.context.get('request').user.is_authenticated else None
         questionnaire = get_object_or_404(Questionnaire, uuid=self.context.get('questionnaire_uuid'))
         if user.is_authenticated:
             answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire, answered_by=user)
