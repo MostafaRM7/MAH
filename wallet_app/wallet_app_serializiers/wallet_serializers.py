@@ -44,18 +44,12 @@ class WalletSerializer(ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        type_ordering = self.context.get('type_ordering')
         amount_ordering = self.context.get('amount_ordering')
         type_filter = self.context.get('transaction_type')
         transaction_start_date = self.context.get('transaction_start_date')
         transaction_end_date = self.context.get('transaction_end_date')
         transaction_date = self.context.get('transaction_date')
         query_set = instance.transactions.all()
-        if type_ordering:
-            if type_ordering == 'i':
-                query_set = query_set.order_by('transaction_type')
-            elif type_ordering == 'o':
-                query_set = query_set.order_by('-transaction_type')
         if amount_ordering:
             if amount_ordering == 'asc':
                 query_set = query_set.order_by('amount')
