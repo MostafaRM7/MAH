@@ -35,7 +35,8 @@ class WalletSerializer(ModelSerializer):
 
     def validate(self, data):
         profile = self.context.get('owner')
-        if Wallet.objects.filter(owner=profile).exists():
+        request = self.context.get('request')
+        if Wallet.objects.filter(owner=profile).exists() and request.method in ['POST']:
             raise serializers.ValidationError('شما قبلا کیف پول ایجاد کرده اید.')
         return data
 
