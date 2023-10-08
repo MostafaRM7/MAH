@@ -58,9 +58,9 @@ class WalletSerializer(ModelSerializer):
                 query_set = query_set.order_by('-transaction_type')
         if amount_ordering:
             if amount_ordering == 'asc':
-                query_set = query_set.order_by('amount')
-            elif amount_ordering == 'desc':
                 query_set = query_set.order_by('-amount')
+            elif amount_ordering == 'desc':
+                query_set = query_set.order_by('amount')
         if type_filter:
             query_set = query_set.filter(transaction_type=type_filter)
         if transaction_start_date:
