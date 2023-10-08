@@ -58,17 +58,17 @@ class WalletSerializer(ModelSerializer):
         if transaction_date and not transaction_start_date and not transaction_end_date:
             query_set = query_set.filter(created_at=transaction_date)
         try:
-            income = query_set.filter(transaction_type='i').count() / query_set.count() * 100
+            answering = query_set.filter(reason='a').count() / query_set.count() * 100
         except ZeroDivisionError:
-            income = 0
+            answering = 0
         try:
-            outcome = query_set.filter(transaction_type='o').count() / query_set.count() * 100
+            interviewing = query_set.filter(reason='i').count() / query_set.count() * 100
         except ZeroDivisionError:
-            outcome = 0
+            interviewing = 0
         representation['transactions'] = TransactionSerializer(query_set, many=True).data
         representation['plot'] = {
-            'income': income,
-            'outcome': outcome
+            'answering': answering,
+            'interviewing': interviewing
         }
         return representation
 
