@@ -58,7 +58,7 @@ class FolderViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        queryset = self.request.user.folders.all()
+        queryset = self.request.user.profile.folders.all()
         return queryset
 
     def get_serializer_context(self):
