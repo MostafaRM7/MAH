@@ -41,10 +41,11 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     permission_classes = (AllowAny,)
 
     def initial(self, request, *args, **kwargs):
-        try:
-            UUID(kwargs.get('uuid'))
-        except ValueError:
-            return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
+        if kwargs.get('uuid'):
+            try:
+                UUID(kwargs.get('uuid'))
+            except ValueError:
+                return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
 
         super(PublicQuestionnaireViewSet, self).initial(request, *args, **kwargs)
 
@@ -75,7 +76,8 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
 
-    @action(detail=True, methods=['get'], url_path='search-questions', permission_classes=(IsQuestionnaireOwnerOrReadOnly,))
+    @action(detail=True, methods=['get'], url_path='search-questions',
+            permission_classes=(IsQuestionnaireOwnerOrReadOnly,))
     def search_in_questions(self, request, *args, **kwargs):
         search = request.query_params.get('search')
         if search:

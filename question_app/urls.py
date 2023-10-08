@@ -35,9 +35,10 @@ urlpatterns = [
     path('search-questionnaires/', views.SearchQuestionnaire.as_view(),
          name='search_questionnaire'),
     path('', include(base_router.urls)),
-    path('', include(router.urls)),
+    # path('', include(router.urls)),
     path('', include(questionnaire_router.urls)),
     path('questionnaires/<str:questionnaire_uuid>/change-questions-placements/',
          views.ChangeQuestionsPlacements.as_view(),
          name='change_questions_placements'),
+    # path('interviews/', views.InterviewViewSet.as_view({'get': 'list'}), name='interviews'),
 ]

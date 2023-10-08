@@ -1,3 +1,4 @@
+from user_app.user_app_serializers.general_serializers import DistrictSerializer
 from . import answer_serializers
 from .question_serializers import *
 from ..models import *
@@ -174,9 +175,12 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        return Questionnaire.objects.create(owner=self.context.get('request').user,
+        return Questionnaire.objects.create(owner=self.context.get('request').user.profile,
                                             pub_date=validated_data.pop('pub_date', timezone.now()),
                                             **validated_data)
+
+
+
 
 
 class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
@@ -185,7 +189,7 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('id', 'name', 'uuid', 'pub_date', 'created_at','answer_count', 'question_count', 'is_active')
+        fields = ('id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active')
 
     def get_answer_count(self, obj):
         return obj.answer_sets.exclude(answers=None).count()
