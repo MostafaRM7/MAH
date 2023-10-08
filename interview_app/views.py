@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from rest_framework import viewsets, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -16,6 +17,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     lookup_field = 'uuid'
     queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').all()
+    pagination_class = PageNumberPagination
 
     def initial(self, request, *args, **kwargs):
         if kwargs.get('uuid'):
