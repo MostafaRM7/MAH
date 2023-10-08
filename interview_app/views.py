@@ -1,6 +1,8 @@
-from django.shortcuts import render
-from rest_framework import viewsets
+from uuid import UUID
+
+from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer
 from interview_app.models import Interview
@@ -13,17 +15,17 @@ class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
     permission_classes = (AllowAny,)
     lookup_field = 'uuid'
-    queryset = Interview.objects.all()
+    queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').all()
 
-    # def initial(self, request, *args, **kwargs):
-    #     if kwargs.get('uuid'):
-    #         print(kwargs.get('uuid'))
-    #         try:
-    #             UUID(kwargs.get('uuid'))
-    #         except ValueError:
-    #             return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
+    def initial(self, request, *args, **kwargs):
+        if kwargs.get('uuid'):
+            print(kwargs.get('uuid'))
+            try:
+                UUID(kwargs.get('uuid'))
+            except ValueError:
+                return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
 
-        # super(InterviewViewSet, self).initial(request, *args, **kwargs)
+        super(InterviewViewSet, self).initial(request, *args, **kwargs)
 
     # def retrieve(self, request, *args, **kwargs):
     #     instance = self.get_object()
