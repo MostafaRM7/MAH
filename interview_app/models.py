@@ -16,7 +16,7 @@ class Interview(Questionnaire):
         (REJECTED, 'رد شده')
     )
     pay_per_answer = models.FloatField(verbose_name='پرداختی برای هر پاسخ')
-    interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان')
+    interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True)
     approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS, default=PENDING,
                                        verbose_name='وضعیت تایید')
     add_to_approve_queue = models.BooleanField(default=False, verbose_name='به صف تایید اضافه شود')
