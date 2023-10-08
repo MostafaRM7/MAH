@@ -1,12 +1,12 @@
 from uuid import UUID
 
 from rest_framework import viewsets, status
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer
 from interview_app.models import Interview
+from porsline_config.paginators import MainPagination
 
 
 # Create your views here.
@@ -17,7 +17,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     lookup_field = 'uuid'
     queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').all()
-    pagination_class = PageNumberPagination
+    pagination_class = MainPagination
 
     def initial(self, request, *args, **kwargs):
         if kwargs.get('uuid'):
