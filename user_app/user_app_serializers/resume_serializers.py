@@ -75,3 +75,4 @@ class ResumeSerializer(ModelSerializer):
             raise serializers.ValidationError(
                 {'resume': 'شما قبلا رزومه‌ای ثبت کرده‌اید'},
             )
+        return data
