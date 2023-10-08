@@ -44,16 +44,16 @@ class WalletSerializer(ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        ordering = self.context.get('ordering')
+        amount_ordering = self.context.get('amount_ordering')
         type_filter = self.context.get('transaction_type')
         transaction_start_date = self.context.get('transaction_start_date')
         transaction_end_date = self.context.get('transaction_end_date')
         transaction_date = self.context.get('transaction_date')
         query_set = instance.transactions.all()
-        if ordering:
-            if ordering == 'asc':
+        if amount_ordering:
+            if amount_ordering == 'asc':
                 query_set = query_set.order_by('amount')
-            elif ordering == 'desc':
+            elif amount_ordering == 'desc':
                 query_set = query_set.order_by('-amount')
         if type_filter:
             query_set = query_set.filter(transaction_type=type_filter)
