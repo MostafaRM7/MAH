@@ -6,6 +6,7 @@ from wallet_app.models import Wallet, Transaction
 
 
 class TransactionSerializer(ModelSerializer):
+
     class Meta:
         model = Transaction
         fields = ['id', 'uuid', 'transaction_type', 'reason', 'amount', 'created_at', 'source', 'destination',
@@ -20,13 +21,13 @@ class TransactionSerializer(ModelSerializer):
         return representation
 
 
+
 class WalletSerializer(ModelSerializer):
-    transactions = serializers.SerializerMethodField(method_name='get_transactions')
+    # transactions = serializers.SerializerMethodField(method_name='get_transactions')
 
     class Meta:
         model = Wallet
-        fields = ['id', 'uuid', 'owner', 'balance', 'IBAN', 'card_number', 'created_at', 'last_transaction',
-                  'transactions']
+        fields = ['id', 'uuid', 'owner', 'balance', 'IBAN', 'card_number', 'created_at', 'last_transaction']
         read_only_fields = ['uuid', 'owner', 'balance', 'created_at', 'last_transaction']
 
     def create(self, validated_data):
@@ -35,17 +36,25 @@ class WalletSerializer(ModelSerializer):
 
     def validate(self, data):
         profile = self.context.get('owner')
-        if Wallet.objects.filter(owner=profile).exists():
+        request = self.context.get('request')
+        if Wallet.objects.filter(owner=profile).exists() and request.method in ['POST']:
             raise serializers.ValidationError('شما قبلا کیف پول ایجاد کرده اید.')
         return data
 
-    def get_transactions(self, instance: Wallet):
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        amount_ordering = self.context.get('amount_ordering')
         type_filter = self.context.get('transaction_type')
         transaction_start_date = self.context.get('transaction_start_date')
         transaction_end_date = self.context.get('transaction_end_date')
         transaction_date = self.context.get('transaction_date')
-
         query_set = instance.transactions.all()
+        if amount_ordering:
+            if amount_ordering == 'asc':
+                query_set = query_set.order_by('amount')
+            elif amount_ordering == 'desc':
+                query_set = query_set.order_by('-amount')
         if type_filter:
             query_set = query_set.filter(transaction_type=type_filter)
         if transaction_start_date:
@@ -54,8 +63,20 @@ class WalletSerializer(ModelSerializer):
             query_set = query_set.filter(created_at__lte=transaction_end_date)
         if transaction_date and not transaction_start_date and not transaction_end_date:
             query_set = query_set.filter(created_at=transaction_date)
-
-        return TransactionSerializer(query_set, many=True).data
+        try:
+            answering = query_set.filter(reason='a').count() / query_set.count() * 100
+        except ZeroDivisionError:
+            answering = 0
+        try:
+            interviewing = query_set.filter(reason='i').count() / query_set.count() * 100
+        except ZeroDivisionError:
+            interviewing = 0
+        representation['transactions'] = TransactionSerializer(query_set, many=True).data
+        representation['plot'] = {
+            'answering': answering,
+            'interviewing': interviewing
+        }
+        return representation
 
 
 class WithdrawSerializer(serializers.Serializer):

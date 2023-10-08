@@ -20,17 +20,21 @@ class FolderSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if name is not None:
             if request.method == 'POST':
-                if Folder.objects.filter(name=name, owner=request.user).exists():
+                if Folder.objects.filter(name=name, owner=request.user.profile).exists():
                     raise serializers.ValidationError(
                         {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},
                     )
             elif request.method in ['PUT', 'PATCH']:
-                if Folder.objects.filter(name=name, owner=self.context.get('request').user).exclude(
+                if Folder.objects.filter(name=name, owner=self.context.get('request').user.profile).exclude(
                         pk=self.instance.id).exists():
                     raise serializers.ValidationError(
                         {'name': 'شما قبلا پوشه‌ای با این نام ایجاد کرده‌اید'},
                     )
         return data
+
+    def create(self, validated_data):
+        profile = self.context.get('request').user.profile
+        return Folder.objects.create(owner=profile, **validated_data)
 
     class Meta:
         model = Folder

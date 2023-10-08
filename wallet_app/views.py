@@ -41,9 +41,12 @@ class WalletViewSet(CreateModelMixin, GenericViewSet):
                 transaction_start_date = request.query_params.get('transaction_created_at_from')
                 transaction_end_date = request.query_params.get('transaction_created_at_to')
                 transaction_date = request.query_params.get('transaction_created_at_exact')
+                amount_ordering = request.query_params.get('amount_ordering')
                 serializer = self.get_serializer(
                     Wallet.objects.prefetch_related('transactions__source', 'transactions__destination').get(
                         owner=request.user.profile))
+                if amount_ordering and (amount_ordering == 'desc' or amount_ordering == 'asc'):
+                    serializer.context.update({'amount_ordering': amount_ordering})
                 if transaction_type and (transaction_type == 'o' or transaction_type == 'i'):
                     serializer.context.update({'transaction_type': transaction_type})
                 if transaction_start_date and is_valid_date(transaction_start_date):
