@@ -144,7 +144,7 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
                     {'date': 'تاریخ شروع پرسشنامه نمی تواند بعد از تاریخ پایان باشد'}
                 )
         if folder is not None:
-            if request.user != folder.owner:
+            if request.user.profile != folder.owner:
                 raise serializers.ValidationError(
                     {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
                     status.HTTP_400_BAD_REQUEST
@@ -178,9 +178,6 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         return Questionnaire.objects.create(owner=self.context.get('request').user.profile,
                                             pub_date=validated_data.pop('pub_date', timezone.now()),
                                             **validated_data)
-
-
-
 
 
 class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
