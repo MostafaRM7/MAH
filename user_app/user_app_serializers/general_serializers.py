@@ -34,6 +34,7 @@ class FolderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile = self.context.get('request').user.profile
+        validated_data.pop('questionnaires')
         return Folder.objects.create(owner=profile, **validated_data)
 
     class Meta:
