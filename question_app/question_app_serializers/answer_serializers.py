@@ -429,7 +429,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         questionnaire = get_object_or_404(Questionnaire, uuid=self.context.get('questionnaire_uuid'))
         if questionnaire.is_active and questionnaire.pub_date <= timezone.now():
             if questionnaire.end_date:
-                if questionnaire.end_date < timezone.now():
+                if questionnaire.end_date >= timezone.now():
                     return serializers.ValidationError(
                         {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
                     )
