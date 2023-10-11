@@ -25,7 +25,7 @@ class IsOwner(BasePermission):
     def has_permission(self, request, view):
         print('has_permission')
         try:
-            user_id = int(view.kwargs.get('pk')) if view.kwargs.get('pk') else None
+            user_id = int(view.kwargs.get('user_pk')) if view.kwargs.get('user_pk') else None
         except ValueError:
             user_id = None
         print(user_id)
