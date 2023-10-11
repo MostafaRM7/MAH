@@ -64,7 +64,7 @@ class OTPCheckSerializer(serializers.Serializer):
             if timezone.now() - otp.created_at > timezone.timedelta(minutes=settings.OTP_LIFE_TIME):
                 otp.delete()
                 raise serializers.ValidationError("کد فعال سازی منقضی شده یا اشتباه است.")
-            user = otp.user
+            user = otp.user.profile
             access_token = AccessToken.for_user(user)
             refresh_token = RefreshToken.for_user(user)
             otp.delete()
