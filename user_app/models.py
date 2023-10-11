@@ -97,7 +97,7 @@ class UserRoleApproveQueue(models.Model):
 
 
 class Resume(models.Model):
-    owner = models.OneToOneField(Profile, on_delete=models.CASCADE, verbose_name='پروفایل')
+    owner = models.OneToOneField(Profile, on_delete=models.CASCADE, verbose_name='پروفایل', related_name='resume')
     linkedin = models.URLField(verbose_name='لینکدین', null=True, blank=True)
     file = models.FileField(upload_to='resume', verbose_name='فایل رزومه', null=True, blank=True)
 
