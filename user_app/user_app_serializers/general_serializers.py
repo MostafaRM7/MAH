@@ -82,6 +82,7 @@ class ProfileSerializer(serializers.ModelSerializer):
                 } for district in instance.prefered_districts.all()]
         else:
             representation['prefered_districts'] = []
+        representation['resume_last_updated'] = instance.resume.last_updated if instance.resume else None
         return representation
 
 
