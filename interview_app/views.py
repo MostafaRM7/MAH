@@ -1,12 +1,14 @@
 from uuid import UUID
 
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer
+from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer, \
+    AnswerSerializer
 from interview_app.models import Interview
 from porsline_config.paginators import MainPagination
 from question_app.models import AnswerSet
@@ -51,7 +53,11 @@ class InterviewViewSet(viewsets.ModelViewSet):
     #                         status.HTTP_403_FORBIDDEN)
 
 
-class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
+class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
+                       viewsets.mixins.RetrieveModelMixin,
+                       viewsets.mixins.DestroyModelMixin,
+                       viewsets.mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
     queryset = AnswerSet.objects.all()
     serializer_class = AnswerSetSerializer
     permission_classes = [IsQuestionnaireOwner]
@@ -61,13 +67,13 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwner],
             filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
-    def search(self, request, questionnaire_uuid):
+    def search(self, request, interview_uuid):
         search = request.query_params.get('search', None)
         if search is None:
             return Response({'message': 'لطفا عبارت سرچ را وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
         result = []
-        questionnaire = Interview.objects.get(uuid=questionnaire_uuid)
-        for answer_set in questionnaire.answer_sets.prefetch_related('answers', 'answers__question').all():
+        questionnaire = Interview.objects.get(uuid=interview_uuid)
+        for answer_set in questionnaire.answer_sets.prefetch_related('answers', 'answers__question').select_related('answered_by').all():
             for answer in answer_set.answers.all():
                 question = answer.question
                 question_type = question.question_type
@@ -154,18 +160,26 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
         page = self.paginate_queryset(result)
         if page is not None:
             serializer = AnswerSetSerializer(page, many=True,
-                                             context={'questionnaire_uuid': questionnaire_uuid})
+                                             context={'interview_uuid': interview_uuid})
             return self.get_paginated_response(serializer.data)
 
-        # serializer = AnswerSetSerializer(result, many=True, context={'questionnaire_uuid': questionnaire_uuid})
-        # return Response(serializer.data)
+    # TODO - Add permission for user roles i & ie
+    @action(methods=['post'], detail=True, permission_classes=[IsAuthenticated], url_path='add-answer')
+    @transaction.atomic
+    def add_answer(self, request, interview_uuid, pk):
+        answer_set = self.get_object()
+        answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set})
+        answers.is_valid(raise_exception=True)
+        answers.save()
+        answer_set.refresh_from_db()
+        return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
         queryset = AnswerSet.objects.prefetch_related('answers__question', 'answers').filter(
-            questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+            questionnaire__uuid=self.kwargs['interview_uuid'])
         return queryset
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({'questionnaire_uuid': self.kwargs.get('questionnaire_uuid')})
+        context.update({'interview_uuid': self.kwargs.get('interview_uuid')})
         return context

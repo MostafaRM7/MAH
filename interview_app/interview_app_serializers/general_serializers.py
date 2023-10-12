@@ -198,9 +198,7 @@ class AnswerSerializer(serializers.ModelSerializer):
             if answer is not None:
                 answer = answer.get('text_answer')
                 if answer:
-                    if (max_length is not None and min_length is not None) and pattern in [
-                        TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS,
-                        TextAnswerQuestion.FREE]:
+                    if (max_length is not None and min_length is not None) and pattern in [TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS, TextAnswerQuestion.FREE]:
                         if len(answer) > max_length:
                             raise serializers.ValidationError(
                                 {question.id: f'طول پاسخ بیشتر از {max_length}است'},
@@ -461,24 +459,32 @@ class AnswerSerializer(serializers.ModelSerializer):
         return result
 
 
+# TODO - add answered by field
 class AnswerSetSerializer(serializers.ModelSerializer):
     answers = AnswerSerializer(many=True, read_only=True)
 
     class Meta:
         model = AnswerSet
         fields = ('id', 'questionnaire', 'answered_at', 'answers')
+        read_only_fields = ('id', 'questionnaire', 'answered_at', 'answers', 'answered_by')
         ref_name = 'Interview'
 
     @transaction.atomic()
     def create(self, validated_data):
-        questionnaire = get_object_or_404(Questionnaire, uuid=self.context.get('questionnaire_uuid'))
+        interview = get_object_or_404(Interview, uuid=self.context.get('interview_uuid'))
         profile = self.context.get('request').user.profile
-        answer_set = AnswerSet.objects.create(**validated_data, questionnaire=questionnaire, answered_by=profile)
+        answer_set = AnswerSet.objects.create(**validated_data, questionnaire=interview, answered_by=profile)
         return answer_set
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['questionnaire'] = self.context.get('questionnaire_uuid')
+        representation['questionnaire'] = self.context.get('interview_uuid')
+        representation['answered_by'] = {
+            'id': instance.answered_by.id,
+            'phone_number': instance.answered_by.phone_number,
+            'first_name': instance.answered_by.first_name,
+            'last_name': instance.answered_by.last_name,
+        }
         return representation
 
 
