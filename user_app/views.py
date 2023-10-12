@@ -40,7 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         if request.method == 'GET':
             serializer = ProfileSerializer(
-                Profile.objects.prefetch_related('prefered_districts', 'resume__skills', 'resume__achievements',
+                Profile.objects.prefetch_related('prefered_districts', 'prefered_districts__city', 'prefered_districts__city__province', 'prefered_districts__city__province__country', 'resume__skills', 'resume__achievements',
                                                  'resume__work_backgrounds', 'resume__educational_backgrounds',
                                                  'resume__research_histories').select_related('resume',
                                                                                               'nationality',
