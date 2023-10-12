@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import ModelSerializer
 from user_app.models import Resume, ResearchHistory, Achievement, Skill, EducationalBackground, WorkBackground
 
@@ -20,7 +21,8 @@ class EducationalBackgroundSerializer(ModelSerializer):
 
     def create(self, validated_data):
         resume_pk = self.context.get('resume_pk')
-        return EducationalBackground.objects.create(**validated_data, resume_id=resume_pk)
+        resume = get_object_or_404(Resume, pk=resume_pk)
+        return EducationalBackground.objects.create(**validated_data, resume=resume)
 
 
 class SkillSerializer(ModelSerializer):
@@ -30,7 +32,8 @@ class SkillSerializer(ModelSerializer):
 
     def create(self, validated_data):
         resume_pk = self.context.get('resume_pk')
-        return Skill.objects.create(**validated_data, resume_id=resume_pk)
+        resume = get_object_or_404(Resume, pk=resume_pk)
+        return Skill.objects.create(**validated_data, resume=resume)
 
 
 class AchievementSerializer(ModelSerializer):
@@ -40,7 +43,8 @@ class AchievementSerializer(ModelSerializer):
 
     def create(self, validated_data):
         resume_pk = self.context.get('resume_pk')
-        return Achievement.objects.create(**validated_data, resume_id=resume_pk)
+        resume = get_object_or_404(Resume, pk=resume_pk)
+        return Achievement.objects.create(**validated_data, resume=resume)
 
 
 class ResearchHistorySerializer(ModelSerializer):
@@ -50,7 +54,8 @@ class ResearchHistorySerializer(ModelSerializer):
 
     def create(self, validated_data):
         resume_pk = self.context.get('resume_pk')
-        return ResearchHistory.objects.create(**validated_data, resume_id=resume_pk)
+        resume = get_object_or_404(Resume, pk=resume_pk)
+        return ResearchHistory.objects.create(**validated_data, resume=resume)
 
 
 class ResumeSerializer(ModelSerializer):
