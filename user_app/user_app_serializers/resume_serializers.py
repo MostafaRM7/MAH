@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import ModelSerializer
-from user_app.models import Resume, ResearchHistory, Achievement, Skill, EducationalBackground, WorkBackground
+from user_app.models import Resume, ResearchHistory, Achievement, Skill, EducationalBackground, WorkBackground, Profile
 
 
 class WorkBackgroundSerializer(ModelSerializer):
@@ -72,7 +72,8 @@ class ResumeSerializer(ModelSerializer):
 
     def create(self, validated_data):
         user_pk = self.context.get('user_pk')
-        return Resume.objects.create(**validated_data, owner_id=user_pk)
+        profile = get_object_or_404(Profile, pk=user_pk)
+        return Resume.objects.create(**validated_data, owner=profile)
 
     def validate(self, data):
         user_pk = self.context.get('user_pk')
