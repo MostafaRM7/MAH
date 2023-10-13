@@ -48,7 +48,7 @@ class Profile(User):
     birth_date = models.DateField(verbose_name='تاریخ تولد', null=True, blank=True)
     nationality = models.ForeignKey('Country', on_delete=models.CASCADE, verbose_name='ملیت', null=True, blank=True)
     province = models.ForeignKey('Province', on_delete=models.CASCADE, verbose_name='استان', null=True, blank=True)
-    prefered_districts = models.ManyToManyField('District', verbose_name='مناطق مورد علاقه', blank=True)
+    preferred_districts = models.ManyToManyField('District', verbose_name='مناطق مورد علاقه', blank=True)
     avatar = models.ImageField(upload_to='avatars/', verbose_name='تصویر پروفایل', null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name='زمان آخرین بروزرسانی')
 

@@ -1,3 +1,4 @@
+from user_app.representors import represent_prefrred_districts
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -5,7 +6,6 @@ from question_app.models import Folder
 from question_app.question_app_serializers import general_serializers
 from user_app.models import Profile, Country, Province, City, District
 from user_app.user_app_serializers.resume_serializers import ResumeSerializer
-from wallet_app.models import Wallet
 
 
 class FolderSerializer(serializers.ModelSerializer):
@@ -58,64 +58,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
-            'address', 'nationality', 'province', 'prefered_districts', 'resume', 'updated_at', 'date_joined')
+            'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['nationality'] = instance.nationality.name if instance.nationality else None
         representation['province'] = instance.province.name if instance.province else None
-        if instance.prefered_districts:
-            # Build the nested structure with IDs and names based on preferred districts
-            nested_preferred_districts = {}
-            for district in instance.prefered_districts.all():
-                city = district.city
-                province = city.province
-                country = province.country
-                if country.id not in nested_preferred_districts:
-                    nested_preferred_districts[country.id] = {'id': country.id, 'name': country.name, 'provinces': []}
-
-                if province.id not in [p['id'] for p in nested_preferred_districts[country.id]['provinces']]:
-                    nested_preferred_districts[country.id]['provinces'].append(
-                        {'id': province.id, 'name': province.name, 'cities': []})
-
-                province_index = [i for i, p in enumerate(nested_preferred_districts[country.id]['provinces']) if
-                                  p['id'] == province.id][0]
-
-                if city.id not in [c['id'] for c in
-                                   nested_preferred_districts[country.id]['provinces'][province_index]['cities']]:
-                    nested_preferred_districts[country.id]['provinces'][province_index]['cities'].append(
-                        {'id': city.id, 'name': city.name, 'districts': []})
-
-                city_index = \
-                    [i for i, c in
-                     enumerate(nested_preferred_districts[country.id]['provinces'][province_index]['cities'])
-                     if c['id'] == city.id][0]
-
-                nested_preferred_districts[country.id]['provinces'][province_index]['cities'][city_index][
-                    'districts'].append({
-                    'id': district.id,
-                    'name': district.name
-                })
-
-            representation['prefered_districts'] = nested_preferred_districts
-
-            # representation['prefered_districts'] = nested_preferred_districts
-            # representation['prefered_districts'] = [{
-            #     'id': district.id,
-            #     'name': district.name,
-            #     'province':
-            #         {
-            #             'id': district.city.province.id,
-            #             'name': district.city.province.name
-            #         },
-            #     'city':
-            #         {
-            #             'id': district.city.id,
-            #             'name': district.city.name
-            #         }
-            # } for district in instance.prefered_districts.all()]
-        else:
-            representation['prefered_districts'] = []
+        representation['preferred_districts'] = represent_prefrred_districts(instance)
         return representation
 
 
