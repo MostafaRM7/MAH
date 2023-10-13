@@ -9,9 +9,12 @@ from rest_framework.response import Response
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer, \
     AnswerSerializer
+from interview_app.interview_app_serializers.question_serializers import *
 from interview_app.models import Interview
+from interview_app.permissions import IsInterviewOwnerOrReadOnly
 from porsline_config.paginators import MainPagination
 from question_app.models import AnswerSet
+from question_app.permissions import IsQuestionOwnerOrReadOnly
 from result_app.filtersets import AnswerSetFilterSet
 from result_app.permissions import IsQuestionnaireOwner
 
@@ -21,7 +24,7 @@ from result_app.permissions import IsQuestionnaireOwner
 
 class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsInterviewOwnerOrReadOnly,)
     lookup_field = 'uuid'
     queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').all()
     pagination_class = MainPagination
@@ -53,6 +56,217 @@ class InterviewViewSet(viewsets.ModelViewSet):
     #                         status.HTTP_403_FORBIDDEN)
 
 
+class OptionalQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = OptionalQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = OptionalQuestion.objects.prefetch_related('options').filter(
+            questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class DropDownQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = DropDownQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = DropDownQuestion.objects.prefetch_related('options').filter(
+            questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class SortQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = SortQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = SortQuestion.objects.prefetch_related('options').filter(
+            questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class TextAnswerQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = TextAnswerQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = TextAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class NumberAnswerQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = NumberAnswerQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = NumberAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class IntegerRangeQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = IntegerRangeQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = IntegerRangeQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class IntegerSelectiveQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = IntegerSelectiveQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = IntegerSelectiveQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class PictureFieldQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = PictureFieldQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = PictureFieldQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class EmailFieldQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = EmailFieldQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = EmailFieldQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class LinkQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = LinkQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = LinkQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class FileQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = FileQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = FileQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class QuestionGroupViewSet(viewsets.ModelViewSet):
+    serializer_class = QuestionGroupSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = QuestionGroup.objects.prefetch_related('child_questions').filter(
+            questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
+class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = NoAnswerQuestionSerializer
+    lookup_field = 'id'
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = NoAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'interview_uuid': self.kwargs['interview_uuid']})
+        return context
+
+
 class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                        viewsets.mixins.RetrieveModelMixin,
                        viewsets.mixins.DestroyModelMixin,
@@ -73,7 +287,8 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
             return Response({'message': 'لطفا عبارت سرچ را وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
         result = []
         questionnaire = Interview.objects.get(uuid=interview_uuid)
-        for answer_set in questionnaire.answer_sets.prefetch_related('answers', 'answers__question').select_related('answered_by').all():
+        for answer_set in questionnaire.answer_sets.prefetch_related('answers', 'answers__question').select_related(
+                'answered_by').all():
             for answer in answer_set.answers.all():
                 question = answer.question
                 question_type = question.question_type
