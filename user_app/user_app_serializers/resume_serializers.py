@@ -11,7 +11,7 @@ class WorkBackgroundSerializer(ModelSerializer):
         fields = ('id', 'company', 'position', 'start_date', 'end_date')
 
     def validate(self, data):
-        profile = self.context.get('profile')
+        profile = self.context.get('request').user.profile
         if not profile.resume:
             raise serializers.ValidationError(
                 {'resume': 'اول رزومه بسازید'},
