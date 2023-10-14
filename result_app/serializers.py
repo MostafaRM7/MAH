@@ -17,7 +17,7 @@ class AnswerSerializer(serializers.ModelSerializer):
         result['is_required'] = instance.question.is_required
         match instance.question.question_type:
             case 'sort':
-                result['answer'] = instance.answer.get('sorted_options') if instance.answer else None
+                result['answer'] = instance.answer.get('sorted_options') if instance.answer else [{'id': o.id, 'text': o.text} for o in instance.question.sortquestion.options.all()]
             case 'drop_down':
                 result['answer'] = instance.answer.get('selected_options') if instance.answer else None
             case 'optional':

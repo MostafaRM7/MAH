@@ -430,11 +430,11 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         if questionnaire.is_active and questionnaire.pub_date <= timezone.now():
             if questionnaire.end_date:
                 if questionnaire.end_date >= timezone.now():
-                    return serializers.ValidationError(
+                    raise serializers.ValidationError(
                         {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
                     )
         else:
-            return serializers.ValidationError(
+            raise serializers.ValidationError(
                 {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"})
         return data
 
