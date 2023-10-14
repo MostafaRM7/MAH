@@ -16,6 +16,7 @@ class WorkBackgroundSerializer(ModelSerializer):
             raise serializers.ValidationError(
                 {'resume': 'اول رزومه بسازید'},
             )
+        return data
 
     def create(self, validated_data):
         resume_pk = self.context.get('resume_pk')
@@ -63,6 +64,7 @@ class SkillSerializer(ModelSerializer):
             raise serializers.ValidationError(
                 {'resume': 'اول رزومه بسازید'},
             )
+        return data
 
     def create(self, validated_data):
         resume_pk = self.context.get('resume_pk')
@@ -81,6 +83,7 @@ class AchievementSerializer(ModelSerializer):
             raise serializers.ValidationError(
                 {'resume': 'اول رزومه بسازید'},
             )
+        return data
 
     def create(self, validated_data):
         resume_pk = self.context.get('resume_pk')
@@ -99,6 +102,7 @@ class ResearchHistorySerializer(ModelSerializer):
             raise serializers.ValidationError(
                 {'resume': 'اول رزومه بسازید'},
             )
+        return data
 
     def create(self, validated_data):
         resume_pk = self.context.get('resume_pk')
