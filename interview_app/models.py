@@ -34,6 +34,7 @@ class Interview(Questionnaire):
 
 class Ticket(models.Model):
     text = models.TextField(verbose_name='متن')
-    source = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='tickets', verbose_name='فرستنده')
+    source = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='sent_tickets', verbose_name='فرستنده')
     destination = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='received_tickets')
+    interview = models.ForeignKey(Interview, on_delete=models.CASCADE, null=True, blank=True, related_name='tickets', verbose_name='پروژه پرسشگری')
     is_read = models.BooleanField(default=False, verbose_name='خوانده شده')

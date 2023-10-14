@@ -30,6 +30,7 @@ interview_router.register(LinkQuestion.URL_PREFIX, views.LinkQuestionViewSet, ba
 interview_router.register(FileQuestion.URL_PREFIX, views.FileQuestionViewSet, basename='file_questions')
 interview_router.register(QuestionGroup.URL_PREFIX, views.QuestionGroupViewSet, basename='question_groups')
 interview_router.register(NoAnswerQuestion.URL_PREFIX, views.NoAnswerQuestionViewSet, basename='noanswer_questions')
+interview_router.register('tickets', views.TicketViewSet, basename='tickets')
 
 urlpatterns = [
     path('', include(base_router.urls)),

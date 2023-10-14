@@ -8,9 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer, \
-    AnswerSerializer
+    AnswerSerializer, TicketSerializer
 from interview_app.interview_app_serializers.question_serializers import *
-from interview_app.models import Interview
+from interview_app.models import Interview, Ticket
 from interview_app.permissions import IsInterviewOwnerOrReadOnly
 from porsline_config.paginators import MainPagination
 from question_app.models import AnswerSet
@@ -398,3 +398,11 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
         context = super().get_serializer_context()
         context.update({'interview_uuid': self.kwargs.get('interview_uuid')})
         return context
+
+
+class TicketViewSet(viewsets.ModelViewSet):
+    serializer_class = TicketSerializer
+    permission_classes = (IsAuthenticated)
+
+    def get_queryset(self):
+        return Ticket.objects.filter(interview__uuid=self.kwargs['interview_uuid'])

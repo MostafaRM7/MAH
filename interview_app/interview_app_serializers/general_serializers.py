@@ -1,13 +1,11 @@
-import datetime
-
 from django.db import models, transaction
 from rest_framework import serializers, status
 from rest_framework.generics import get_object_or_404
 
-from interview_app.models import Interview
+from interview_app.models import Interview, Ticket
 from question_app import validators
 from question_app.models import Answer, AnswerSet, DropDownOption, SortOption, Option, FileQuestion, \
-    IntegerRangeQuestion, NumberAnswerQuestion, TextAnswerQuestion, DropDownQuestion, OptionalQuestion, Questionnaire
+    IntegerRangeQuestion, NumberAnswerQuestion, TextAnswerQuestion, DropDownQuestion, OptionalQuestion
 from question_app.question_app_serializers.question_serializers import NoGroupQuestionSerializer
 from question_app.validators import tag_remover
 
@@ -198,7 +196,9 @@ class AnswerSerializer(serializers.ModelSerializer):
             if answer is not None:
                 answer = answer.get('text_answer')
                 if answer:
-                    if (max_length is not None and min_length is not None) and pattern in [TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS, TextAnswerQuestion.FREE]:
+                    if (max_length is not None and min_length is not None) and pattern in [
+                        TextAnswerQuestion.ENGLISH_LETTERS, TextAnswerQuestion.PERSIAN_LETTERS,
+                        TextAnswerQuestion.FREE]:
                         if len(answer) > max_length:
                             raise serializers.ValidationError(
                                 {question.id: f'طول پاسخ بیشتر از {max_length}است'},
@@ -531,3 +531,24 @@ class InterviewSerializer(serializers.ModelSerializer):
         interview.districts.set(districts)
         interview.interviewers.set(interviewers)
         return interview
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ('id', 'text', 'source', 'destination', 'is_read')
+
+    def to_representation(self, instance: Ticket):
+        representation = super().to_representation(instance)
+        representation['source'] = {
+            'id': instance.source.id,
+            'phone_number': instance.source.phone_number
+        }
+        representation['destination'] = {
+            'id': instance.destination.id,
+            'phone_number': instance.destination.phone_number
+        }
+        return representation
+
+    def validate(self, data):
+        return data
