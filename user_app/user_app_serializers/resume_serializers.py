@@ -75,7 +75,7 @@ class SkillSerializer(ModelSerializer):
 class AchievementSerializer(ModelSerializer):
     class Meta:
         model = Achievement
-        fields = ('id', 'field', 'year')
+        fields = ('id', 'field', 'institute', 'year')
 
     def validate(self, data):
         profile = self.context.get('request').user.profile

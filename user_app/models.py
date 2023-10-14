@@ -161,6 +161,7 @@ class Skill(models.Model):
 
 class Achievement(models.Model):
     field = models.CharField(max_length=255, verbose_name='زمینه')
+    institute = models.CharField(max_length=255, verbose_name='مرکز')
     year = models.DateField(verbose_name='سال')
     resume = models.ForeignKey('Resume', on_delete=models.CASCADE, verbose_name='رزومه', related_name='achievements')
 
