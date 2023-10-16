@@ -17,4 +17,4 @@ class MainPagination(PageNumberPagination):
                 return page_size
             except Exception as e:
                 print(e)
-                return choices[2]
+                return self.choices[2]
