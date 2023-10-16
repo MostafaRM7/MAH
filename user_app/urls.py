@@ -21,7 +21,6 @@ province_router.register('cities', CityViewSet, basename='cities')
 city_router = routers.NestedDefaultRouter(province_router, 'cities', lookup='city')
 city_router.register('districts', DistrictViewSet, basename='districts')
 
-
 user_router = routers.NestedDefaultRouter(base_router, 'users', lookup='user')
 user_router.register('resume', ResumeViewSet, basename='resume')
 

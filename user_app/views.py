@@ -10,6 +10,7 @@ from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, Bl
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from porsline_config import settings
+from question_app.models import AnswerSet
 from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
     RefreshTokenSerializer
 from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
@@ -38,9 +39,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
+        AnswerSet.objects.filter(answers__isnull=True).delete()
         if request.method == 'GET':
             serializer = ProfileSerializer(
-                Profile.objects.prefetch_related('preferred_districts', 'preferred_districts__city', 'preferred_districts__city__province', 'preferred_districts__city__province__country', 'resume__skills', 'resume__achievements',
+                Profile.objects.prefetch_related('preferred_districts', 'preferred_districts__city', 'preferred_districts__city__province', 'preferred_districts__city__province__country', 'resume__skills',
+                                                 'resume__achievements',
                                                  'resume__work_backgrounds', 'resume__educational_backgrounds',
                                                  'resume__research_histories').select_related('resume',
                                                                                               'nationality',
@@ -215,7 +218,8 @@ class CountryNestedAPIView(APIView):
                                                     'provinces__cities__districts').all()
         if search:
             queryset = queryset.filter(Q(name__icontains=search) | Q(provinces__name__icontains=search) | Q(
-                provinces__cities__name__icontains=search) | Q(provinces__cities__districts__name__icontains=search)).distinct()
+                provinces__cities__name__icontains=search) | Q(
+                provinces__cities__districts__name__icontains=search)).distinct()
         serializer = CountryNestedSerializer(queryset, many=True)
         return Response(serializer.data)
 
