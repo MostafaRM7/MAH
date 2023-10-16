@@ -20,7 +20,7 @@ from .serializers import NumberQuestionPlotSerializer, ChoiceQuestionPlotSeriali
 
 
 class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = AnswerSet.objects.all()
+    queryset = AnswerSet.objects.all().order_by('answered_at')
     serializer_class = AnswerSetSerializer
     permission_classes = [IsQuestionnaireOwner]
     filter_backends = (DjangoFilterBackend,)
