@@ -1,5 +1,4 @@
-from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination, _positive_int
+from rest_framework.pagination import PageNumberPagination
 
 
 class MainPagination(PageNumberPagination):
@@ -12,10 +11,17 @@ class MainPagination(PageNumberPagination):
         if self.page_size_query_param:
             choices = self.choices
             page_size = request.query_params.get(self.page_size_query_param)
-            if not page_size:
-                return self.page_size
-            else:
-                if int(page_size) in choices:
-                    return int(page_size)
+
+            if page_size is None:  # Check if page_size is not provided
+                return self.page_size  # Return the default page size
+
+            try:
+                page_size = int(page_size)
+                if page_size in choices:
+                    return page_size
                 else:
-                    return self.page_size
+                    return self.page_size  # Return the default page size if the value is not in choices
+            except ValueError:
+                return self.page_size  # Return the default page size if page_size is not a valid integer
+
+        return self.page_size
