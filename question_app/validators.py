@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-
+from urllib.parse import urlparse
 import jdatetime
 
 
@@ -68,3 +68,12 @@ def option_in_html_tag_validator(options_list: list, option_text):
 
 def tag_remover(string):
     return re.sub(r'<[^>]+>', '', string)
+
+
+def url_validator(url):
+    url = url.replace('https://', '')
+    url = url.replace('http://', '')
+    url = url.replace('www.', '')
+    url = 'https://' + url
+    result = urlparse(url)
+    return bool((result.scheme and result.netloc) or (result.netloc))
