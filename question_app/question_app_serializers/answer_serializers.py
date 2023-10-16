@@ -320,6 +320,21 @@ class AnswerSerializer(serializers.ModelSerializer):
                         {question.id: 'پاسخ به سوال اجباری است'},
                         status.HTTP_400_BAD_REQUEST
                     )
+        elif question.question_type == "link":
+            if answer is not None:
+                answer = answer.get('link')
+                if answer is not None:
+                    if not validators.url_validator(answer):
+                        raise serializers.ValidationError(
+                            {question.id: 'پاسخ در قالب لینک نیست'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
+                else:
+                    raise serializers.ValidationError(
+                        {
+                            question.id: 'از link برای پاسخ استفاده کنید'
+                        }
+                    )
         elif question.question_type == "integer_range":
             number_answer_question: IntegerRangeQuestion = question.integerrangequestion
             max_value = number_answer_question.max

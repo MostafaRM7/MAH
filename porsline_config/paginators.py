@@ -11,10 +11,10 @@ class MainPagination(PageNumberPagination):
         if self.page_size_query_param:
             try:
                 choices = self.choices
-                page_size = int(request.query_params.get(self.page_size_query_param, choices[2]))
+                page_size = int(request.query_params.get(self.page_size_query_param, 7))
                 if page_size not in choices:
-                    page_size = choices[2]
+                    page_size = 7
                 return page_size
             except Exception as e:
                 print(e)
-                return Response(data={'اندازه صفحه نامعتبر!'}, status=400)
+                return Response(data={e}, status=400)
