@@ -1,3 +1,4 @@
+import re
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
@@ -6,7 +7,6 @@ from wallet_app.models import Wallet, Transaction
 
 
 class TransactionSerializer(ModelSerializer):
-
     class Meta:
         model = Transaction
         fields = ['id', 'uuid', 'transaction_type', 'reason', 'amount', 'created_at', 'source', 'destination',
@@ -19,7 +19,6 @@ class TransactionSerializer(ModelSerializer):
         representation['source'] = instance.source.uuid
         representation['destination'] = instance.destination.uuid
         return representation
-
 
 
 class WalletSerializer(ModelSerializer):
@@ -37,6 +36,15 @@ class WalletSerializer(ModelSerializer):
     def validate(self, data):
         profile = self.context.get('owner')
         request = self.context.get('request')
+        card_number = data.get('card_number')
+        IBAN = data.get('IBAN')
+        if not bool(re.match(r'^IR(?=.{24}$)[0-9]*$', IBAN)):
+            raise serializers.ValidationError({'IBAN': 'فرمت شماره شبا صحیح نیست.'})
+        for c in card_number:
+            if not c.isdigit():
+                raise serializers.ValidationError({'card_number': 'شماره کارت باید عدد باشد.'})
+        if len(card_number) not in range(16, 20):
+            raise serializers.ValidationError({'card_number': 'شماره کارت باید 16 یا 19 رقمی باشد.'})
         if Wallet.objects.filter(owner=profile).exists() and request.method in ['POST']:
             raise serializers.ValidationError('شما قبلا کیف پول ایجاد کرده اید.')
         return data
