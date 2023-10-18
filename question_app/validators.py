@@ -76,4 +76,4 @@ def url_validator(url):
     url = url.replace('www.', '')
     url = 'https://' + url
     result = urlparse(url)
-    return bool((result.scheme and result.netloc) or (result.netloc))
+    return bool((result.scheme and result.netloc) or result.netloc)

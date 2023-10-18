@@ -130,7 +130,7 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = AnswerSet.objects.prefetch_related('answers__question', 'answers').filter(
-            questionnaire__uuid=self.kwargs['questionnaire_uuid'])
+            questionnaire__uuid=self.kwargs['questionnaire_uuid']).order_by('answered_at')
         return queryset
 
     def get_serializer_context(self):
