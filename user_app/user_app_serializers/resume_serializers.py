@@ -116,11 +116,16 @@ class ResumeSerializer(ModelSerializer):
     skills = SkillSerializer(many=True, read_only=True)
     achievements = AchievementSerializer(many=True, read_only=True)
     research_histories = ResearchHistorySerializer(many=True, read_only=True)
+    is_empty = serializers.SerializerMethodField()
 
     class Meta:
         model = Resume
         fields = ('id', 'linkedin', 'file', 'work_backgrounds', 'educational_backgrounds', 'skills', 'achievements',
-                  'research_histories')
+                  'research_histories', 'is_empty')
+
+    def get_is_empty(self, obj):
+        if obj.work_backgrounds.exists() or obj.educational_backgrounds.exists() or obj.skills.exists() or obj.achievements.exists() or obj.research_histories.exists():
+            return False
 
     def create(self, validated_data):
         user_pk = self.context.get('user_pk')
