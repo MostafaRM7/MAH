@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import status, permissions
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
@@ -289,7 +289,7 @@ class AchievementViewSet(viewsets.ModelViewSet):
         return context
 
 
-class ResumeViewSet(RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, GenericViewSet):
+class ResumeViewSet(viewsets.ModelViewSet):
     serializer_class = ResumeSerializer
     permission_classes = (IsOwner,)
 
