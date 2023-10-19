@@ -116,7 +116,7 @@ class ResumeSerializer(ModelSerializer):
     skills = SkillSerializer(many=True, read_only=True)
     achievements = AchievementSerializer(many=True, read_only=True)
     research_histories = ResearchHistorySerializer(many=True, read_only=True)
-    is_empty = serializers.SerializerMethodField()
+    is_empty = serializers.SerializerMethodField(method_name='get_is_empty')
 
     class Meta:
         model = Resume
