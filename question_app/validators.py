@@ -76,4 +76,7 @@ def url_validator(url):
     url = url.replace('www.', '')
     url = 'https://' + url
     result = urlparse(url)
-    return bool((result.scheme and result.netloc) or result.netloc)
+    print(result.scheme)
+    print(result.netloc)
+    spurl = url.split('.')
+    return bool(((result.scheme and result.netloc) or result.netloc) and len(spurl) > 1 and spurl[-1] in ['com', 'ir', 'org', 'net', 'edu', 'gov', 'co', 'info', 'me', 'biz', 'mobi', 'tv', 'name', 'us', 'cc', 'ws', 'bz', 'mn', 'co.uk', 'org.uk', 'me.uk', 'uk.com', 'uk.net', 'gb.com', 'gb.net', 'eu.com', 'eu.net', 'de.com', 'qc.com', 'ae.org', 'kr.com', 'us.com', 'ar.com', 'br.com', 'cn.com', 'hu.com', 'no.com', 'ru.com', 'sa.com', 'se.com', 'se.net', 'uy.com', 'za.com', 'co.jp', 'jp.net', 'jpn.com', 'de', 'fr', 'it', 'nl', 'se', 'es', 'xxx', 'pw', 'tk', 'ml', 'cf', 'ga', 'gq', 'cm', 'dj', 'com.de', 'com.se', 'net.se', 'org.se', 'eu', 'com.au', 'net.au', 'org.au', 'co.nz', 'net.nz', 'org.nz', 'com.tw', 'idv.tw', 'org.tw', 'game.tw', 'ebiz.tw', 'club.tw', 'tw', 'com.cn', 'net.cn', 'org.cn', 'gov.cn', 'ac.cn', 'bj.cn', 'sh.cn', 'tj.cn', 'cq.cn', 'he.cn', 'nm.cn', 'ln.cn', 'jl.cn', 'hl.cn', 'js.cn', 'zj.cn', 'ah.cn', 'fj.cn', 'jx.cn', 'sd.cn', 'ha.cn', 'hb.cn', 'hn.cn', 'gd.cn', 'gx.cn', 'hi.cn', 'sc.cn', 'gz.cn', 'yn.cn', 'xz.cn', 'sn.cn', 'gs.cn', 'qh.cn', 'nx.cn', 'xj.cn', 'tw.cn', 'hk.cn', 'mo.cn', 'asia', 'biz', 'cc', 'cn', 'co', 'com', 'info', 'me', 'mobi', 'name', 'net', 'org', 'pro', 'tel', 'tv', 'us'])
