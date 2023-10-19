@@ -126,6 +126,7 @@ class ResumeSerializer(ModelSerializer):
     def get_is_empty(self, obj):
         if obj.work_backgrounds.exists() or obj.educational_backgrounds.exists() or obj.skills.exists() or obj.achievements.exists() or obj.research_histories.exists():
             return False
+        return True
 
     def create(self, validated_data):
         user_pk = self.context.get('user_pk')
