@@ -102,9 +102,13 @@ class OTPCheckViewSet(CreateModelMixin, GenericViewSet):
         #                     status=status.HTTP_201_CREATED, headers=headers)
         response = Response(status=status.HTTP_201_CREATED, headers=headers)
         response.set_cookie('access_token', access, secure=True, httponly=True,
-                            expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
+                            expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME')
+                            , domain='mah.codintofuture.ir'
+                            )
         response.set_cookie('refresh_token', refresh, secure=True, httponly=True,
-                            expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
+                            expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME')
+                            , domain='mah.codintofuture.ir'
+                            )
         return response
 
 
@@ -158,9 +162,13 @@ class RefreshTokenView(APIView):
             }
             response = Response(data=data, status=status.HTTP_201_CREATED)
             response.set_cookie('access_token', data['access'], secure=True, httponly=True,
-                                expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
+                                expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME')
+                                , domain='mah.codintofuture.ir'
+                                )
             response.set_cookie('refresh_token', data['refresh'], secure=True, httponly=True,
-                                expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
+                                expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME')
+                                , domain='mah.codintofuture.ir'
+                                )
             return response
 
 
