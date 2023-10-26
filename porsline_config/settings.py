@@ -167,5 +167,3 @@ OTP_LIFE_TIME = 2
 
 OTP_TRY_COUNT = 3
 
-SESSION_COOKIE_DOMAIN = '.codintofuture.ir'
-CSRF_COOKIE_DOMAIN = '.codintofuture.ir'
