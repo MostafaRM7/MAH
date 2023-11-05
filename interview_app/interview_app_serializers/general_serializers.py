@@ -459,7 +459,6 @@ class AnswerSerializer(serializers.ModelSerializer):
         return result
 
 
-# TODO - add answered by field
 class AnswerSetSerializer(serializers.ModelSerializer):
     answers = AnswerSerializer(many=True, read_only=True)
 
@@ -494,11 +493,10 @@ class InterviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Interview
-        # TODO - check required fields after UI is ready
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
             'pay_per_answer', 'interviewers', 'approval_status',
-            'add_to_approve_queue', 'districts', 'goal', 'answer_count_goal', 'difficulty'
+            'add_to_approve_queue', 'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty'
         )
         read_only_fields = ('owner', 'questions')
 
@@ -513,23 +511,21 @@ class InterviewSerializer(serializers.ModelSerializer):
         return representation
 
     # TODO - add validation after interview panel UI is ready
-    # def validate(self, attrs):
-    #     return attrs
+    # def validate(self, data):
+    #     return
 
     def get_difficulty(self, instance: Interview):
         try:
             return sum(
-                [question.difficulty for question in instance.questions.all()]) / instance.questions.count() * 100
+                [question.level for question in instance.questions.all()]) / instance.questions.count() * 100
         except ZeroDivisionError:
             return 0
 
     def create(self, validated_data):
         districts = validated_data.pop('districts')
-        interviewers = validated_data.pop('interviewers')
         owner = self.context['request'].user.profile
         interview = Interview.objects.create(owner=owner, **validated_data)
         interview.districts.set(districts)
-        interview.interviewers.set(interviewers)
         return interview
 
 

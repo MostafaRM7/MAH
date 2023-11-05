@@ -1,22 +1,23 @@
 from uuid import UUID
 
 from django.db import transaction
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer, \
     AnswerSerializer, TicketSerializer
 from interview_app.interview_app_serializers.question_serializers import *
 from interview_app.models import Interview, Ticket
-from interview_app.permissions import IsInterviewOwnerOrReadOnly
+from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerOrInterviewerReadOnly
 from porsline_config.paginators import MainPagination
 from question_app.models import AnswerSet
-from question_app.permissions import IsQuestionOwnerOrReadOnly
 from result_app.filtersets import AnswerSetFilterSet
-from result_app.permissions import IsQuestionnaireOwner
 
 
 # Create your views here.
@@ -24,10 +25,34 @@ from result_app.permissions import IsQuestionnaireOwner
 
 class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
-    # permission_classes = (IsInterviewOwnerOrReadOnly,)
+    permission_classes = (InterviewOwnerOrInterviewerReadOnly,)
     lookup_field = 'uuid'
     queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').all()
     pagination_class = MainPagination
+
+    @action(detail=True, methods=['get'], url_path='search-questions')
+    def search_in_questions(self, request, *args, **kwargs):
+        search = request.query_params.get('search')
+        if search:
+            obj = self.get_object()
+            result = obj.questions.filter(Q(title__icontains=search) | Q(description__icontains=search))
+            return Response(NoGroupQuestionSerializer(result, many=True, context={'request': request}).data)
+        else:
+            return Response([])
+
+    @action(detail=True, methods=['delete'], url_path='delete-question')
+    def delete_question(self, request, *args, **kwargs):
+        question_id = request.query_params.get('id')
+        if question_id is None:
+            return Response({"detail": "لطفا آی دی سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            question_id = int(question_id)
+        except ValueError:
+            return Response({"detail": "آی دی سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        question = get_object_or_404(Question, id=question_id, questionnaire=self.get_object())
+        question.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
     def initial(self, request, *args, **kwargs):
         if kwargs.get('uuid'):
@@ -55,11 +80,49 @@ class InterviewViewSet(viewsets.ModelViewSet):
     #         return Response({"detail": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
     #                         status.HTTP_403_FORBIDDEN)
 
+class SearchInterview(APIView):
+    """
+        if user is in a folder:
+            {host}/.../search_questionnaire/?search=questionnaire_name&folder_id=folder_id
+        else:
+            {host}/.../search_questionnaire/?search=questionnaire_name
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        questionnaire_name = request.query_params.get('search')
+        folder_id = request.query_params.get('folder_id')
+        if questionnaire_name and folder_id:
+            if not request.user.is_staff:
+                questionnaires = request.user.questionnaires.filter(folder__id=folder_id, is_delete=False,
+                                                                    name__icontains=questionnaire_name, interview__isnull=False)
+                interviews = Interview.objects.filter(questionnaire_ptr__in=questionnaires)
+                serializer = InterviewSerializer(interviews, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                questionnaires = Questionnaire.objects.filter(name__icontains=questionnaire_name, interview__isnull=False)
+                interviews = Interview.objects.filter(questionnaire_ptr__in=questionnaires)
+                serializer = InterviewSerializer(interviews, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        elif questionnaire_name:
+            if not request.user.is_staff:
+                questionnaires = request.user.questionnaires.filter(is_delete=False,
+                                                                    name__icontains=questionnaire_name, interview__isnull=False)
+                interviews = Interview.objects.filter(questionnaire_ptr__in=questionnaires)
+                serializer = InterviewSerializer(interviews, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                questionnaires = Questionnaire.objects.filter(folder__isnull=False, name__icontains=questionnaire_name, interview__isnull=False)
+                interviews = Interview.objects.filter(questionnaire_ptr__in=questionnaires)
+                serializer = InterviewSerializer(interviews, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 class OptionalQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = OptionalQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = OptionalQuestion.objects.prefetch_related('options').filter(
@@ -76,7 +139,7 @@ class OptionalQuestionViewSet(viewsets.ModelViewSet):
 class DropDownQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = DropDownQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = DropDownQuestion.objects.prefetch_related('options').filter(
@@ -93,7 +156,7 @@ class DropDownQuestionViewSet(viewsets.ModelViewSet):
 class SortQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = SortQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = SortQuestion.objects.prefetch_related('options').filter(
@@ -110,7 +173,7 @@ class SortQuestionViewSet(viewsets.ModelViewSet):
 class TextAnswerQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = TextAnswerQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = TextAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -126,7 +189,7 @@ class TextAnswerQuestionViewSet(viewsets.ModelViewSet):
 class NumberAnswerQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = NumberAnswerQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = NumberAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -142,7 +205,7 @@ class NumberAnswerQuestionViewSet(viewsets.ModelViewSet):
 class IntegerRangeQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = IntegerRangeQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = IntegerRangeQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -158,7 +221,7 @@ class IntegerRangeQuestionViewSet(viewsets.ModelViewSet):
 class IntegerSelectiveQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = IntegerSelectiveQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = IntegerSelectiveQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -174,7 +237,7 @@ class IntegerSelectiveQuestionViewSet(viewsets.ModelViewSet):
 class PictureFieldQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = PictureFieldQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = PictureFieldQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -190,7 +253,7 @@ class PictureFieldQuestionViewSet(viewsets.ModelViewSet):
 class EmailFieldQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = EmailFieldQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = EmailFieldQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -206,7 +269,7 @@ class EmailFieldQuestionViewSet(viewsets.ModelViewSet):
 class LinkQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = LinkQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = LinkQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -222,7 +285,7 @@ class LinkQuestionViewSet(viewsets.ModelViewSet):
 class FileQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = FileQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = FileQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -238,7 +301,7 @@ class FileQuestionViewSet(viewsets.ModelViewSet):
 class QuestionGroupViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionGroupSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = QuestionGroup.objects.prefetch_related('child_questions').filter(
@@ -255,7 +318,7 @@ class QuestionGroupViewSet(viewsets.ModelViewSet):
 class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = NoAnswerQuestionSerializer
     lookup_field = 'id'
-    # permission_classes = (IsQuestionOwnerOrReadOnly,)
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
         queryset = NoAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
@@ -274,12 +337,12 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     queryset = AnswerSet.objects.all()
     serializer_class = AnswerSetSerializer
-    # permission_classes = [IsQuestionnaireOwner]
+    # permission_classes = [IsInterviewOwnerOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AnswerSetFilterSet
     pagination_class = MainPagination
 
-    @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwner],
+    @action(methods=['get'], detail=False,
             filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
     def search(self, request, interview_uuid):
         search = request.query_params.get('search', None)
@@ -378,8 +441,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                                              context={'interview_uuid': interview_uuid})
             return self.get_paginated_response(serializer.data)
 
-    # TODO - Add permission for user roles i & ie
-    @action(methods=['post'], detail=True, permission_classes=[IsAuthenticated], url_path='add-answer')
+    @action(methods=['post'], detail=True, url_path='add-answer')
     @transaction.atomic
     def add_answer(self, request, interview_uuid, pk):
         answer_set = self.get_object()

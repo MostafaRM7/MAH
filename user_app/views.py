@@ -100,7 +100,7 @@ class OTPCheckViewSet(CreateModelMixin, GenericViewSet):
         refresh = serializer.data.get('refresh')
         # response = Response({'access': access, 'refresh': refresh},
         #                     status=status.HTTP_201_CREATED, headers=headers)
-        response = Response(status=status.HTTP_201_CREATED, headers=headers)
+        response = Response({'access': access, 'refresh': refresh}, status=status.HTTP_201_CREATED, headers=headers)
         response.set_cookie('access_token', access, secure=True, httponly=True,
                             expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
         response.set_cookie('refresh_token', refresh, secure=True, httponly=True,

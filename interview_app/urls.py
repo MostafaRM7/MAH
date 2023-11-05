@@ -33,6 +33,8 @@ interview_router.register(NoAnswerQuestion.URL_PREFIX, views.NoAnswerQuestionVie
 interview_router.register('tickets', views.TicketViewSet, basename='tickets')
 
 urlpatterns = [
+    path('search-questionnaires/', views.SearchInterview.as_view(),
+         name='search_questionnaire'),
     path('', include(base_router.urls)),
     path('', include(interview_router.urls))
 ]

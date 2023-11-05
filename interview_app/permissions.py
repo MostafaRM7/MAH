@@ -1,52 +1,45 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+from interview_app.models import Interview
 
 
-class InterviewerOrEmployerOrIsStaff(BasePermission):
-    def has_permission(self, request, view):
-        user = request.user
-        if user.is_authenticated:
-            if user.is_staff:
-                return True
-            else:
-                match user.role:
-                    # interviewer
-                    case 'i':
-                        pass
-                    # employer
-                    case 'e':
-                        pass
-                    # interviewer and employer
-                    case 'ie':
-                        pass
-                    case _:
-                        pass
-
-
-class IsInterviewOwnerOrReadOnly(BasePermission):
+class InterviewOwnerOrInterviewerReadOnly(BasePermission):
     def has_permission(self, request, view):
         uuid = view.kwargs.get('uuid')
         if request.user.is_authenticated:
-            if request.user.profile.role in ['i', 'ie', 'e']:
-                if uuid:
-                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+            if uuid:
+                if request.user.profile.interviews.filter(uuid=uuid).exists() or request.user.is_staff:
+                    return True
                 else:
-                    if request.method == 'POST':
-                        return request.user.is_authenticated
-                    else:
-                        return request.user.is_staff
+                    if request.method in SAFE_METHODS:
+                        if view.get_object().interviewers.filter(id=request.user.id).exists():
+                            return True
+
+
+class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
+    def has_permission(self, request, view):
+        is_detail = view.kwargs.get('pk')
+        interview_uuid = view.kwargs.get('interview_uuid')
+        if request.user.is_authenticated:
+            if is_detail:
+                answer_set = view.get_object()
+                if answer_set.interview.owner == request.user or request.user.is_staff:
+                    return True
+                else:
+                    if answer_set.interview.interviewers.filter(id=request.user.id).exists():
+                        return True
+            else:
+                interview = get_object_or_404(Interview, uuid=interview_uuid)
+                return interview.owner == request.user or request.user.is_staff or interview.interviewers.filter(
+                    request.user.id).exists()
 
 
 class IsQuestionOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        question_id = view.kwargs.get('pk')
         uuid = view.kwargs.get('interview_uuid')
         if request.user.is_authenticated:
-            if question_id:
-                if request.user.is_authenticated:
-                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
-            else:
-                if request.user.is_authenticated:
-                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
+            return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
 
 
 class ChangePlacementForOwnerOrStaff(BasePermission):
@@ -56,36 +49,3 @@ class ChangePlacementForOwnerOrStaff(BasePermission):
             if request.user.is_authenticated:
                 return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
         return False
-
-
-class AnonPOSTOrOwner(BasePermission):
-    def has_permission(self, request, view):
-        answer_set_id = view.kwargs.get('pk')
-        uuid = view.kwargs.get('interview_uuid')
-        if request.user.is_authenticated:
-            if answer_set_id:
-                if request.user.is_authenticated and request.method != 'POST':
-                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
-                else:
-                    return True
-        else:
-            if request.method == 'POST':
-                return True
-            else:
-                if request.user.is_authenticated:
-                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
-
-
-class IsPageOwnerOrReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        page_id = view.kwargs.get('pk')
-        uuid = view.kwargs.get('interview_uuid')
-        if page_id:
-            if request.user.is_authenticated:
-                return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
-        else:
-            if request.method == 'POST':
-                return request.user.is_authenticated
-            else:
-                if request.user.is_authenticated:
-                    return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
