@@ -461,12 +461,20 @@ class AnswerSerializer(serializers.ModelSerializer):
 
 class AnswerSetSerializer(serializers.ModelSerializer):
     answers = AnswerSerializer(many=True, read_only=True)
+    answered_at_time = serializers.SerializerMethodField(method_name='get_answered_at_time')
+    answered_at_date = serializers.SerializerMethodField(method_name='get_answered_at_date')
 
     class Meta:
         model = AnswerSet
         fields = ('id', 'questionnaire', 'answered_at', 'answers')
-        read_only_fields = ('id', 'questionnaire', 'answered_at', 'answers', 'answered_by')
+        read_only_fields = ('id', 'questionnaire', 'answered_at_time', 'answered_at_date', 'answers', 'answered_by')
         ref_name = 'Interview'
+
+    def get_answered_at_time(self, obj):
+        return obj.answered_at.strftime("%H:%M:%S")
+
+    def get_answered_at_date(self, obj):
+        return obj.answered_at.strftime("%Y-%m-%d")
 
     @transaction.atomic()
     def create(self, validated_data):
@@ -478,12 +486,6 @@ class AnswerSetSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['questionnaire'] = self.context.get('interview_uuid')
-        representation['answered_by'] = {
-            'id': instance.answered_by.id,
-            'phone_number': instance.answered_by.phone_number,
-            'first_name': instance.answered_by.first_name,
-            'last_name': instance.answered_by.last_name,
-        }
         return representation
 
 

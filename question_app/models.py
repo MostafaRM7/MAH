@@ -323,7 +323,7 @@ class FileQuestion(Question):
     def __str__(self):
         return self.title
 
-
+# TODO add answered where to answer set for interviews
 class AnswerSet(models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.PROTECT,
                                       related_name='answer_sets', verbose_name='پرسشنامه')

@@ -18,11 +18,12 @@ from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerO
 from porsline_config.paginators import MainPagination
 from question_app.models import AnswerSet
 from result_app.filtersets import AnswerSetFilterSet
+from user_app.models import Profile
 
 
-# Create your views here.
 
 
+# TODO add recommended interviews to postman
 class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
     permission_classes = (InterviewOwnerOrInterviewerReadOnly,)
@@ -52,6 +53,13 @@ class InterviewViewSet(viewsets.ModelViewSet):
         question = get_object_or_404(Question, id=question_id, questionnaire=self.get_object())
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['get'],  url_path='recommended-interviews')
+    def get_recommended_interviews(self,  request, *args, **kwargs):
+        # TODO filter by interview status
+        serializer = self.get_serializer(data=Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all()), many=True)
+        serializer.is_valid()
+        return Response(serializer.data)
 
 
     def initial(self, request, *args, **kwargs):
@@ -319,6 +327,7 @@ class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = NoAnswerQuestionSerializer
     lookup_field = 'id'
     permission_classes = (IsQuestionOwnerOrReadOnly,)
+
 
     def get_queryset(self):
         queryset = NoAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])

@@ -15,6 +15,8 @@ class InterviewOwnerOrInterviewerReadOnly(BasePermission):
                     if request.method in SAFE_METHODS:
                         if view.get_object().interviewers.filter(id=request.user.id).exists():
                             return True
+            else:
+                return request.user.is_staff
 
 
 class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
