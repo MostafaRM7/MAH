@@ -497,7 +497,7 @@ class InterviewSerializer(serializers.ModelSerializer):
         model = Interview
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
-            'pay_per_answer', 'interviewers', 'approval_status',
+            'interviewers', 'approval_status',
             'add_to_approve_queue', 'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty'
         )
         read_only_fields = ('owner', 'questions')
@@ -519,14 +519,15 @@ class InterviewSerializer(serializers.ModelSerializer):
     def get_difficulty(self, instance: Interview):
         try:
             return sum(
-                [question.level for question in instance.questions.all()]) / instance.questions.count() * 100
+                [question.level for question in instance.questions.all()]) / instance.questions.filter(level__gt=0).count() * 100
         except ZeroDivisionError:
             return 0
 
     def create(self, validated_data):
         districts = validated_data.pop('districts')
         owner = self.context['request'].user.profile
-        interview = Interview.objects.create(owner=owner, **validated_data)
+        folder = validated_data.pop('folder')
+        interview = Interview.objects.create(owner=owner, folder=folder, **validated_data)
         interview.districts.set(districts)
         return interview
 
