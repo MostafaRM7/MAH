@@ -511,6 +511,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             {'id': interviewer.id, 'first_name': interviewer.first_name, 'last_name': interviewer.last_name,
              'phone_number': interviewer.phone_number} for interviewer in
             instance.interviewers.all()]
+        representation['folder'] = instance.folder.name if instance.folder else None
         return representation
 
     # TODO - add validation after interview panel UI is ready
