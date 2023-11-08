@@ -13,28 +13,40 @@ def get_current_date():
 # Create your models here.
 
 class Interview(Questionnaire):
-    APPROVED_ADMIN = 'aa'
-    PENDING_ADMIN = 'pa'
-    REJECTED_ADMIN = 'ra'
-    APPROVED_EMPLOYER = 'ae'
-    PENDING_EMPLOYER = 'pe'
-    REJECTED_EMPLOYER = 're'
+    # 0
+    PENDING_CONTENT_ADMIN = 'pending_content_admin'
+    # 1
+    PENDING_LEVEL_ADMIN = 'pending_level_admin'
+    # 2
+    PENDING_PRICE_ADMIN = 'pending_price_admin'
+    # 3
+    REJECTED_ADMIN = 'rejected_admin'
+    # 4
+    APPROVED_PRICE_EMPLOYER = 'approved_price_employer'
+    # 5
+    PENDING_PRICE_EMPLOYER = 'pending_price_employer'
+    # 6
+    REJECTED_PRICE_EMPLOYER = 'rejected_price_employer'
+    # 7
+    SEARCHING_FOR_INTERVIEWERS = 'searching_for_interviewers'
     APPROVAL_STATUS = (
-        (APPROVED_ADMIN, 'تایید شده توسط ادمین'),
-        (PENDING_ADMIN, 'در انتظار تایید ادمین'),
+        (PENDING_CONTENT_ADMIN, 'در انتظار تایید محتوا توسط ادمین'),
+        (PENDING_LEVEL_ADMIN, 'در انتظار تعیین سطح ادمین'),
+        (PENDING_PRICE_ADMIN, 'در انتظار تعیین قیمت ادمین'),
         (REJECTED_ADMIN, 'رد شده توسط ادمین'),
-        (APPROVED_EMPLOYER, 'تایید شده توسط کارفرما'),
-        (PENDING_EMPLOYER, 'در انتظار تایید کارفرما'),
-        (REJECTED_EMPLOYER, 'رد شده توسط کارفرما')
+        (APPROVED_PRICE_EMPLOYER, 'قیمت تایید شده توسط کارفرما'),
+        (PENDING_PRICE_EMPLOYER, 'در انتظار تایید قیمت توسط کارفرما'),
+        (REJECTED_PRICE_EMPLOYER, 'رد قیمت شده توسط کارفرما'),
+        (SEARCHING_FOR_INTERVIEWERS, 'در جست و جوی پرسشگر')
     )
     interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True)
-    approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS, default=PENDING_ADMIN,
+    approval_status = models.CharField(max_length=255, choices=APPROVAL_STATUS, default=PENDING_LEVEL_ADMIN,
                                        verbose_name='وضعیت تایید')
     add_to_approve_queue = models.BooleanField(default=False, verbose_name='به صف تایید اضافه شود')
     districts = models.ManyToManyField(District, related_name='interviews', verbose_name='مناطق')
-    goal_start_date = models.DateField(default=get_current_date, verbose_name='تاریخ شروع هدف')
-    goal_end_date = models.DateField(default=get_current_date, verbose_name='تاریخ پایان هدف')
-    answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف')
+    goal_start_date = models.DateField(default=get_current_date, verbose_name='تاریخ شروع هدف', null=True, blank=True)
+    goal_end_date = models.DateField(default=get_current_date, verbose_name='تاریخ پایان هدف', null=True, blank=True)
+    answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف', null=True, blank=True)
     price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت')
 
     def __str__(self):

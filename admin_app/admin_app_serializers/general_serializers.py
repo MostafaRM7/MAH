@@ -41,15 +41,18 @@ class InterviewSerializer(serializers.ModelSerializer):
             return not instance.questions.filter(level=0).exists()
         return False
     def get_difficulty(self, instance: Interview):
-        try:
-            # print([question.level for question in instance.questions.filter(level__gt=0).all()])
-            # print('sum: ',sum([question.level for question in instance.questions.all()]))
-            # print('count: ',instance.questions.filter(level__gt=0).count())
-            return int(sum(
-                [question.level for question in instance.questions.all()]) / instance.questions.filter(
-                level__gt=0).count())
-        except ZeroDivisionError:
-            return None
+        if instance.questions.count() > 0 and not instance.questions.filter(level=0).exists():
+            try:
+                return int(sum(
+                    [question.level for question in instance.questions.all()]) / instance.questions.filter(
+                    level__gt=0).count())
+            except ZeroDivisionError:
+                return None
+        return None
+
+    def get_interviewers_count(self, instance: Interview):
+        return instance.interviewers.count() if instance.interviewers else 0
+
 
     def create(self, validated_data):
         districts = validated_data.pop('districts')
