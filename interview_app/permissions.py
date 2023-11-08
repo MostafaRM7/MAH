@@ -26,10 +26,10 @@ class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
         if request.user.is_authenticated:
             if is_detail:
                 answer_set = view.get_object()
-                if answer_set.interview.owner == request.user or request.user.is_staff:
+                if answer_set.questionnaire.owner == request.user or request.user.is_staff:
                     return True
                 else:
-                    if answer_set.interview.interviewers.filter(id=request.user.id).exists():
+                    if answer_set.questionnaire.interviewers.filter(id=request.user.id).exists():
                         return True
             else:
                 interview = get_object_or_404(Interview, uuid=interview_uuid)
