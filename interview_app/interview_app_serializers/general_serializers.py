@@ -466,7 +466,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerSet
-        fields = ('id', 'questionnaire', 'answered_at', 'answers')
+        fields = ('id', 'questionnaire', 'answered_at', 'answers', 'answered_at_time', 'answered_at_date')
         read_only_fields = ('id', 'questionnaire', 'answered_at_time', 'answered_at_date', 'answers', 'answered_by')
         ref_name = 'Interview'
 
