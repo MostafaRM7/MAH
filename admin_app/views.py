@@ -65,6 +65,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 profile.role = 'e'
                 profile.save()
                 return Response({profile.id: 'نقش کارفرما به کاربر داده شد'}, status=status.HTTP_200_OK)
+    @action(detail=True, methods=['post'], url_path='revoke-employer-role')
     def revoke_employer_role(self, request, pk):
         profile = self.get_object()
         if profile.role == 'e':
