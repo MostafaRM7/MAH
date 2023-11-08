@@ -12,8 +12,9 @@ class FolderSerializer(serializers.ModelSerializer):
     questionnaires = serializers.SerializerMethodField(method_name='get_questionnaires')
 
     def get_questionnaires(self, instance):
-        return general_serializers.NoQuestionQuestionnaireSerializer(instance.questionnaires.filter(is_delete=False),
-                                                                     many=True, read_only=True).data
+        is_interview = self.context.get('is_interview')
+        return general_serializers.NoQuestionQuestionnaireSerializer(instance.questionnaires.filter(is_delete=False, interview__isnull=not is_interview),
+                                                                 many=True, read_only=True).data
 
     def validate(self, data):
         name = data.get('name')

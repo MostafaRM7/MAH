@@ -66,7 +66,12 @@ class FolderViewSet(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({'request': self.request})
+        is_interview = self.request.query_params.get('is_interview')
+        try:
+            is_interview = bool(int(is_interview))
+        except Exception as e:
+            is_interview = False
+        context.update({'request': self.request, 'is_interview': is_interview})
         return context
 
     def perform_create(self, serializer):
