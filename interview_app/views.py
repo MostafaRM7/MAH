@@ -14,7 +14,8 @@ from interview_app.interview_app_serializers.general_serializers import Intervie
     AnswerSerializer, TicketSerializer
 from interview_app.interview_app_serializers.question_serializers import *
 from interview_app.models import Interview, Ticket
-from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerOrInterviewerReadOnly
+from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerOrInterviewerReadOnly, IsInterviewer, \
+    InterviewOwnerOrInterviewerAddAnswer
 from porsline_config.paginators import MainPagination
 from question_app.models import AnswerSet
 from result_app.filtersets import AnswerSetFilterSet
@@ -54,15 +55,25 @@ class InterviewViewSet(viewsets.ModelViewSet):
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['get'],  url_path='recommended-interviews')
+    @action(detail=False, methods=['get'],  url_path='recommended-interviews', permission_classes=[IsInterviewer])
     def get_recommended_interviews(self,  request, *args, **kwargs):
         # TODO filter by interview status
-        queryeset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all())
+        queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all())
         paginator = MainPagination()
-        paginated_queryset = paginator.paginate_queryset(queryeset, request)
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
         serializer = self.get_serializer(data=paginated_queryset, many=True)
         serializer.is_valid()
         return paginator.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='add-interviewer', permission_classes=[IsInterviewer])
+    def add_interviewer(self, request, *args, **kwargs):
+        obj = self.get_object()
+        user = request.user.profile
+        if user not in obj.interviewers.all():
+            obj.interviewers.add(user)
+            obj.save()
+            return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 
     def initial(self, request, *args, **kwargs):
@@ -349,7 +360,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     queryset = AnswerSet.objects.all()
     serializer_class = AnswerSetSerializer
-    # permission_classes = [IsInterviewOwnerOrReadOnly]
+    permission_classes = [InterviewOwnerOrInterviewerAddAnswer]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AnswerSetFilterSet
     pagination_class = MainPagination
@@ -457,7 +468,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
     @transaction.atomic
     def add_answer(self, request, interview_uuid, pk):
         answer_set = self.get_object()
-        answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set})
+        answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set, 'request': request})
         answers.is_valid(raise_exception=True)
         answers.save()
         answer_set.refresh_from_db()
