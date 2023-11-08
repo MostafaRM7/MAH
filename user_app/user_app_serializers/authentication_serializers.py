@@ -35,6 +35,7 @@ class OTPCheckSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=20, min_length=11, required=True)
     refresh = serializers.CharField(read_only=True)
     access = serializers.CharField(read_only=True)
+    role = serializers.CharField(read_only=True)
 
     def validate(self, data):
         token = data.get('token')
@@ -69,7 +70,7 @@ class OTPCheckSerializer(serializers.Serializer):
             refresh_token = RefreshToken.for_user(user)
             otp.delete()
             return {'token': otp.token, 'phone_number': otp.user.phone_number, 'refresh': str(refresh_token),
-                    'access': str(access_token)}
+                    'access': str(access_token), 'role': user.role}
         raise serializers.ValidationError(
             "شماره تلفن یا کد فعال سازی صحیح نمی باشد لطفا مجددا برای دریافت کد اقدام کنید.")
 
