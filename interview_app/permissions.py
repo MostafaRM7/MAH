@@ -51,3 +51,9 @@ class ChangePlacementForOwnerOrStaff(BasePermission):
             if request.user.is_authenticated:
                 return request.user.profile.questionnaires.filter(uuid=uuid).exists() or request.user.is_staff
         return False
+
+
+class IsInterviewer(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return request.user.role in ['ie', 'i']

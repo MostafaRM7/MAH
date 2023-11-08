@@ -11,13 +11,14 @@ class User(AbstractUser):
         ('i', 'پرسشگر'),
         ('e', 'کارفرما'),
         ('ie', 'پرسشگر و کارفرما'),
+        ('', 'بدون نقش'),
     )
     phone_number = models.CharField(max_length=20, validators=[
         RegexValidator(regex='^09[0-9]{9}$', message='شماره تلفن همراه وارد شده صحیح نمی باشد')], unique=True,
                                     verbose_name='شماره تلفن همراه')
     username = None
     USERNAME_FIELD = 'phone_number'
-    role = models.CharField(max_length=2, choices=ROLE_CHOICES, verbose_name='نقش')
+    role = models.CharField(max_length=2, choices=ROLE_CHOICES, verbose_name='نقش', default='')
 
     def __str__(self):
         if self.first_name and self.last_name:
@@ -51,6 +52,8 @@ class Profile(User):
     preferred_districts = models.ManyToManyField('District', verbose_name='مناطق مورد علاقه', blank=True)
     avatar = models.ImageField(upload_to='avatars/', verbose_name='تصویر پروفایل', null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name='زمان آخرین بروزرسانی')
+    ask_for_interview_role = models.BooleanField(default=False, verbose_name='درخواست نقش پرسشگر')
+    ask_for_employer_role = models.BooleanField(default=False, verbose_name='درخواست نقش کارفرما')
 
 
 class Country(models.Model):

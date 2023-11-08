@@ -55,6 +55,7 @@ class NoGroupQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ('question',)
+        ref_name = 'interview'
 
     def child_question(self, instance):
         """
@@ -111,7 +112,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
             'is_random_options',
             'max_selected_options',
             'min_selected_options', 'additional_options', 'all_options', 'nothing_selected',
-            'other_options', 'options')
+            'other_options', 'options', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
@@ -302,7 +303,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
             'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'multiple_choice', 'is_alphabetic_order',
             'is_random_options',
-            'max_selected_options', 'min_selected_options', 'options')
+            'max_selected_options', 'min_selected_options', 'options', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
@@ -404,7 +405,7 @@ class SortQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'is_finalized', 'url_prefix',
-            'media', 'double_picture_size', 'is_random_options', 'options')
+            'media', 'double_picture_size', 'is_random_options', 'options', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
@@ -456,7 +457,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'is_finalized', 'url_prefix',
-            'media', 'double_picture_size', 'answer_template', 'pattern', 'min', 'max')
+            'media', 'double_picture_size', 'answer_template', 'pattern', 'min', 'max', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
@@ -498,7 +499,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'is_finalized', 'url_prefix',
-            'media', 'double_picture_size', 'min', 'max', 'accept_negative', 'accept_float')
+            'media', 'double_picture_size', 'min', 'max', 'accept_negative', 'accept_float', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
@@ -547,7 +548,7 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'is_finalized', 'url_prefix',
-            'media', 'double_picture_size', 'shape', 'max'
+            'media', 'double_picture_size', 'shape', 'max', 'level'
         )
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -574,7 +575,7 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'is_finalized', 'url_prefix',
-            'media', 'double_picture_size', 'min', 'max', 'min_label', 'mid_label', 'max_label'
+            'media', 'double_picture_size', 'min', 'max', 'min_label', 'mid_label', 'max_label', 'level'
         )
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -638,7 +639,7 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'is_finalized', 'url_prefix',
-            'media', 'double_picture_size',)
+            'media', 'double_picture_size', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
@@ -664,7 +665,7 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'is_finalized', 'url_prefix',
-            'media', 'double_picture_size',)
+            'media', 'double_picture_size', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
@@ -691,7 +692,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
             'is_required', 'is_finalized', 'url_prefix',
-            'media', 'double_picture_size', 'max_volume', 'volume_unit')
+            'media', 'double_picture_size', 'max_volume', 'volume_unit', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
     def get_url_prefix(self, obj):
@@ -726,7 +727,7 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
             'is_finalized',
-            'url_prefix', 'media', 'double_picture_size', 'child_questions'
+            'url_prefix', 'media', 'double_picture_size', 'child_questions', 'level'
         )
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -754,7 +755,7 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
             'is_finalized', 'is_finalized',
             'url_prefix',
-            'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text'
+            'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text', 'level'
         )
         read_only_fields = ('question_type', 'questionnaire')
 

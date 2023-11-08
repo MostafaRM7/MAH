@@ -51,8 +51,8 @@ class Question(models.Model):
     LEVEL_CHOICES = (
         (1, 'آسان'),
         (2, 'متوسط'),
-        (3, 'متوسط'),
-        (0, 'دسته بندی نشده')
+        (3, 'سخت'),
+        (0, 'تعیین سطح نشده')
     )
     ALLOWED_MEDIA_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'mp4', 'avi', 'mov', 'wmv', 'flv',
                                 'mkv', 'webm']

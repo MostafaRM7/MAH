@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils import timezone
+
+from admin_app.models import PricePack
 from question_app.models import Questionnaire
 from user_app.models import Profile, District
 
@@ -25,7 +27,6 @@ class Interview(Questionnaire):
         (PENDING_EMPLOYER, 'در انتظار تایید کارفرما'),
         (REJECTED_EMPLOYER, 'رد شده توسط کارفرما')
     )
-    pay_per_answer = models.FloatField(verbose_name='پرداختی برای هر پاسخ', null=True, blank=True)
     interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True)
     approval_status = models.CharField(max_length=10, choices=APPROVAL_STATUS, default=PENDING_ADMIN,
                                        verbose_name='وضعیت تایید')
@@ -34,13 +35,10 @@ class Interview(Questionnaire):
     goal_start_date = models.DateField(default=get_current_date, verbose_name='تاریخ شروع هدف')
     goal_end_date = models.DateField(default=get_current_date, verbose_name='تاریخ پایان هدف')
     answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف')
+    price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت')
 
     def __str__(self):
         return self.name
-
-    @property
-    def total_pay(self):
-        return self.pay_per_answer * self.answer_count_goal
 
 
 class Ticket(models.Model):

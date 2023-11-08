@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'user_app',
     'wallet_app',
     'interview_app',
+    'admin_app',
 
     'drf_yasg',
     'rest_framework',
