@@ -58,6 +58,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
     pagination_class = MainPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProfileFilterSet
+    ordering_fields = ('name', 'date_joined')
 
 
     @action(detail=False, methods=['get'], url_path='search-users')
@@ -81,25 +82,35 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     profile.role = 'ie'
                     profile.ask_for_interview_role = False
                     profile.save()
-                    return Response({profile.id: 'نقش پرسشگر به کاربر داده شد'}, status=status.HTTP_200_OK)
+                    return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
                 elif profile.role == '':
                     profile.role = 'i'
                     profile.ask_for_interview_role = False
                     profile.save()
-                    return Response({profile.id: 'نقش پرسشگر به کاربر داده شد'}, status=status.HTTP_200_OK)
+                    return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
             else:
                 return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'], url_path='reject-interviewer-request')
+    def reject_interviewer_request(self, request, pk):
+        profile = self.get_object()
+        if profile.ask_for_interview_role:
+            profile.ask_for_interview_role = False
+            profile.is_interview_role_accepted = False
+            profile.save()
+            return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
+        return Response({profile.id: 'کاربر برای نقش پرسشگر درخواستی نداده'}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='revoke-interviewer-role')
     def revoke_interviewer_role(self, request, pk):
         profile = self.get_object()
         if profile.role == 'i':
-            profile.role = ''
+            profile.role = 'n'
             profile.save()
         elif profile.role == 'ie':
             profile.role = 'e'
             profile.save()
-            return Response({profile.id: 'نقش پرسشگر از کاربر گرفته شد'}, status=status.HTTP_200_OK)
+            return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
         else:
             return Response({profile.id: 'کاربر در حال حاضر نقش پرسشگر ندارد'}, status=status.HTTP_400_BAD_REQUEST)
     @action(detail=True, methods=['post'], url_path='grant-employer-role')
@@ -108,26 +119,48 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if profile.role in ['ie', 'e']:
             return Response({profile.id: 'کاربر در حال حاضر نقش کارفرما دارد'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            if validate_user_info(profile):
+            if validate_user_info(profile, False):
                 if profile.role == 'i':
                     profile.role = 'ie'
                     profile.save()
-                    return Response({profile.id: 'نقش کارفرما به کاربر داده شد'}, status=status.HTTP_200_OK)
+                    return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
                 elif profile.role == '':
                     profile.role = 'e'
                     profile.save()
-                    return Response({profile.id: 'نقش کارفرما به کاربر داده شد'}, status=status.HTTP_200_OK)
+                    return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
             else:
                 return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'}, status=status.HTTP_400_BAD_REQUEST)
     @action(detail=True, methods=['post'], url_path='revoke-employer-role')
     def revoke_employer_role(self, request, pk):
         profile = self.get_object()
         if profile.role == 'e':
-            profile.role = ''
+            profile.role = 'n'
             profile.save()
+            return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
         elif profile.role == 'ie':
             profile.role = 'i'
             profile.save()
-            return Response({profile.id: 'نقش کارفرما از کاربر گرفته شد'}, status=status.HTTP_200_OK)
+            return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
         else:
             return Response({profile.id: 'کاربر در حال حاضر نقش کارفرما ندارد'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @action(detail=True, methods=['post'], url_path='block-user')
+    def block_user(self, request, pk):
+        profile = self.get_object()
+        if not profile.is_active:
+            return Response({profile.id: 'کاربر در حال حاضر مسدود است'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            profile.is_active = False
+            profile.save()
+            return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='unblock-user')
+    def unblock_user(self, request, pk):
+        profile = self.get_object()
+        if profile.is_active:
+            return Response({profile.id: 'کاربر در حال حاضر مسدود نیست'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            profile.is_active = True
+            profile.save()
+            return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)

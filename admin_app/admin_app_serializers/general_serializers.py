@@ -40,6 +40,7 @@ class InterviewSerializer(serializers.ModelSerializer):
         if instance.questions.count() > 0:
             return not instance.questions.filter(level=0).exists()
         return False
+
     def get_difficulty(self, instance: Interview):
         if instance.questions.count() > 0 and not instance.questions.filter(level=0).exists():
             try:
@@ -52,7 +53,6 @@ class InterviewSerializer(serializers.ModelSerializer):
 
     def get_interviewers_count(self, instance: Interview):
         return instance.interviewers.count() if instance.interviewers else 0
-
 
     def create(self, validated_data):
         districts = validated_data.pop('districts')
@@ -69,4 +69,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
-            'address', 'nationality', 'province', 'resume', 'updated_at', 'date_joined')
+            'address', 'nationality', 'province', 'resume', 'updated_at', 'date_joined', 'ask_for_interview_role',
+            'is_interview_role_accepted')
+        read_only_fields = ('role', 'updated_at', 'date_joined', 'is_interview_role_accepted')

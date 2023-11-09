@@ -66,6 +66,8 @@ class OTPCheckSerializer(serializers.Serializer):
                 otp.delete()
                 raise serializers.ValidationError("کد فعال سازی منقضی شده یا اشتباه است.")
             user = otp.user.profile
+            if not user.is_active:
+                raise serializers.ValidationError("حساب شما مسدود است.")
             access_token = AccessToken.for_user(user)
             refresh_token = RefreshToken.for_user(user)
             otp.delete()
