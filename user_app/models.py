@@ -53,7 +53,6 @@ class Profile(User):
     avatar = models.ImageField(upload_to='avatars/', verbose_name='تصویر پروفایل', null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name='زمان آخرین بروزرسانی')
     ask_for_interview_role = models.BooleanField(default=False, verbose_name='درخواست نقش پرسشگر')
-    ask_for_employer_role = models.BooleanField(default=False, verbose_name='درخواست نقش کارفرما')
 
 
 class Country(models.Model):

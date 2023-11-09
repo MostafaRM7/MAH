@@ -14,6 +14,7 @@ from interview_app.models import Interview
 from porsline_config.paginators import MainPagination
 from question_app.models import Question
 from user_app.models import Profile
+from user_app.utils import validate_user_info
 
 
 class PricePackViewSet(viewsets.ModelViewSet):
@@ -75,14 +76,19 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if profile.role in ['ie', 'i']:
             return Response({profile.id: 'کاربر در حال حاضر نقش پرسشگر دارد'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            if profile.role == 'e':
-                profile.role = 'ie'
-                profile.save()
-                return Response({profile.id: 'نقش پرسشگر به کاربر داده شد'}, status=status.HTTP_200_OK)
-            elif profile.role == '':
-                profile.role = 'i'
-                profile.save()
-                return Response({profile.id: 'نقش پرسشگر به کاربر داده شد'}, status=status.HTTP_200_OK)
+            if validate_user_info(profile, True):
+                if profile.role == 'e':
+                    profile.role = 'ie'
+                    profile.ask_for_interview_role = False
+                    profile.save()
+                    return Response({profile.id: 'نقش پرسشگر به کاربر داده شد'}, status=status.HTTP_200_OK)
+                elif profile.role == '':
+                    profile.role = 'i'
+                    profile.ask_for_interview_role = False
+                    profile.save()
+                    return Response({profile.id: 'نقش پرسشگر به کاربر داده شد'}, status=status.HTTP_200_OK)
+            else:
+                return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='revoke-interviewer-role')
     def revoke_interviewer_role(self, request, pk):
@@ -102,14 +108,17 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if profile.role in ['ie', 'e']:
             return Response({profile.id: 'کاربر در حال حاضر نقش کارفرما دارد'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            if profile.role == 'i':
-                profile.role = 'ie'
-                profile.save()
-                return Response({profile.id: 'نقش کارفرما به کاربر داده شد'}, status=status.HTTP_200_OK)
-            elif profile.role == '':
-                profile.role = 'e'
-                profile.save()
-                return Response({profile.id: 'نقش کارفرما به کاربر داده شد'}, status=status.HTTP_200_OK)
+            if validate_user_info(profile):
+                if profile.role == 'i':
+                    profile.role = 'ie'
+                    profile.save()
+                    return Response({profile.id: 'نقش کارفرما به کاربر داده شد'}, status=status.HTTP_200_OK)
+                elif profile.role == '':
+                    profile.role = 'e'
+                    profile.save()
+                    return Response({profile.id: 'نقش کارفرما به کاربر داده شد'}, status=status.HTTP_200_OK)
+            else:
+                return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'}, status=status.HTTP_400_BAD_REQUEST)
     @action(detail=True, methods=['post'], url_path='revoke-employer-role')
     def revoke_employer_role(self, request, pk):
         profile = self.get_object()

@@ -59,7 +59,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
-            'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined')
+            'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined', 'is_staff')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

@@ -42,7 +42,6 @@ class Interview(Questionnaire):
     interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True)
     approval_status = models.CharField(max_length=255, choices=APPROVAL_STATUS, default=PENDING_LEVEL_ADMIN,
                                        verbose_name='وضعیت تایید')
-    add_to_approve_queue = models.BooleanField(default=False, verbose_name='به صف تایید اضافه شود')
     districts = models.ManyToManyField(District, related_name='interviews', verbose_name='مناطق')
     goal_start_date = models.DateField(default=get_current_date, verbose_name='تاریخ شروع هدف', null=True, blank=True)
     goal_end_date = models.DateField(default=get_current_date, verbose_name='تاریخ پایان هدف', null=True, blank=True)

@@ -16,7 +16,8 @@ class InterviewFilterSet(django_filters.FilterSet):
 
 class ProfileFilterSet(django_filters.FilterSet):
     role = django_filters.CharFilter(field_name='role', lookup_expr='exact')
+    is_admin = django_filters.BooleanFilter(field_name='is_staff', lookup_expr='exact')
 
     class Meta:
         model = Profile
-        fields = ['role']
+        fields = ['role', 'is_admin']
