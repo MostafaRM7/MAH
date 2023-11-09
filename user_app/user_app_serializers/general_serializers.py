@@ -59,7 +59,32 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
-            'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined', 'is_staff')
+            'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined', 'is_staff', 'ask_for_interview_role')
+        read_only_fields = ('role', 'updated_at', 'date_joined', 'is_staff')
+
+    def validate(self, data):
+        if self.context.get('request').method == 'POST':
+            ask_for_interview_role = data.get('ask_for_interview_role')
+            role = data.get('role')
+            if ask_for_interview_role and role:
+                if role in ['i', 'ie']:
+                    raise serializers.ValidationError(
+                        {
+                            'ask_for_interview_role': 'شما در حال حاضر نقش پرسشگر را دارید و نمی‌توانید درخواست نقش پرسشگر را داشته باشید'
+                        }
+                    )
+        elif self.context.get('request').method in ['PUT', 'PATCH']:
+            ask_for_interview_role = data.get('ask_for_interview_role', self.instance.ask_for_interview_role)
+            role = data.get('role', self.instance.role)
+            if ask_for_interview_role:
+                if role in ['i', 'ie']:
+                    raise serializers.ValidationError(
+                        {
+                            'ask_for_interview_role': 'شما در حال حاضر نقش پرسشگر را دارید و نمی‌توانید درخواست نقش پرسشگر را داشته باشید'
+                        }
+                    )
+
+
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

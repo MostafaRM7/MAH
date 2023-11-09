@@ -49,8 +49,10 @@ class UserViewSet(viewsets.ModelViewSet):
                                                                                               'nationality',
                                                                                               'province').filter(
                     id=request.user.profile.id).first())
+            serializer.context.update({'request': request})
             return Response(serializer.data)
         serializer = ProfileSerializer(request.user.profile, data=request.data, partial=True)
+        serializer.context.update({'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
