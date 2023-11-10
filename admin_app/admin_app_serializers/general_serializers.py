@@ -38,7 +38,10 @@ class InterviewSerializer(serializers.ModelSerializer):
 
     def get_is_leveled(self, instance: Interview):
         if instance.questions.count() > 0:
-            return not instance.questions.filter(level=0).exists()
+            if not instance.questions.filter(level=0).exists():
+                instance.approval_status = Interview.PENDING_PRICE_ADMIN
+                instance.save()
+                return True
         return False
 
     def get_difficulty(self, instance: Interview):

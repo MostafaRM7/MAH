@@ -15,32 +15,28 @@ def get_current_date():
 class Interview(Questionnaire):
     # 0
     PENDING_CONTENT_ADMIN = 'pending_content_admin'
+    REJECTED_CONTENT_ADMIN = 'rejected_content_admin'
     # 1
     PENDING_LEVEL_ADMIN = 'pending_level_admin'
     # 2
     PENDING_PRICE_ADMIN = 'pending_price_admin'
     # 3
-    REJECTED_ADMIN = 'rejected_admin'
-    # 4
-    APPROVED_PRICE_EMPLOYER = 'approved_price_employer'
-    # 5
     PENDING_PRICE_EMPLOYER = 'pending_price_employer'
-    # 6
+    # 4
     REJECTED_PRICE_EMPLOYER = 'rejected_price_employer'
-    # 7
+    # 5
     SEARCHING_FOR_INTERVIEWERS = 'searching_for_interviewers'
     APPROVAL_STATUS = (
         (PENDING_CONTENT_ADMIN, 'در انتظار تایید محتوا توسط ادمین'),
         (PENDING_LEVEL_ADMIN, 'در انتظار تعیین سطح ادمین'),
         (PENDING_PRICE_ADMIN, 'در انتظار تعیین قیمت ادمین'),
-        (REJECTED_ADMIN, 'رد شده توسط ادمین'),
-        (APPROVED_PRICE_EMPLOYER, 'قیمت تایید شده توسط کارفرما'),
+        (REJECTED_CONTENT_ADMIN, 'رد محتوا شده توسط ادمین'),
         (PENDING_PRICE_EMPLOYER, 'در انتظار تایید قیمت توسط کارفرما'),
         (REJECTED_PRICE_EMPLOYER, 'رد قیمت شده توسط کارفرما'),
         (SEARCHING_FOR_INTERVIEWERS, 'در جست و جوی پرسشگر')
     )
     interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True)
-    approval_status = models.CharField(max_length=255, choices=APPROVAL_STATUS, default=PENDING_LEVEL_ADMIN,
+    approval_status = models.CharField(max_length=255, choices=APPROVAL_STATUS, default=PENDING_CONTENT_ADMIN,
                                        verbose_name='وضعیت تایید')
     districts = models.ManyToManyField(District, related_name='interviews', verbose_name='مناطق')
     goal_start_date = models.DateField(default=get_current_date, verbose_name='تاریخ شروع هدف', null=True, blank=True)
@@ -50,7 +46,6 @@ class Interview(Questionnaire):
 
     def __str__(self):
         return self.name
-
 
 class Ticket(models.Model):
     text = models.TextField(verbose_name='متن')

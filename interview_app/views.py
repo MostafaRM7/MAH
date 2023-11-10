@@ -29,7 +29,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
     permission_classes = (InterviewOwnerOrInterviewerReadOnly,)
     lookup_field = 'uuid'
-    queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').all()
+    queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').filter(is_delete=False)
     pagination_class = MainPagination
 
     @action(detail=True, methods=['get'], url_path='search-questions')
@@ -74,6 +74,30 @@ class InterviewViewSet(viewsets.ModelViewSet):
             obj.save()
             return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post'], url_path='approve-price')
+    def approve_price(self, request, *args, **kwargs):
+        obj = self.get_object()
+        user = request.user.profile
+        if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
+            if user.wallet.balance >= obj.questions.count() * obj.price_pack.price:
+                obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
+                obj.save()
+                return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+            else:
+                return Response({"detail": "موجودی کیف پول شما کافی نیست"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"detail": "پروژه شما هنوز توسط ادمین تایید نشده"}, status=status.HTTP_400_BAD_REQUEST)
+    # TODO add the ticket message to this action
+    @action(detail=True, methods=['post'], url_path='reject-price')
+    def reject_price(self, request, *args, **kwargs):
+        obj = self.get_object()
+        user = request.user.profile
+        if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
+            obj.approval_status = Interview.REJECTED_PRICE_EMPLOYER
+            obj.save()
+            return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "پروژه شما هنوز توسط ادمین تایید نشده"}, status=status.HTTP_400_BAD_REQUEST)
 
 
     def initial(self, request, *args, **kwargs):

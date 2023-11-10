@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
@@ -49,8 +50,33 @@ class InterviewViewSet(viewsets.ModelViewSet):
         else:
             return Response([])
 
+    @action(detail=True, methods=['post'], url_path='approve-content')
+    def approve_content(self, request, uuid):
+        interview = self.get_object()
+        interview.status = Interview.PENDING_LEVEL_ADMIN
+        interview.save()
+        return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post'], url_path='reject-content')
+    def reject_content(self, request, uuid):
+        interview = self.get_object()
+        interview.status = Interview.REJECTED_CONTENT_ADMIN
+        interview.save()
+        return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post'], url_path='set-price-pack')
+    def set_price_pack(self, request, uuid):
+        interview = self.get_object()
+        try:
+            price_pack = int(request.data.get('price_pack'))
+        except ValueError:
+            price_pack = None
+        if price_pack:
+            interview.price_pack = get_object_or_404(PricePack, pk=price_pack)
+            interview.approval_status = Interview.PENDING_PRICE_EMPLOYER
+            interview.save()
+            return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
+        return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
