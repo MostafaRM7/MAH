@@ -14,7 +14,7 @@ class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ('id', 'question', 'answer', 'file', 'answered_at')
-        ref_name = 'Interview'
+        ref_name = 'interview_app_answer'
 
     def validate(self, data):
         question = data.get('question')
@@ -468,7 +468,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         model = AnswerSet
         fields = ('id', 'questionnaire', 'answered_at', 'answers', 'answered_at_time', 'answered_at_date')
         read_only_fields = ('id', 'questionnaire', 'answered_at_time', 'answered_at_date', 'answers', 'answered_by')
-        ref_name = 'Interview'
+        ref_name = 'interview_app_answer_set'
 
     def get_answered_at_time(self, obj):
         return obj.answered_at.strftime("%H:%M:%S")
@@ -498,7 +498,7 @@ class InterviewSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
             'interviewers', 'approval_status',
-            'add_to_approve_queue', 'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
+            'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
             'folder'
         )
         read_only_fields = ('owner', 'questions')

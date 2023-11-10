@@ -30,6 +30,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = InterviewFilterSet
     ordering_fields = ('created_at', 'pub_date', 'end_date', 'goal_start_date', 'goal_end_date', 'answer_count_goal')
+    lookup_field = 'uuid'
 
 
     @action(detail=False, methods=['get'], url_path='search-questions')

@@ -25,7 +25,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty', 'is_leveled'
         )
         read_only_fields = ('owner', 'questions')
-        ref_name = 'admin_interviews'
+        ref_name = 'admin_app_interviews'
 
     def to_representation(self, instance: Interview):
         representation = super().to_representation(instance)
@@ -72,3 +72,4 @@ class ProfileSerializer(serializers.ModelSerializer):
             'address', 'nationality', 'province', 'resume', 'updated_at', 'date_joined', 'ask_for_interview_role',
             'is_interview_role_accepted')
         read_only_fields = ('role', 'updated_at', 'date_joined', 'is_interview_role_accepted')
+        ref_name = 'admin_app_profile'
