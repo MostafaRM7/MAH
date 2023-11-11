@@ -83,6 +83,7 @@ class ProfileSerializer(serializers.ModelSerializer):
                             'ask_for_interview_role': 'شما در حال حاضر نقش پرسشگر را دارید و نمی‌توانید درخواست نقش پرسشگر را داشته باشید'
                         }
                     )
+        return data
 
 
 
