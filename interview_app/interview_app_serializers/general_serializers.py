@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.generics import get_object_or_404
 
@@ -501,7 +502,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
             'folder'
         )
-        read_only_fields = ('owner', 'questions')
+        read_only_fields = ('owner', 'questions', 'approval_status')
 
     def to_representation(self, instance: Interview):
         representation = super().to_representation(instance)
@@ -525,11 +526,76 @@ class InterviewSerializer(serializers.ModelSerializer):
         except ZeroDivisionError:
             return 0
 
+    def validate(self, data):
+        folder = data.get('folder')
+        name = data.get('name')
+        request = self.context.get('request')
+        pub_date = data.get('pub_date')
+        end_date = data.get('end_date')
+        if pub_date:
+            if request.method == 'POST':
+                if pub_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {'pub_date': 'تاریخ شروع پرسشنامه نمی تواند قبل از زمان حال باشد'}
+                    )
+            elif request.method in ['PUT', 'PATCH']:
+                if pub_date != self.instance.pub_date and pub_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {
+                            'pub_date': 'نمی توانید تاریخ شروع پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ شروع قبلی یا تاریخی پس از زمان حال است'}
+                    )
+        if end_date:
+            if request.method == 'POST':
+                if end_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {'end_date': 'تاریخ پایان پرسشنامه نمی تواند قبل از زمان حال باشد'}
+                    )
+            elif request.method in ['PUT', 'PATCH']:
+                if end_date != self.instance.end_date and end_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {
+                            'end_date': 'نمی توانید تاریخ پایان پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ پایان قبلی یا تاریخی پس از زمان حال است'}
+                    )
+        if end_date and pub_date:
+            if end_date < pub_date:
+                raise serializers.ValidationError(
+                    {'date': 'تاریخ شروع پرسشنامه نمی تواند بعد از تاریخ پایان باشد'}
+                )
+        if folder is not None:
+            if request.user.profile != folder.owner:
+                raise serializers.ValidationError(
+                    {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            if name is not None:
+                if request.method == 'POST':
+                    if Interview.objects.filter(folder=folder, name=name).exists():
+                        raise serializers.ValidationError(
+                            {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
+                elif request.method in ['PUT', 'PATCH']:
+                    if Interview.objects.filter(folder=folder, name=name).exclude(pk=self.instance.id).exists():
+                        raise serializers.ValidationError(
+                            {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
+        else:
+            if request.method != 'PATCH':
+                raise serializers.ValidationError(
+                    {'folder': 'یک پوشه انتخاب کنید'}
+                )
+            elif request.method == 'PATCH' and self.instance.folder is None:
+                raise serializers.ValidationError(
+                    {'folder': 'یک پوشه انتخاب کنید'}
+                )
+
+        return data
+
     def create(self, validated_data):
         districts = validated_data.pop('districts')
         owner = self.context['request'].user.profile
-        folder = validated_data.pop('folder')
-        interview = Interview.objects.create(owner=owner, folder=folder, **validated_data)
+        interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()), **validated_data)
         interview.districts.set(districts)
         return interview
 
