@@ -23,8 +23,10 @@ class PricePackViewSet(viewsets.ModelViewSet):
     serializer_class = PricePackSerializer
     permission_classes = (IsAdminUser,)
 
+
 class InterviewViewSet(viewsets.ModelViewSet):
-    queryset = Interview.objects.prefetch_related('interviewers', 'questions', 'districts').select_related('price_pack', 'owner').all()
+    queryset = Interview.objects.prefetch_related('interviewers', 'questions', 'districts').select_related('price_pack',
+                                                                                                           'owner').all()
     serializer_class = InterviewSerializer
     permission_classes = (IsAdminUser,)
     pagination_class = MainPagination
@@ -33,14 +35,14 @@ class InterviewViewSet(viewsets.ModelViewSet):
     ordering_fields = ('created_at', 'pub_date', 'end_date', 'goal_start_date', 'goal_end_date', 'answer_count_goal')
     lookup_field = 'uuid'
 
-
     @action(detail=False, methods=['get'], url_path='search-questions')
     def search_in_questions(self, request, *args, **kwargs):
         search = request.query_params.get('search')
         if search:
             search = str(search)
             print(search)
-            questions =  Question.objects.filter(Q(title__icontains=search) | Q(description__icontains=search), questionnaire__interview__isnull=False)
+            questions = Question.objects.filter(Q(title__icontains=search) | Q(description__icontains=search),
+                                                questionnaire__interview__isnull=False)
             interviews = Interview.objects.filter(questions__in=questions).distinct()
             # paginate the response
             paginated_queryset = self.paginate_queryset(interviews)
@@ -78,6 +80,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
             return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
         return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all().order_by('-date_joined')
     serializer_class = ProfileSerializer
@@ -87,17 +90,18 @@ class ProfileViewSet(viewsets.ModelViewSet):
     filterset_class = ProfileFilterSet
     ordering_fields = ('name', 'date_joined')
 
-
     @action(detail=False, methods=['get'], url_path='search-users')
     def search_profiles(self, request):
         search = request.query_params.get('search')
         if search:
-            queryset = self.queryset.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(phone_number__icontains=search))
+            queryset = self.queryset.filter(
+                Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(phone_number__icontains=search))
             # paginate the response
             paginated_queryset = self.paginate_queryset(queryset)
             serializer = ProfileSerializer(paginated_queryset, many=True)
             return self.get_paginated_response(serializer.data)
         return Response([])
+
     @action(detail=True, methods=['post'], url_path='grant-interviewer-role')
     def grant_interviewer_role(self, request, pk):
         profile = self.get_object()
@@ -116,7 +120,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     profile.save()
                     return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
             else:
-                return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='reject-interviewer-request')
     def reject_interviewer_request(self, request, pk):
@@ -140,6 +145,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
             return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
         else:
             return Response({profile.id: 'کاربر در حال حاضر نقش پرسشگر ندارد'}, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=True, methods=['post'], url_path='grant-employer-role')
     def grant_employer_role(self, request, pk):
         profile = self.get_object()
@@ -156,7 +162,9 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     profile.save()
                     return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
             else:
-                return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=True, methods=['post'], url_path='revoke-employer-role')
     def revoke_employer_role(self, request, pk):
         profile = self.get_object()
@@ -170,7 +178,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
             return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
         else:
             return Response({profile.id: 'کاربر در حال حاضر نقش کارفرما ندارد'}, status=status.HTTP_400_BAD_REQUEST)
-
 
     @action(detail=True, methods=['post'], url_path='block-user')
     def block_user(self, request, pk):
