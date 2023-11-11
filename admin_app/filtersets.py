@@ -9,10 +9,14 @@ class InterviewFilterSet(django_filters.FilterSet):
     start_date = django_filters.DateFilter(field_name='created_at', lookup_expr='gte')
     end_date = django_filters.DateFilter(field_name='created_at', lookup_expr='lte')
     approval_status = django_filters.CharFilter(field_name='approval_status', lookup_expr='exact')
+    owner = django_filters.NumberFilter(field_name='owner', lookup_expr='exact', method='filter_owner')
 
     class Meta:
         model = Interview
         fields = ['created_at', 'approval_status']
+
+    def filter_owner(self, queryset, name, value):
+        return queryset.filter(owner__id=value)
 
 
 class ProfileFilterSet(django_filters.FilterSet):

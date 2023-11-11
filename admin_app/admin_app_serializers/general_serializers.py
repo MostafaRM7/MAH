@@ -39,8 +39,9 @@ class InterviewSerializer(serializers.ModelSerializer):
     def get_is_leveled(self, instance: Interview):
         if instance.questions.count() > 0:
             if not instance.questions.filter(level=0).exists():
-                instance.approval_status = Interview.PENDING_PRICE_ADMIN
-                instance.save()
+                if instance.approval_status == Interview.PENDING_LEVEL_ADMIN:
+                    instance.approval_status = Interview.PENDING_PRICE_ADMIN
+                    instance.save()
                 return True
         return False
 
@@ -67,12 +68,16 @@ class InterviewSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     resume = ResumeSerializer(read_only=True)
+    questionnaires_count = serializers.SerializerMethodField(method_name='get_questionnaires_count')
 
     class Meta:
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
             'address', 'nationality', 'province', 'resume', 'updated_at', 'date_joined', 'ask_for_interview_role',
-            'is_interview_role_accepted')
+            'is_interview_role_accepted', 'is_active', 'questionnaires_count')
         read_only_fields = ('role', 'updated_at', 'date_joined', 'is_interview_role_accepted')
         ref_name = 'admin_app_profile'
+
+    def get_questionnaires_count(self, instance: Profile):
+        return instance.questionnaires.count()

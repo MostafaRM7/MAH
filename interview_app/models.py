@@ -42,7 +42,7 @@ class Interview(Questionnaire):
     goal_start_date = models.DateField(default=get_current_date, verbose_name='تاریخ شروع هدف', null=True, blank=True)
     goal_end_date = models.DateField(default=get_current_date, verbose_name='تاریخ پایان هدف', null=True, blank=True)
     answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف', null=True, blank=True)
-    price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت')
+    price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت', null=True, blank=True)
 
     def __str__(self):
         return self.name
