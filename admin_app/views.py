@@ -79,7 +79,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.all().order_by('-date_joined')
     serializer_class = ProfileSerializer
     permission_classes = (IsAdminUser,)
     pagination_class = MainPagination
