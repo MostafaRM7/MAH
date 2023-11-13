@@ -16,6 +16,7 @@ class InterviewSerializer(serializers.ModelSerializer):
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
     difficulty = serializers.SerializerMethodField(method_name='get_difficulty')
     is_leveled = serializers.SerializerMethodField(method_name='get_is_leveled')
+    answer_count = serializers.SerializerMethodField(method_name='get_answer_count')
 
     class Meta:
         model = Interview
@@ -44,6 +45,9 @@ class InterviewSerializer(serializers.ModelSerializer):
                     instance.save()
                 return True
         return False
+
+    def get_answer_count(self, instance: Interview):
+        return instance.answer_sets.count()
 
     def get_difficulty(self, instance: Interview):
         if instance.questions.count() > 0 and not instance.questions.filter(level=0).exists():
