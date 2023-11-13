@@ -56,7 +56,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='recommended-interviews', permission_classes=[IsInterviewer])
     def get_recommended_interviews(self, request, *args, **kwargs):
         # TODO filter by interview status
-        queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all())
+        queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all(),
+                                            is_delete=False, is_active=True)
         paginator = MainPagination()
         paginated_queryset = paginator.paginate_queryset(queryset, request)
         serializer = self.get_serializer(data=paginated_queryset, many=True)
