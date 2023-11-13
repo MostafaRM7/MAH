@@ -7,6 +7,7 @@ from question_app.models import OptionalQuestion, DropDownQuestion, SortQuestion
 
 base_router = routers.DefaultRouter()
 base_router.register('interviews', views.InterviewViewSet, basename='interviews')
+base_router.register('tickets', views.TicketViewSet, basename='tickets')
 
 interview_router = routers.NestedDefaultRouter(base_router, 'interviews', lookup='interview')
 # interview_router.register(WelcomePage.URL_PREFIX, views.WelcomePageViewSet, basename='welcome_pages')
@@ -30,11 +31,12 @@ interview_router.register(LinkQuestion.URL_PREFIX, views.LinkQuestionViewSet, ba
 interview_router.register(FileQuestion.URL_PREFIX, views.FileQuestionViewSet, basename='file_questions')
 interview_router.register(QuestionGroup.URL_PREFIX, views.QuestionGroupViewSet, basename='question_groups')
 interview_router.register(NoAnswerQuestion.URL_PREFIX, views.NoAnswerQuestionViewSet, basename='noanswer_questions')
-interview_router.register('tickets', views.TicketViewSet, basename='tickets')
 
 urlpatterns = [
     path('search-questionnaires/', views.SearchInterview.as_view(),
          name='search_questionnaire'),
     path('', include(base_router.urls)),
-    path('', include(interview_router.urls))
+    path('', include(interview_router.urls)),
+    # path('<int:user_pk>/tickets/', views.TicketViewSet.as_view({'get': 'list', 'post': 'create'}), name='tickets'),
+    # path('<int:user_pk>/tickets/<int:pk>/', views.TicketViewSet.as_view({'get': 'retrieve'}), name='ticket'),
 ]

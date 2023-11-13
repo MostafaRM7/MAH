@@ -47,10 +47,12 @@ class Interview(Questionnaire):
     def __str__(self):
         return self.name
 
+
 class Ticket(models.Model):
     text = models.TextField(verbose_name='متن')
-    source = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='sent_tickets', verbose_name='فرستنده')
-    destination = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='received_tickets')
+    sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='sent_tickets', verbose_name='فرستنده')
+    receiver = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='received_tickets', verbose_name='دریافت کننده', null=True, blank=True)
     interview = models.ForeignKey(Interview, on_delete=models.CASCADE, null=True, blank=True, related_name='tickets',
                                   verbose_name='پروژه پرسشگری')
     is_read = models.BooleanField(default=False, verbose_name='خوانده شده')
+    sent_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ارسال')

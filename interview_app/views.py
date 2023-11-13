@@ -22,8 +22,6 @@ from result_app.filtersets import AnswerSetFilterSet
 from user_app.models import Profile
 
 
-
-
 # TODO add recommended interviews to postman
 class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
@@ -55,8 +53,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['get'],  url_path='recommended-interviews', permission_classes=[IsInterviewer])
-    def get_recommended_interviews(self,  request, *args, **kwargs):
+    @action(detail=False, methods=['get'], url_path='recommended-interviews', permission_classes=[IsInterviewer])
+    def get_recommended_interviews(self, request, *args, **kwargs):
         # TODO filter by interview status
         queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all())
         paginator = MainPagination()
@@ -87,18 +85,21 @@ class InterviewViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "موجودی کیف پول شما کافی نیست"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"detail": "پروژه شما هنوز توسط ادمین تایید نشده"}, status=status.HTTP_400_BAD_REQUEST)
-    # TODO add the ticket message to this action
+
     @action(detail=True, methods=['post'], url_path='reject-price')
     def reject_price(self, request, *args, **kwargs):
         obj = self.get_object()
         user = request.user.profile
+        text = request.data.get('message')
+        if text is None or text.isspace():
+            return Response({"detail": "لطفا علت رد کردن قیمت را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
         if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
             obj.approval_status = Interview.REJECTED_PRICE_EMPLOYER
+            Ticket.objects.create(interview=obj, sender=user, text=text)
             obj.save()
             return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "پروژه شما هنوز توسط ادمین تایید نشده"}, status=status.HTTP_400_BAD_REQUEST)
-
 
     def initial(self, request, *args, **kwargs):
         if kwargs.get('uuid'):
@@ -126,6 +127,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     #         return Response({"detail": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
     #                         status.HTTP_403_FORBIDDEN)
 
+
 class SearchInterview(APIView):
     """
         if user is in a folder:
@@ -141,24 +143,28 @@ class SearchInterview(APIView):
         if questionnaire_name and folder_id:
             if not request.user.is_staff:
                 questionnaires = request.user.questionnaires.filter(folder__id=folder_id, is_delete=False,
-                                                                    name__icontains=questionnaire_name, interview__isnull=False)
+                                                                    name__icontains=questionnaire_name,
+                                                                    interview__isnull=False)
                 interviews = Interview.objects.filter(questionnaire_ptr__in=questionnaires)
                 serializer = InterviewSerializer(interviews, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                questionnaires = Questionnaire.objects.filter(name__icontains=questionnaire_name, interview__isnull=False)
+                questionnaires = Questionnaire.objects.filter(name__icontains=questionnaire_name,
+                                                              interview__isnull=False)
                 interviews = Interview.objects.filter(questionnaire_ptr__in=questionnaires)
                 serializer = InterviewSerializer(interviews, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
         elif questionnaire_name:
             if not request.user.is_staff:
                 questionnaires = request.user.questionnaires.filter(is_delete=False,
-                                                                    name__icontains=questionnaire_name, interview__isnull=False)
+                                                                    name__icontains=questionnaire_name,
+                                                                    interview__isnull=False)
                 interviews = Interview.objects.filter(questionnaire_ptr__in=questionnaires)
                 serializer = InterviewSerializer(interviews, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                questionnaires = Questionnaire.objects.filter(folder__isnull=False, name__icontains=questionnaire_name, interview__isnull=False)
+                questionnaires = Questionnaire.objects.filter(folder__isnull=False, name__icontains=questionnaire_name,
+                                                              interview__isnull=False)
                 interviews = Interview.objects.filter(questionnaire_ptr__in=questionnaires)
                 serializer = InterviewSerializer(interviews, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -366,7 +372,6 @@ class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
     lookup_field = 'id'
     permission_classes = (IsQuestionOwnerOrReadOnly,)
 
-
     def get_queryset(self):
         queryset = NoAnswerQuestion.objects.filter(questionnaire__uuid=self.kwargs['interview_uuid'])
         return queryset
@@ -511,7 +516,17 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
 
 class TicketViewSet(viewsets.ModelViewSet):
     serializer_class = TicketSerializer
-    # permission_classes = (IsAuthenticated)
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Ticket.objects.filter(interview__uuid=self.kwargs['interview_uuid'])
+        interview_id = self.request.query_params.get('interview_id')
+        try:
+            interview_id = int(interview_id)
+            interview = Interview.objects.get(id=interview_id)
+        except (ValueError, TypeError, Interview.DoesNotExist):
+            interview = None
+        if interview:
+            return Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id),
+                                         interview=interview)
+        return Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id),
+                                     interview__isnull=True)

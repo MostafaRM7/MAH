@@ -8,10 +8,10 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from admin_app.admin_app_serializers.general_serializers import InterviewSerializer, ProfileSerializer, \
-    PricePackSerializer
+    PricePackSerializer, TicketSerializer
 from admin_app.filtersets import InterviewFilterSet, ProfileFilterSet
 from admin_app.models import PricePack
-from interview_app.models import Interview
+from interview_app.models import Interview, Ticket
 from porsline_config.paginators import MainPagination
 from question_app.models import Question
 from user_app.models import Profile
@@ -54,15 +54,22 @@ class InterviewViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='approve-content')
     def approve_content(self, request, uuid):
+        text = request.data.get('message')
         interview = self.get_object()
         interview.status = Interview.PENDING_LEVEL_ADMIN
+        if text:
+            Ticket.objects.create(sender=request.user.profile, interview=interview, receiver=interview.owner, text=text)
         interview.save()
         return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='reject-content')
     def reject_content(self, request, uuid):
+        text = request.data.get('message')
         interview = self.get_object()
         interview.status = Interview.REJECTED_CONTENT_ADMIN
+        if text is None:
+            return Response({'detail': 'لطفا علت رد کردن محتوا را وارد کنید'})
+        Ticket.objects.create(sender=request.user.profile, interview=interview, receiver=interview.owner, text=text)
         interview.save()
         return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
 
@@ -198,3 +205,27 @@ class ProfileViewSet(viewsets.ModelViewSet):
             profile.is_active = True
             profile.save()
             return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
+
+
+class TicketViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
+    serializer_class = TicketSerializer
+    pagination_class = MainPagination
+
+    def get_queryset(self):
+        queryset = Ticket.objects.filter(receiver__isnull=True).order_by('-sent_at')
+        try:
+            interview_id = int(self.request.query_params.get('interview_id', None))
+            interview = Interview.objects.get(id=interview_id)
+        except (ValueError, TypeError, Interview.DoesNotExist):
+            interview = None
+        try:
+            sender_id = int(self.request.query_params.get('receiver_id', None))
+            sender = Profile.objects.get(id=sender_id)
+        except (ValueError, TypeError, Profile.DoesNotExist):
+            sender = None
+        if interview:
+            queryset = queryset.filter(interview=interview)
+        if sender:
+            queryset = queryset.filter(sender=sender)
+        return queryset

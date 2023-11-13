@@ -515,14 +515,11 @@ class InterviewSerializer(serializers.ModelSerializer):
         representation['folder'] = instance.folder.name if instance.folder else None
         return representation
 
-    # TODO - add validation after interview panel UI is ready
-    # def validate(self, data):
-    #     return
-
     def get_difficulty(self, instance: Interview):
         try:
             return sum(
-                [question.level for question in instance.questions.all()]) / instance.questions.filter(level__gt=0).count() * 100
+                [question.level for question in instance.questions.all()]) / instance.questions.filter(
+                level__gt=0).count() * 100
         except ZeroDivisionError:
             return 0
 
@@ -595,7 +592,8 @@ class InterviewSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         districts = validated_data.pop('districts')
         owner = self.context['request'].user.profile
-        interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()), **validated_data)
+        interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()),
+                                             **validated_data)
         interview.districts.set(districts)
         return interview
 
@@ -603,19 +601,33 @@ class InterviewSerializer(serializers.ModelSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = ('id', 'text', 'source', 'destination', 'is_read')
+        fields = ('id', 'text', 'sender', 'receiver', 'is_read', 'sent_at', 'interview')
+        read_only_fields = ('sender', 'receiver' 'is_read', 'sent_at')
+        ref_name = 'interview_app_ticket'
 
     def to_representation(self, instance: Ticket):
         representation = super().to_representation(instance)
-        representation['source'] = {
-            'id': instance.source.id,
-            'phone_number': instance.source.phone_number
-        }
-        representation['destination'] = {
-            'id': instance.destination.id,
-            'phone_number': instance.destination.phone_number
-        }
+        if instance.sender == self.context['request'].user.profile:
+            representation['sender'] = 'me'
+        else:
+            representation['sender'] = {
+                'id': instance.sender.id,
+                'first_name': instance.sender.first_name,
+                'last_name': instance.sender.last_name
+            }
+        if instance.receiver is None:
+            representation['receiver'] = 'admin'
         return representation
 
     def validate(self, data):
+        sender = self.context['request'].user.profile
+        if sender == data.get('receiver'):
+            raise serializers.ValidationError(
+                {'receiver': 'فرستنده و گیرنده نمی توانند یکی باشند'}
+            )
         return data
+
+    def create(self, validated_data):
+        sender = self.context['request'].user.profile
+        ticket = Ticket.objects.create(sender=sender, **validated_data)
+        return ticket

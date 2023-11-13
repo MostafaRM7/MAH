@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from admin_app.models import *
 from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
-from interview_app.models import Interview
+from interview_app.models import Interview, Ticket
 from user_app.models import Profile
 from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
@@ -81,3 +81,46 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_questionnaires_count(self, instance: Profile):
         return instance.questionnaires.count()
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ('id', 'text', 'sender', 'receiver', 'is_read', 'sent_at', 'interview')
+        read_only_fields = ('sender', 'is_read', 'sent_at')
+        ref_name = 'admin_app_ticket'
+
+    def to_representation(self, instance: Ticket):
+        representation = super().to_representation(instance)
+        if instance.sender == self.context['request'].user.profile:
+            representation['sender'] = 'me'
+        else:
+            representation['sender'] = {
+                'id': instance.sender.id,
+                'first_name': instance.sender.first_name,
+                'last_name': instance.sender.last_name,
+                'phone_number': instance.sender.phone_number,
+                'email': instance.sender.email,
+                'role': instance.sender.role,
+                'interview': {
+                    'id': instance.interview.id,
+                    'uuid': instance.interview.uuid,
+                    'name': instance.interview.name
+                } if instance.interview else None
+            }
+        if instance.receiver is None:
+            representation['receiver'] = 'admin'
+        return representation
+
+    def validate(self, data):
+        sender = self.context['request'].user.profile
+        if sender == data.get('receiver'):
+            raise serializers.ValidationError(
+                {'receiver': 'فرستنده و گیرنده نمی توانند یکی باشند'}
+            )
+        return data
+
+    def create(self, validated_data):
+        sender = self.context['request'].user.profile
+        ticket = Ticket.objects.create(sender=sender, **validated_data)
+        return ticket

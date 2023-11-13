@@ -10,6 +10,7 @@ class InterviewFilterSet(django_filters.FilterSet):
     end_date = django_filters.DateFilter(field_name='created_at', lookup_expr='lte')
     approval_status = django_filters.CharFilter(field_name='approval_status', lookup_expr='exact')
     owner = django_filters.NumberFilter(field_name='owner', lookup_expr='exact', method='filter_owner')
+    has_interviewer = django_filters.BooleanFilter(method='filter_has_interviewer')
 
     class Meta:
         model = Interview
@@ -17,6 +18,9 @@ class InterviewFilterSet(django_filters.FilterSet):
 
     def filter_owner(self, queryset, name, value):
         return queryset.filter(owner__id=value)
+
+    def filter_has_interviewer(self, queryset, name,  value):
+        return queryset.filter(interviewers__isnull=value, approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
 
 
 class ProfileFilterSet(django_filters.FilterSet):
