@@ -26,7 +26,7 @@ class PricePackViewSet(viewsets.ModelViewSet):
 
 class InterviewViewSet(viewsets.ModelViewSet):
     queryset = Interview.objects.prefetch_related('interviewers', 'questions', 'districts').select_related('price_pack',
-                                                                                                           'owner').all()
+                                                                                                           'owner').filter(is_delete=False)
     serializer_class = InterviewSerializer
     permission_classes = (IsAdminUser,)
     pagination_class = MainPagination
@@ -43,7 +43,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
             print(search)
             questions = Question.objects.filter(Q(title__icontains=search) | Q(description__icontains=search),
                                                 questionnaire__interview__isnull=False)
-            interviews = Interview.objects.filter(questions__in=questions).distinct()
+            interviews = self.queryset.filter(questions__in=questions).distinct()
             # paginate the response
             paginated_queryset = self.paginate_queryset(interviews)
             serializer = InterviewSerializer(paginated_queryset, many=True, context={'request': request})
