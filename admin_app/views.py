@@ -46,7 +46,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
             interviews = Interview.objects.filter(questions__in=questions).distinct()
             # paginate the response
             paginated_queryset = self.paginate_queryset(interviews)
-            serializer = InterviewSerializer(paginated_queryset, many=True)
+            serializer = InterviewSerializer(paginated_queryset, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
         else:
