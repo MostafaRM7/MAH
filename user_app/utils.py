@@ -2,6 +2,8 @@ from user_app.models import Profile
 
 
 def validate_user_info(user: Profile, for_interview):
+    if user.wallet is None:
+        return False
     if user.first_name is None or user.first_name == '':
         return False
     if user.last_name is None or user.last_name == '':

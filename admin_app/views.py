@@ -56,11 +56,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='approve-content')
     def approve_content(self, request, uuid):
-        text = request.data.get('message')
         interview = self.get_object()
-        interview.status = Interview.PENDING_LEVEL_ADMIN
-        if text:
-            Ticket.objects.create(sender=request.user.profile, interview=interview, receiver=interview.owner, text=text)
+        interview.approval_status = Interview.PENDING_LEVEL_ADMIN
         interview.save()
         return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
 
@@ -68,7 +65,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     def reject_content(self, request, uuid):
         text = request.data.get('message')
         interview = self.get_object()
-        interview.status = Interview.REJECTED_CONTENT_ADMIN
+        interview.approval_status = Interview.REJECTED_CONTENT_ADMIN
         if text is None:
             return Response({'detail': 'لطفا علت رد کردن محتوا را وارد کنید'})
         Ticket.objects.create(sender=request.user.profile, interview=interview, receiver=interview.owner, text=text)

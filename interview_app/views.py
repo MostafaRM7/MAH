@@ -55,9 +55,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='recommended-interviews', permission_classes=[IsInterviewer])
     def get_recommended_interviews(self, request, *args, **kwargs):
-        # TODO filter by interview status
         queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all(),
-                                            is_delete=False, is_active=True)
+                                            is_delete=False, is_active=True, approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
         paginator = MainPagination()
         paginated_queryset = paginator.paginate_queryset(queryset, request)
         serializer = self.get_serializer(data=paginated_queryset, many=True)
@@ -78,12 +77,13 @@ class InterviewViewSet(viewsets.ModelViewSet):
         obj = self.get_object()
         user = request.user.profile
         if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
-            if user.wallet.balance >= obj.questions.count() * obj.price_pack.price:
+            needed_balance = (obj.answer_count_goal - obj.answer_sets.filter(answered_by__isnull=False).count()) * obj.price_pack.price
+            if user.wallet.balance >= needed_balance:
                 obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
                 obj.save()
                 return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
             else:
-                return Response({"detail": "موجودی کیف پول شما کافی نیست"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"detail": "پروژه شما هنوز توسط ادمین تایید نشده"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -501,6 +501,12 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
         answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set, 'request': request})
         answers.is_valid(raise_exception=True)
         answers.save()
+        price = answer_set.questionnaire.price_pack.price
+        if price:
+            request.user.profile.wallet.balance += price
+            answer_set.questionnaire.owner.wallet.balance -= price
+            request.user.profile.wallet.save()
+            answer_set.questionnaire.owner.wallet.save()
         answer_set.refresh_from_db()
         return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
 
