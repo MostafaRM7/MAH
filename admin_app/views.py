@@ -1,6 +1,7 @@
 # Create your views here.
+from django.db.models.functions import Cast
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
+from django.db.models import Q, CharField, F
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -26,7 +27,8 @@ class PricePackViewSet(viewsets.ModelViewSet):
 
 class InterviewViewSet(viewsets.ModelViewSet):
     queryset = Interview.objects.prefetch_related('interviewers', 'questions', 'districts').select_related('price_pack',
-                                                                                                           'owner').filter(is_delete=False)
+                                                                                                           'owner').filter(
+        is_delete=False)
     serializer_class = InterviewSerializer
     permission_classes = (IsAdminUser,)
     pagination_class = MainPagination
@@ -104,6 +106,17 @@ class ProfileViewSet(viewsets.ModelViewSet):
             queryset = self.queryset.filter(
                 Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(phone_number__icontains=search))
             # paginate the response
+            paginated_queryset = self.paginate_queryset(queryset)
+            serializer = ProfileSerializer(paginated_queryset, many=True)
+            return self.get_paginated_response(serializer.data)
+        return Response([])
+
+    @action(detail=False, methods=['get'], url_path='search-by-id')
+    def search_by_id(self, request):
+        search = request.query_params.get('search')
+        if search:
+            queryset = self.queryset.annotate(string_id=Cast(F('pk'), CharField(db_index=True))).filter(
+                string_id__icontains=search)
             paginated_queryset = self.paginate_queryset(queryset)
             serializer = ProfileSerializer(paginated_queryset, many=True)
             return self.get_paginated_response(serializer.data)
