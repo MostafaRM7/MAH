@@ -42,7 +42,6 @@ class InterviewViewSet(viewsets.ModelViewSet):
         search = request.query_params.get('search')
         if search:
             search = str(search)
-            print(search)
             questions = Question.objects.filter(Q(title__icontains=search) | Q(description__icontains=search),
                                                 questionnaire__interview__isnull=False)
             interviews = self.queryset.filter(questions__in=questions).distinct()

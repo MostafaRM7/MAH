@@ -2,6 +2,7 @@ from django.db import transaction
 from django.http import HttpRequest
 from rest_framework import serializers, status
 
+from interview_app.models import Interview
 from porsline_config import settings
 from question_app.models import Questionnaire, NoAnswerQuestion, QuestionGroup, FileQuestion, LinkQuestion, \
     EmailFieldQuestion, PictureFieldQuestion, IntegerRangeQuestion, IntegerSelectiveQuestion, NumberAnswerQuestion, \
@@ -282,7 +283,10 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
 
             for option in options.values():
                 option.delete()
-
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
         return super().update(instance, validated_data)
 
 
@@ -386,7 +390,10 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
 
             for option in options.values():
                 option.delete()
-
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
         return super().update(instance, validated_data)
 
 
@@ -445,7 +452,10 @@ class SortQuestionSerializer(serializers.ModelSerializer):
 
             for option in options.values():
                 option.delete()
-
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
         return super().update(instance, validated_data)
 
 
@@ -490,6 +500,13 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return TextAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)
+
 
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
     url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
@@ -511,7 +528,6 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         if data.get('media'):
             data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
         return data
-
     def validate(self, data):
         max_value = data.get('max')
         min_value = data.get('min')
@@ -539,6 +555,13 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return NumberAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)
+
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
     url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
@@ -565,6 +588,13 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return IntegerSelectiveQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
@@ -608,6 +638,13 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return IntegerRangeQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)
 
 
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
@@ -656,6 +693,13 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return EmailFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)
+
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
     url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
@@ -682,6 +726,13 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
         print(validated_data)
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return LinkQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
@@ -717,6 +768,13 @@ class FileQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return FileQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)
+
 
 class QuestionGroupSerializer(serializers.ModelSerializer):
     url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
@@ -745,6 +803,13 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return QuestionGroup.objects.create(**validated_data, questionnaire=questionnaire)
 
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)
+
 
 class NoAnswerQuestionSerializer(serializers.ModelSerializer):
     url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
@@ -772,3 +837,10 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return NoAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
+
+    def update(self, instance, validated_data):
+        interview = instance.questionnaire.interview
+        if interview:
+            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+            interview.save()
+        return super().update(instance, validated_data)

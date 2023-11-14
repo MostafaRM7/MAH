@@ -597,12 +597,11 @@ class InterviewSerializer(serializers.ModelSerializer):
         interview.districts.set(districts)
         return interview
 
-    # def update(self, instance, validated_data):
-    #     """call the super func then make the approval status to pending"""
-    #     instance = super().update(instance, validated_data)
-    #     instance.approval_status = Interview.PENDING_CONTENT_ADMIN
-    #     instance.save()
-    #     return instance
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.approval_status = Interview.PENDING_CONTENT_ADMIN
+        instance.save()
+        return instance
 
 
 class TicketSerializer(serializers.ModelSerializer):
