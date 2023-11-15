@@ -60,7 +60,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         # filter the query set that return the interviews that the user has not taken yet
         queryset = queryset.filter(~Q(interviewers=request.user.profile))
         # filter the query set that return the interviews that their current interviewrs count are blow the requiered count
-        queryset = queryset.annotate(interviewrs_count=Count('interviews')).filter(~Q(interviewrs_count__lt=F('required_interviewer_count')))
+        queryset = queryset.annotate(interviewersinterviewrs_count=Count('interviewers')).filter(~Q(interviewers_count__lt=F('required_interviewer_count')))
         paginated_queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(data=paginated_queryset, many=True)
         serializer.is_valid()
