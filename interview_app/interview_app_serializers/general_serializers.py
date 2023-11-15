@@ -498,7 +498,7 @@ class InterviewSerializer(serializers.ModelSerializer):
         model = Interview
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
-            'interviewers', 'approval_status',
+            'interviewers', 'approval_status', 'required_interviewer_count',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
             'folder'
         )
@@ -513,6 +513,12 @@ class InterviewSerializer(serializers.ModelSerializer):
              'phone_number': interviewer.phone_number} for interviewer in
             instance.interviewers.all()]
         representation['folder'] = instance.folder.name if instance.folder else None
+        representation['owner'] = {
+            'id': instance.owner.id,
+            'first_name': instance.owner.first_name,
+            'last_name': instance.owner.last_name,
+            'phone_number': instance.owner.phone_number
+        }
         return representation
 
     def get_difficulty(self, instance: Interview):

@@ -13,8 +13,9 @@ class FolderSerializer(serializers.ModelSerializer):
 
     def get_questionnaires(self, instance):
         is_interview = self.context.get('is_interview')
-        return general_serializers.NoQuestionQuestionnaireSerializer(instance.questionnaires.filter(is_delete=False, interview__isnull=not is_interview),
-                                                                 many=True, read_only=True).data
+        return general_serializers.NoQuestionQuestionnaireSerializer(
+            instance.questionnaires.filter(is_delete=False, interview__isnull=not is_interview),
+            many=True, read_only=True).data
 
     def validate(self, data):
         name = data.get('name')
@@ -59,7 +60,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
-            'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined', 'is_staff', 'ask_for_interview_role')
+            'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined',
+            'is_staff', 'ask_for_interview_role')
         read_only_fields = ('role', 'updated_at', 'date_joined', 'is_staff')
 
     def validate(self, data):
@@ -85,12 +87,16 @@ class ProfileSerializer(serializers.ModelSerializer):
                     )
         return data
 
-
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['nationality'] = instance.nationality.name if instance.nationality else None
-        representation['province'] = instance.province.name if instance.province else None
+        representation['nationality'] = {
+            'id': instance.nationality.id,
+            'name': instance.nationality.name
+        } if instance.nationality else None
+        representation['province'] = {
+            'id': instance.province.id,
+            'name': instance.province.name
+        } if instance.province else None
         representation['preferred_districts'] = represent_prefrred_districts(instance)
         return representation
 

@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, F
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -22,7 +22,6 @@ from result_app.filtersets import AnswerSetFilterSet
 from user_app.models import Profile
 
 
-# TODO add recommended interviews to postman
 class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
     permission_classes = (InterviewOwnerOrInterviewerReadOnly,)
@@ -56,12 +55,17 @@ class InterviewViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='recommended-interviews', permission_classes=[IsInterviewer])
     def get_recommended_interviews(self, request, *args, **kwargs):
         queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all(),
-                                            is_delete=False, is_active=True, approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
-        paginator = MainPagination()
-        paginated_queryset = paginator.paginate_queryset(queryset, request)
+                                            is_delete=False, is_active=True,
+                                            approval_status=Interview.SEARCHING_FOR_INTERVIEWERS).exclude(
+            request.user.profile.intreviews.all())
+        # filter the query set that return the interviews that the user has not taken yet
+        queryset = queryset.filter(~Q(interviewers=request.user.profile))
+        # filter the query set that return the interviews that their current interviewrs count are blow the requiered count
+        queryset = queryset.filter(~Q(interviewers__count__lt=F('required_interviewer_count')))
+        paginated_queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(data=paginated_queryset, many=True)
         serializer.is_valid()
-        return paginator.get_paginated_response(serializer.data)
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['post'], url_path='add-interviewer', permission_classes=[IsInterviewer])
     def add_interviewer(self, request, *args, **kwargs):
@@ -71,19 +75,28 @@ class InterviewViewSet(viewsets.ModelViewSet):
             obj.interviewers.add(user)
             obj.save()
             return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+        return Response({'detail': 'شما در حال حاضر این پروژه را برداشتید'}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['get'], url_path='my-interviews', permission_classes=[IsInterviewer])
+    def my_interviews(self, request, *args, **kwargs):
+        queryset = self.request.user.profile.interviews.all()
+        paginated_queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(data=paginated_queryset, many=True)
+        return self.get_paginated_response(serializer.data)
     @action(detail=True, methods=['post'], url_path='approve-price')
     def approve_price(self, request, *args, **kwargs):
         obj = self.get_object()
         user = request.user.profile
         if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
-            needed_balance = (obj.answer_count_goal - obj.answer_sets.filter(answered_by__isnull=False).count()) * obj.price_pack.price
+            needed_balance = (obj.answer_count_goal - obj.answer_sets.filter(
+                answered_by__isnull=False).count()) * obj.price_pack.price
             if user.wallet.balance >= needed_balance:
                 obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
                 obj.save()
                 return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
             else:
-                return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"},
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"detail": "پروژه شما هنوز توسط ادمین تایید نشده"}, status=status.HTTP_400_BAD_REQUEST)
 
