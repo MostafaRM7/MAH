@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from django.db import transaction
-from django.db.models import Q, F
+from django.db.models import Q, F, Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -60,7 +60,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         # filter the query set that return the interviews that the user has not taken yet
         queryset = queryset.filter(~Q(interviewers=request.user.profile))
         # filter the query set that return the interviews that their current interviewrs count are blow the requiered count
-        queryset = queryset.filter(~Q(interviewers__count__lt=F('required_interviewer_count')))
+        queryset = queryset.annotate(interviewrs_count=Count('interviews')).filter(~Q(interviewrs_count__lt=F('required_interviewer_count')))
         paginated_queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(data=paginated_queryset, many=True)
         serializer.is_valid()
