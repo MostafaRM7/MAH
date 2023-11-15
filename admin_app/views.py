@@ -130,7 +130,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     profile.ask_for_interview_role = False
                     profile.save()
                     return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
-                elif profile.role == '':
+                elif profile.role == 'n':
                     profile.role = 'i'
                     profile.ask_for_interview_role = False
                     profile.save()
@@ -173,7 +173,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     profile.role = 'ie'
                     profile.save()
                     return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
-                elif profile.role == '':
+                elif profile.role == 'n':
                     profile.role = 'e'
                     profile.save()
                     return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
