@@ -81,6 +81,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         queryset = self.request.user.profile.interviews.all()
         paginated_queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(data=paginated_queryset, many=True)
+        serializer.is_valid()
         return self.get_paginated_response(serializer.data)
     @action(detail=True, methods=['post'], url_path='approve-price')
     def approve_price(self, request, *args, **kwargs):
