@@ -3,6 +3,7 @@ from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.generics import get_object_or_404
 
+from admin_app.admin_app_serializers.general_serializers import PricePackSerializer
 from interview_app.models import Interview, Ticket
 from question_app import validators
 from question_app.models import Answer, AnswerSet, DropDownOption, SortOption, Option, FileQuestion, \
@@ -493,12 +494,13 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 class InterviewSerializer(serializers.ModelSerializer):
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
     difficulty = serializers.SerializerMethodField(method_name='get_difficulty')
+    price_pack = PricePackSerializer(read_only=True)
 
     class Meta:
         model = Interview
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
-            'interviewers', 'approval_status', 'required_interviewer_count',
+            'interviewers', 'approval_status', 'required_interviewer_count', 'price_pack',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
             'folder'
         )
