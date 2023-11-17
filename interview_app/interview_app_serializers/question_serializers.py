@@ -107,7 +107,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         model = OptionalQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level', 'level', 'media', 'double_picture_size',
+            'is_required', 'is_finalized', 'url_prefix', 'media', 'double_picture_size',
             'multiple_choice',
             'is_vertical',
             'is_random_options',
@@ -304,7 +304,7 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
         model = DropDownQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'multiple_choice', 'is_alphabetic_order',
             'is_random_options',
             'max_selected_options', 'min_selected_options', 'options', 'level')
@@ -411,7 +411,7 @@ class SortQuestionSerializer(serializers.ModelSerializer):
         model = SortQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'is_random_options', 'options', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -466,7 +466,7 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
         model = TextAnswerQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'answer_template', 'pattern', 'min', 'max', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -515,7 +515,7 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         model = NumberAnswerQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'min', 'max', 'accept_negative', 'accept_float', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -570,7 +570,7 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
         model = IntegerSelectiveQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'shape', 'max', 'level'
         )
         read_only_fields = ('question_type', 'questionnaire')
@@ -604,7 +604,7 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         model = IntegerRangeQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'min', 'max', 'min_label', 'mid_label', 'max_label', 'level'
         )
         read_only_fields = ('question_type', 'questionnaire')
@@ -675,7 +675,7 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
         model = EmailFieldQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -708,7 +708,7 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
         model = LinkQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -742,7 +742,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
         model = FileQuestion
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group',
-            'is_required', 'is_finalized', 'url_prefix', 'level',
+            'is_required', 'is_finalized', 'url_prefix',
             'media', 'double_picture_size', 'max_volume', 'volume_unit', 'level')
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -785,7 +785,7 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
             'is_finalized',
-            'url_prefix', 'level', 'media', 'double_picture_size', 'child_questions', 'level'
+            'url_prefix', 'media', 'double_picture_size', 'child_questions', 'level'
         )
         read_only_fields = ('question_type', 'questionnaire')
 
@@ -819,7 +819,7 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'questionnaire', 'question_type', 'title', 'description', 'placement', 'group', 'is_required',
             'is_finalized', 'is_finalized',
-            'url_prefix', 'level',
+            'url_prefix',
             'media', 'double_picture_size', 'button_shape', 'is_solid_button', 'button_text', 'level'
         )
         read_only_fields = ('question_type', 'questionnaire')
