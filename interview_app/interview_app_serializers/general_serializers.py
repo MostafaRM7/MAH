@@ -8,7 +8,7 @@ from interview_app.models import Interview, Ticket
 from question_app import validators
 from question_app.models import Answer, AnswerSet, DropDownOption, SortOption, Option, FileQuestion, \
     IntegerRangeQuestion, NumberAnswerQuestion, TextAnswerQuestion, DropDownQuestion, OptionalQuestion
-from question_app.question_app_serializers.question_serializers import NoGroupQuestionSerializer
+from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
 from question_app.validators import tag_remover
 
 
