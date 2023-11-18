@@ -198,6 +198,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='block-user')
     def block_user(self, request, pk):
         profile = self.get_object()
+        if profile == request.user.profile:
+            return Response({profile.id: 'شما نمی‌توانید خودتان را مسدود کنید'}, status=status.HTTP_400_BAD_REQUEST)
         if not profile.is_active:
             return Response({profile.id: 'کاربر در حال حاضر مسدود است'}, status=status.HTTP_400_BAD_REQUEST)
         else:

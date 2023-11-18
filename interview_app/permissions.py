@@ -15,7 +15,7 @@ class InterviewOwnerOrInterviewerReadOnly(BasePermission):
                     if request.method in SAFE_METHODS:
                         return request.user.role in ['ie', 'i']
             else:
-                return request.user.is_staff
+                return request.user.role in ['ie', 'e'] or request.user.is_staff
 
 
 class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
