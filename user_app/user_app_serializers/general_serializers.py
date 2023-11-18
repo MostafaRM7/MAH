@@ -55,14 +55,24 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     resume = ResumeSerializer(read_only=True)
+    has_wallet = serializers.SerializerMethodField(method_name='get_has_wallet')
 
     class Meta:
         model = Profile
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
             'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined',
-            'is_staff', 'ask_for_interview_role')
+            'is_staff', 'ask_for_interview_role', 'has_wallet')
         read_only_fields = ('role', 'updated_at', 'date_joined', 'is_staff')
+
+    def get_has_wallet(self, instance):
+        user = instance
+        try:
+            if user.wallet is None:
+                return False
+        except:
+            return False
+        return True
 
     def validate(self, data):
         if self.context.get('request').method == 'POST':
