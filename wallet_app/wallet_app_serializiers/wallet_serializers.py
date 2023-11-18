@@ -38,8 +38,8 @@ class WalletSerializer(ModelSerializer):
         request = self.context.get('request')
         card_number = data.get('card_number')
         IBAN = data.get('IBAN')
-        if not bool(re.match(r'^IR(?=.{24}$)[0-9]*$', IBAN)):
-            raise serializers.ValidationError({'IBAN': 'فرمت شماره شبا صحیح نیست.'})
+        # if not bool(re.match(r'^IR(?=.{24}$)[0-9]*$', IBAN)):
+        #     raise serializers.ValidationError({'IBAN': 'فرمت شماره شبا صحیح نیست.'})
         for c in card_number:
             if not c.isdigit():
                 raise serializers.ValidationError({'card_number': 'شماره کارت باید عدد باشد.'})
