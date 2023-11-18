@@ -8,8 +8,9 @@ from user_app.models import Profile
 class Wallet(models.Model):
     owner = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='wallet', verbose_name='مالک')
     balance = models.IntegerField(default=0, verbose_name='موجودی')
-    IBAN = models.CharField(max_length=26, verbose_name='شماره شبا', validators=[
-        RegexValidator(regex=r'^(?:IR)(?=.{24}$)[0-9]*$', message='فرمت شماره شبا صحیح نمی باشد')])
+    # , validators = [
+        # RegexValidator(regex=r'^(?:IR)(?=.{24}$)[0-9]*$', message='فرمت شماره شبا صحیح نمی باشد')]
+    IBAN = models.CharField(max_length=26, verbose_name='شماره شبا')
     card_number = models.CharField(max_length=19, verbose_name='شماره کارت')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='ساخته شد در')
