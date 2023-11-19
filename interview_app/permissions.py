@@ -9,7 +9,7 @@ class InterviewOwnerOrInterviewerReadOnly(BasePermission):
         uuid = str(view.kwargs.get('uuid'))
         if request.user.is_authenticated:
             if uuid:
-                if request.user.profile.interviews.filter(uuid=uuid).exists() or request.user.is_staff:
+                if request.user.profile.interviews.filter(id=view.get_object().id).exists() or request.user.is_staff:
                     return True
                 else:
                     if request.method in SAFE_METHODS:
