@@ -6,7 +6,7 @@ from interview_app.models import Interview
 
 class InterviewOwnerOrInterviewerReadOnly(BasePermission):
     def has_permission(self, request, view):
-        uuid = str(view.kwargs.get('uuid'))
+        uuid = view.kwargs.get('uuid')
         if request.user.is_authenticated:
             if uuid:
                 if view.get_object().owner == request.user.profile or request.user.is_staff:
