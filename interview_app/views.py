@@ -544,13 +544,12 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         interview_id = self.request.query_params.get('interview_id')
+        queryset = Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id)).order_by('-sent_at')
         try:
             interview_id = int(interview_id)
             interview = Interview.objects.get(id=interview_id)
         except (ValueError, TypeError, Interview.DoesNotExist):
             interview = None
         if interview:
-            return Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id),
-                                         interview=interview).order_by('-sent_at')
-        return Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id),
-                                     interview__isnull=True).order_by('-sent_at')
+            return queryset.filter(interview_id=interview.id)
+        return queryset.filter(interview__isnull=True)
