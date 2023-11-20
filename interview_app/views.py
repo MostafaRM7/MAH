@@ -544,7 +544,8 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         interview_id = self.request.query_params.get('interview_id')
-        queryset = Ticket.objects.filter(Q(sender=self.request.user) or Q(receiver=self.request.user)).order_by('-sent_at')
+        # Q(sender=self.request.user) or
+        queryset = Ticket.objects.filter(Q(receiver=self.request.user)).order_by('-sent_at')
         try:
             interview_id = int(interview_id)
             interview = Interview.objects.get(id=interview_id)
