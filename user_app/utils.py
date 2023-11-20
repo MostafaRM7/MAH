@@ -27,5 +27,5 @@ def validate_user_info(user: Profile):
     if user.resume is None:
         return errors.update({'resume': 'رزومه کاربر خالی است'})
     if len(errors) > 0:
-        return [False, errors]
-    return [True, errors]
+        return False, errors
+    return True, errors
