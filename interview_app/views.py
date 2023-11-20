@@ -552,4 +552,5 @@ class TicketViewSet(viewsets.ModelViewSet):
             interview = None
         # if interview:
         #     return queryset.filter(interview_id=interview.id)
-        return queryset.filter(interview__isnull=True)
+        # return queryset.filter(interview__isnull=True)
+        return queryset
