@@ -631,6 +631,12 @@ class TicketSerializer(serializers.ModelSerializer):
             }
         if instance.receiver is None:
             representation['receiver'] = 'admin'
+        else:
+            representation['receiver'] = {
+                'id': instance.receiver.id,
+                'first_name': instance.receiver.first_name,
+                'last_name': instance.receiver.last_name
+            }
         return representation
 
     def validate(self, data):
