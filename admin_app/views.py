@@ -124,7 +124,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if profile.role in ['ie', 'i']:
             return Response({profile.id: 'کاربر در حال حاضر نقش پرسشگر دارد'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            if validate_user_info(profile, True):
+            is_valid, errors = validate_user_info(profile)
+            if is_valid:
                 if profile.role == 'e':
                     profile.role = 'ie'
                     profile.ask_for_interview_role = False
@@ -136,7 +137,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     profile.save()
                     return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
             else:
-                return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'},
+                return Response(errors,
                                 status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='reject-interviewer-request')
@@ -168,18 +169,18 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if profile.role in ['ie', 'e']:
             return Response({profile.id: 'کاربر در حال حاضر نقش کارفرما دارد'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            if validate_user_info(profile, False):
-                if profile.role == 'i':
-                    profile.role = 'ie'
-                    profile.save()
-                    return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
-                elif profile.role == 'n':
-                    profile.role = 'e'
-                    profile.save()
-                    return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
-            else:
-                return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'},
-                                status=status.HTTP_400_BAD_REQUEST)
+            # if validate_user_info(profile, False):
+            if profile.role == 'i':
+                profile.role = 'ie'
+                profile.save()
+                return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
+            elif profile.role == 'n':
+                profile.role = 'e'
+                profile.save()
+                return Response(self.get_serializer(profile).data, status=status.HTTP_200_OK)
+            # else:
+            #     return Response({profile.id: 'کاربر هنوز اطلاعات خود را تکمیل نکرده است'},
+            #                     status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='revoke-employer-role')
     def revoke_employer_role(self, request, pk):

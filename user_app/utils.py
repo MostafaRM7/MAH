@@ -1,27 +1,29 @@
 from user_app.models import Profile
 
 
-def validate_user_info(user: Profile, for_interview):
+def validate_user_info(user: Profile):
+    errors = {}
     try:
         if user.wallet is None:
-            return False
+            errors.update({'wallet': 'کاربر کیف پول ندارد'})
     except:
-        return False
+        errors.update({'wallet': 'کاربر کیف پول ندارد'})
     if user.first_name is None or user.first_name == '':
-        return False
+        return errors.update({'first_name': 'نام کاربر خالی است'})
     if user.last_name is None or user.last_name == '':
-        return False
+        return errors.update({'last_name': 'نام خانوادگی کاربر خالی است'})
     if user.email is None or user.email == '':
-        return False
-    if for_interview:
-        if user.preferred_districts.all().exists() is False:
-            return False
+        return errors.update({'email': 'ایمیل کاربر خالی است'})
+    if user.preferred_districts.all().exists() is False:
+        return errors.update({'preferred_districts': 'مناطق پرسشگری کاربر خالی است'})
     if user.province is None:
-        return False
+        return errors.update({'province': 'استان کاربر خالی است'})
     if user.nationality is None:
-        return False
+        return errors.update({'nationality': 'ملیت کاربر خالی است'})
     if user.gender is None or user.gender == '':
-        return False
+        return errors.update({'gender': 'جنسیت کاربر خالی است'})
     if user.birth_date is None:
-        return False
-    return True
+        return errors.update({'birth_date': 'تاریخ تولد کاربر خالی است'})
+    if len(errors) > 0:
+        return (False, errors)
+    return (True, errors)
