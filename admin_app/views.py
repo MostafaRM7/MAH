@@ -124,7 +124,9 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if profile.role in ['ie', 'i']:
             return Response({profile.id: 'کاربر در حال حاضر نقش پرسشگر دارد'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            is_valid, errors = validate_user_info(profile)
+            validate = validate_user_info(profile)
+            is_valid = validate['is_valid']
+            errors = validate['errors']
             if is_valid:
                 if profile.role == 'e':
                     profile.role = 'ie'

@@ -2,6 +2,7 @@ from user_app.models import Profile
 
 
 def validate_user_info(user: Profile):
+    Profile.objects.get_or_create()
     errors = {}
     try:
         if user.wallet is None:
@@ -27,5 +28,11 @@ def validate_user_info(user: Profile):
     if user.resume is None:
         return errors.update({'resume': 'رزومه کاربر خالی است'})
     if len(errors) > 0:
-        return False, errors
-    return True, errors
+        return {
+            'is_valid': False,
+            'errors': errors
+        }
+    return {
+        'is_valid': True,
+        'errors': errors
+    }
