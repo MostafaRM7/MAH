@@ -550,6 +550,6 @@ class TicketViewSet(viewsets.ModelViewSet):
             interview = Interview.objects.get(id=interview_id)
         except (ValueError, TypeError, Interview.DoesNotExist):
             interview = None
-        if interview:
-            return queryset.filter(interview_id=interview.id)
+        # if interview:
+        #     return queryset.filter(interview_id=interview.id)
         return queryset.filter(interview__isnull=True)
