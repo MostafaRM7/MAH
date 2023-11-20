@@ -24,6 +24,8 @@ def validate_user_info(user: Profile):
         return errors.update({'gender': 'جنسیت کاربر خالی است'})
     if user.birth_date is None:
         return errors.update({'birth_date': 'تاریخ تولد کاربر خالی است'})
+    if user.resume is None:
+        return errors.update({'resume': 'رزومه کاربر خالی است'})
     if len(errors) > 0:
         return (False, errors)
     return (True, errors)
