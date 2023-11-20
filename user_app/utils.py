@@ -2,7 +2,6 @@ from user_app.models import Profile
 
 
 def validate_user_info(user: Profile):
-    Profile.objects.get_or_create()
     errors = {}
     try:
         if user.wallet is None:
