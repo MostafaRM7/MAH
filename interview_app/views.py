@@ -548,6 +548,6 @@ class TicketViewSet(viewsets.ModelViewSet):
             interview = None
         if interview:
             return Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id),
-                                         interview=interview)
+                                         interview=interview).order_by('-sent_at')
         return Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id),
-                                     interview__isnull=True)
+                                     interview__isnull=True).order_by('-sent_at')
