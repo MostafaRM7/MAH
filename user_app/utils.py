@@ -14,16 +14,16 @@ def validate_user_info(user: Profile):
         errors.update({'last_name': 'نام خانوادگی کاربر خالی است'})
     if user.email is None or user.email == '':
         errors.update({'email': 'ایمیل کاربر خالی است'})
-    if user.preferred_districts.all().exists() is False:
-        errors.update({'preferred_districts': 'مناطق پرسشگری کاربر خالی است'})
+    # if user.preferred_districts.all().exists() is False:
+    #     errors.update({'preferred_districts': 'مناطق پرسشگری کاربر خالی است'})
     if user.province is None:
         errors.update({'province': 'استان کاربر خالی است'})
     if user.nationality is None:
         errors.update({'nationality': 'ملیت کاربر خالی است'})
     if user.gender is None or user.gender == '':
         errors.update({'gender': 'جنسیت کاربر خالی است'})
-    if user.birth_date is None:
-        errors.update({'birth_date': 'تاریخ تولد کاربر خالی است'})
+    # if user.birth_date is None:
+    #     errors.update({'birth_date': 'تاریخ تولد کاربر خالی است'})
     if user.resume is None:
         errors.update({'resume': 'رزومه کاربر خالی است'})
     if len(errors) > 0:
