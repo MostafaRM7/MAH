@@ -538,7 +538,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
 class TicketViewSet(viewsets.ModelViewSet):
     serializer_class = TicketSerializer
     permission_classes = (IsAuthenticated,)
-
+    pagination_class = MainPagination
     def get_queryset(self):
         interview_id = self.request.query_params.get('interview_id')
         try:
