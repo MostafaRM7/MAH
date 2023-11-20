@@ -57,7 +57,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
         queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all(),
                                             is_delete=False, is_active=True
                                             # approval_status=Interview.SEARCHING_FOR_INTERVIEWERS
-                                            ).exclude(pk__in=request.user.profile.interviews.all().values_list('pk', flat=True))
+                                            ).exclude(
+            pk__in=request.user.profile.interviews.all().values_list('pk', flat=True))
         # filter the query set that return the interviews that the user has not taken yet
         # queryset = queryset.filter(~Q(interviewers=request.user.profile))
         # filter the query set that return the interviews that their current interviewrs count are blow the requiered count
@@ -84,6 +85,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=paginated_queryset, many=True)
         serializer.is_valid()
         return self.get_paginated_response(serializer.data)
+
     @action(detail=True, methods=['post'], url_path='approve-price')
     def approve_price(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -539,6 +541,7 @@ class TicketViewSet(viewsets.ModelViewSet):
     serializer_class = TicketSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = MainPagination
+
     def get_queryset(self):
         interview_id = self.request.query_params.get('interview_id')
         try:
@@ -547,7 +550,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError, Interview.DoesNotExist):
             interview = None
         if interview:
-            return Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id),
+            return Ticket.objects.filter(Q(sender_id=self.request.user.id) | Q(receiver_id=self.request.user.id),
                                          interview=interview).order_by('-sent_at')
-        return Ticket.objects.filter(Q(sender_id=self.request.user.id) or Q(receiver_id=self.request.user.id),
+        return Ticket.objects.filter(Q(sender_id=self.request.user.id) | Q(receiver_id=self.request.user.id),
                                      interview__isnull=True).order_by('-sent_at')
