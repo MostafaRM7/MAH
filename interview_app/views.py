@@ -62,7 +62,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
                                                 approval_status=Interview.SEARCHING_FOR_INTERVIEWERS
                                                 ).distinct()
             # filter the query set that return the interviews that the user has not taken yet
-            queryset = queryset.filter(~Q(interviewers=request.user.profile))
+            # queryset = queryset.filter(~Q(interviewers=request.user.profile))
             # filter the query set that return the interviews that their current interviewrs count are blow the requiered count
             # queryset = queryset.annotate(interviewers_count=Count('interviewers')).filter(~Q(interviewers_count__lt=F('required_interviewer_count')))
             paginated_queryset = self.paginate_queryset(queryset)
