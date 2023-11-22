@@ -598,11 +598,12 @@ class InterviewSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        districts = validated_data.pop('districts')
+        districts = validated_data.pop('districts', None)
         owner = self.context['request'].user.profile
         interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()),
                                              **validated_data)
-        interview.districts.set(districts)
+        if districts:
+            interview.districts.set(districts)
         return interview
 
     def update(self, instance, validated_data):
