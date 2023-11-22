@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 class MainPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 50
-    choices = [2, 5, 7, 9, 10, 15, 20, 25, 30, 50]
+    choices = [7, 25, 50, 100]
     page_size = 7
 
     def get_page_size(self, request):

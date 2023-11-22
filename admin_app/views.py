@@ -74,15 +74,16 @@ class InterviewViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='set-price-pack')
     def set_price_pack(self, request, uuid):
         interview = self.get_object()
-        try:
-            price_pack = int(request.data.get('price_pack'))
-        except ValueError:
-            price_pack = None
-        if price_pack:
-            interview.price_pack = get_object_or_404(PricePack, pk=price_pack)
-            interview.approval_status = Interview.PENDING_PRICE_EMPLOYER
-            interview.save()
-            return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
+        if interview.approval_status == Interview.PENDING_PRICE_ADMIN:
+            try:
+                price_pack = int(request.data.get('price_pack'))
+            except ValueError:
+                price_pack = None
+            if price_pack:
+                interview.price_pack = get_object_or_404(PricePack, pk=price_pack)
+                interview.approval_status = Interview.PENDING_PRICE_EMPLOYER
+                interview.save()
+                return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
         return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
