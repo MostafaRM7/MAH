@@ -12,6 +12,17 @@ class WorkBackgroundSerializer(ModelSerializer):
 
     def validate(self, data):
         profile = self.context.get('request').user.profile
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        if start_date and end_date:
+            if start_date > end_date:
+                raise serializers.ValidationError(
+                    {'end_date': 'تاریخ پایان باید بعد از تاریخ شروع باشد'},
+                )
+            if start_date > timezone.now().date():
+                raise serializers.ValidationError(
+                    {'start_date': 'تاریخ شروع نمی‌تواند بعد از زمان حال باشد'},
+                )
         if not profile.resume:
             raise serializers.ValidationError(
                 {'resume': 'اول رزومه بسازید'},
