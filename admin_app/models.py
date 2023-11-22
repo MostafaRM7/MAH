@@ -9,7 +9,7 @@ class PricePack(models.Model):
         'max_length': 'اسم باید کمتر از 255 کاراکتر باشد'
     })
     description = models.TextField(blank=True, null=True, verbose_name='توضیحات')
-    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='قیمت')
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='قیمت')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد')
 
     def __str__(self):
