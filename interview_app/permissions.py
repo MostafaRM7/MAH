@@ -28,7 +28,7 @@ class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
                 if answer_set.questionnaire.owner == request.user or request.user.is_staff:
                     return True
                 else:
-                    if answer_set.questionnaire.interview.interviewers.filter(id=request.user.id).exists():
+                    if request.user.profile in answer_set.questionnaire.interview.interviewers.all():
                         return True
             else:
                 interview = get_object_or_404(Interview, uuid=interview_uuid)
