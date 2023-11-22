@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from admin_app.models import *
 from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
@@ -61,7 +62,7 @@ class InterviewSerializer(serializers.ModelSerializer):
 
     def get_interviewers_count(self, instance: Interview):
         return instance.interviewers.count() if instance.interviewers else 0
-
+    @transaction.atomic
     def create(self, validated_data):
         districts = validated_data.pop('districts')
         owner = self.context['request'].user.profile
