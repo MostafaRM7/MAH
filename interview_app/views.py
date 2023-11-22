@@ -94,15 +94,18 @@ class InterviewViewSet(viewsets.ModelViewSet):
         obj = self.get_object()
         user = request.user.profile
         if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
-            needed_balance = (obj.answer_count_goal - obj.answer_sets.filter(
-                answered_by__isnull=False).count()) * obj.price_pack.price
-            if user.wallet.balance >= needed_balance:
-                obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
-                obj.save()
-                return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+            if obj.answer_count_goal:
+                needed_balance = (obj.answer_count_goal - obj.answer_sets.filter(
+                    answered_by__isnull=False).count()) * obj.price_pack.price
+                if user.wallet.balance >= needed_balance:
+                    obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
+                    obj.save()
+                    return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+                else:
+                    return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"},
+                                    status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "اول تعداد پاسخ های مورد نظر خود را وارد کنید"})
         else:
             return Response({"detail": "پروژه شما هنوز توسط ادمین تایید نشده"}, status=status.HTTP_400_BAD_REQUEST)
 
