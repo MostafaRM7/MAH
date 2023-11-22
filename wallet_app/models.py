@@ -10,8 +10,14 @@ class Wallet(models.Model):
     balance = models.IntegerField(default=0, verbose_name='موجودی')
     # , validators = [
         # RegexValidator(regex=r'^(?:IR)(?=.{24}$)[0-9]*$', message='فرمت شماره شبا صحیح نمی باشد')]
-    IBAN = models.CharField(max_length=26, verbose_name='شماره شبا')
-    card_number = models.CharField(max_length=19, verbose_name='شماره کارت')
+    IBAN = models.CharField(max_length=26, verbose_name='شماره شبا', error_messages={
+        'required': 'لطفا شماره شبا را وارد کنید',
+        'max_length': 'شماره شبا باید 26 کاراکتر باشد',
+    })
+    card_number = models.CharField(max_length=19, verbose_name='شماره کارت', error_messages={
+        'required': 'لطفا شماره کارت را وارد کنید',
+        'max_length': 'شماره کارت باید 19 کاراکتر باشد',
+    })
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='ساخته شد در')
     last_transaction = models.DateTimeField(null=True, blank=True, verbose_name='آخرین تراکنش')

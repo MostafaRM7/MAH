@@ -193,8 +193,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                 {
                     'additional_options':
                         'برای اضافه کردن گزینه ی همه گزینه ها یا گزینه هیچ کدام ابتدا باید گزینه های اضافی را فعال کنید'
-                },
-                status.HTTP_400_BAD_REQUEST
+                }
             )
         elif additional_options:
             if nothing_selected:
@@ -698,8 +697,7 @@ class FileQuestionSerializer(serializers.ModelSerializer):
     def validate_max_volume(self, value):
         if value > 30:
             raise serializers.ValidationError(
-                {'max_volume': 'حداکثر حجم فایل نمی تواند بیشتر از ۳۰ مگابایت باشد'},
-                status.HTTP_400_BAD_REQUEST
+                {'max_volume': 'حداکثر حجم فایل نمی تواند بیشتر از ۳۰ مگابایت باشد'}
             )
         return value
 
