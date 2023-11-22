@@ -57,7 +57,10 @@ class InterviewViewSet(viewsets.ModelViewSet):
     def approve_content(self, request, uuid):
         interview = self.get_object()
         if interview.answer_count_goal and interview.required_interviewer_count:
-            interview.approval_status = Interview.PENDING_LEVEL_ADMIN
+            if interview.price_pack:
+                interview.approval_status = Interview.PENDING_LEVEL_ADMIN
+            else:
+                interview.approval_status = Interview.PENDING_PRICE_EMPLOYER
             interview.save()
             return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
         return Response({interview.id: 'کارفرما باید تعداد پرسشگر مورد نیاز و تعداد پاسخ مورد نیاز را وارد کند'}, status=status.HTTP_400_BAD_REQUEST)

@@ -57,13 +57,13 @@ class InterviewViewSet(viewsets.ModelViewSet):
         if request.user.profile.preferred_districts.all().exists():
             queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all(),
                                                 is_delete=False, is_active=True,
-                                                approval_status=Interview.SEARCHING_FOR_INTERVIEWERS
+                                                # approval_status=Interview.SEARCHING_FOR_INTERVIEWERS
                                                 ).exclude(
                 pk__in=request.user.profile.interviews.all().values_list('pk', flat=True))
             # filter the query set that return the interviews that the user has not taken yet
-            queryset = queryset.filter(~Q(interviewers=request.user.profile))
+            # queryset = queryset.filter(~Q(interviewers=request.user.profile))
             # filter the query set that return the interviews that their current interviewrs count are blow the requiered count
-            queryset = queryset.annotate(interviewers_count=Count('interviewers')).filter(~Q(interviewers_count__lt=F('required_interviewer_count')))
+            # queryset = queryset.annotate(interviewers_count=Count('interviewers')).filter(~Q(interviewers_count__lt=F('required_interviewer_count')))
             paginated_queryset = self.paginate_queryset(queryset)
             serializer = self.get_serializer(data=paginated_queryset, many=True)
             serializer.is_valid()
