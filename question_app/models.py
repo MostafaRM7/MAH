@@ -19,7 +19,7 @@ class Questionnaire(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام')
     is_delete = models.BooleanField(default=False, verbose_name='حذف شده/نشده')
     is_active = models.BooleanField(default=True, verbose_name='فعال/غیرفعال')
-    pub_date = models.DateTimeField(verbose_name='تاریخ انتشار')
+    pub_date = models.DateTimeField(verbose_name='تاریخ انتشار', null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ پایان')
     timer = models.DurationField(null=True, blank=True, verbose_name='تایمر')
     previous_button = models.BooleanField(default=False, verbose_name='نمایش دکمه قبلی')
