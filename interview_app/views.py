@@ -524,7 +524,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
         answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set, 'request': request})
         answers.is_valid(raise_exception=True)
         answers.save()
-        price = answer_set.questionnaire.price_pack.price
+        price = answer_set.questionnaire.interview.price_pack.price
         if price:
             request.user.profile.wallet.balance += price
             answer_set.questionnaire.owner.wallet.balance -= price
