@@ -47,7 +47,7 @@ class ProfileFilterSet(django_filters.FilterSet):
         elif value == 'r':
             return queryset.filter(ask_for_interview_role=False, is_interview_role_accepted=False, role__in=['e', 'n'])
         elif value == 'p':
-            return queryset.filter(ask_for_interview_role=True, is_interview_role_accepted=False, role__in=['e', 'n'])
+            return queryset.filter(ask_for_interview_role=True, is_interview_role_accepted=None, role__in=['e', 'n'])
         elif value == 'n':
             return queryset.filter(ask_for_interview_role=False, is_interview_role_accepted=None, role__in=['e', 'n'])
         else:

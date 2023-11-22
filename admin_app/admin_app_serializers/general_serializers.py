@@ -45,6 +45,10 @@ class InterviewSerializer(serializers.ModelSerializer):
                     instance.approval_status = Interview.PENDING_PRICE_ADMIN
                     instance.save()
                 return True
+            else:
+                instance.approval_status = Interview.PENDING_LEVEL_ADMIN
+                instance.save()
+                return False
         return False
 
     def get_answer_count(self, instance: Interview):

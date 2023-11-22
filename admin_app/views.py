@@ -56,9 +56,11 @@ class InterviewViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='approve-content')
     def approve_content(self, request, uuid):
         interview = self.get_object()
-        interview.approval_status = Interview.PENDING_LEVEL_ADMIN
-        interview.save()
-        return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
+        if interview.answer_count_goal and interview.required_interviewer_count:
+            interview.approval_status = Interview.PENDING_LEVEL_ADMIN
+            interview.save()
+            return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
+        return Response({interview.id: 'کارفرما باید تعداد پرسشگر مورد نیاز و تعداد پاسخ مورد نیاز را وارد کند'})
 
     @action(detail=True, methods=['post'], url_path='reject-content')
     def reject_content(self, request, uuid):
@@ -84,6 +86,9 @@ class InterviewViewSet(viewsets.ModelViewSet):
                 interview.approval_status = Interview.PENDING_PRICE_EMPLOYER
                 interview.save()
                 return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
+        elif interview.approval_status == Interview.PENDING_LEVEL_ADMIN:
+            un_leveled_questions_count = interview.questions.filter(level=0).count()
+            return Response({interview.id: f'در این پروژه تعداد {un_leveled_questions_count} سوال تعیین سطح نشده اند'})
         return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
