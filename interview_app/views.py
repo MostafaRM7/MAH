@@ -57,7 +57,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         if request.user.profile.preferred_districts.all().exists():
             queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all(),
                                                 is_delete=False, is_active=True,
-                                                # approval_status=Interview.SEARCHING_FOR_INTERVIEWERS
+                                                approval_status=Interview.SEARCHING_FOR_INTERVIEWERS
                                                 ).exclude(
                 pk__in=request.user.profile.interviews.all().values_list('pk', flat=True))
             # filter the query set that return the interviews that the user has not taken yet
