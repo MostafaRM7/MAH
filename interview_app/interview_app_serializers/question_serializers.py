@@ -500,12 +500,12 @@ class TextAnswerQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return TextAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
 
 
 class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
@@ -555,12 +555,12 @@ class NumberAnswerQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return NumberAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
 
 
 class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
@@ -589,12 +589,12 @@ class IntegerSelectiveQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return IntegerSelectiveQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
 
 
 class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
@@ -639,12 +639,12 @@ class IntegerRangeQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return IntegerRangeQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
 
 
 class PictureFieldQuestionSerializer(serializers.ModelSerializer):
@@ -693,12 +693,12 @@ class EmailFieldQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return EmailFieldQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
 
 
 class LinkQuestionSerializer(serializers.ModelSerializer):
@@ -727,12 +727,12 @@ class LinkQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return LinkQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
 
 
 class FileQuestionSerializer(serializers.ModelSerializer):
@@ -768,12 +768,12 @@ class FileQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return FileQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
 
 
 class QuestionGroupSerializer(serializers.ModelSerializer):
@@ -803,12 +803,12 @@ class QuestionGroupSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return QuestionGroup.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
 
 
 class NoAnswerQuestionSerializer(serializers.ModelSerializer):
@@ -838,9 +838,9 @@ class NoAnswerQuestionSerializer(serializers.ModelSerializer):
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('interview_uuid'))
         return NoAnswerQuestion.objects.create(**validated_data, questionnaire=questionnaire)
 
-    def update(self, instance, validated_data):
-        interview = instance.questionnaire.interview
-        if interview:
-            interview.approval_status = Interview.PENDING_CONTENT_ADMIN
-            interview.save()
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     interview = instance.questionnaire.interview
+    #     if interview:
+    #         interview.approval_status = Interview.PENDING_CONTENT_ADMIN
+    #         interview.save()
+    #     return super().update(instance, validated_data)
