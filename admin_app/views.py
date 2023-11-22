@@ -60,7 +60,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
             interview.approval_status = Interview.PENDING_LEVEL_ADMIN
             interview.save()
             return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
-        return Response({interview.id: 'کارفرما باید تعداد پرسشگر مورد نیاز و تعداد پاسخ مورد نیاز را وارد کند'})
+        return Response({interview.id: 'کارفرما باید تعداد پرسشگر مورد نیاز و تعداد پاسخ مورد نیاز را وارد کند'}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='reject-content')
     def reject_content(self, request, uuid):
@@ -68,7 +68,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         interview = self.get_object()
         interview.approval_status = Interview.REJECTED_CONTENT_ADMIN
         if text is None:
-            return Response({'detail': 'لطفا علت رد کردن محتوا را وارد کنید'})
+            return Response({'detail': 'لطفا علت رد کردن محتوا را وارد کنید'}, status=status.HTTP_400_BAD_REQUEST)
         Ticket.objects.create(sender=request.user.profile, interview=interview, receiver=interview.owner, text=text)
         interview.save()
         return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
@@ -88,7 +88,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
                 return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
         elif interview.approval_status == Interview.PENDING_LEVEL_ADMIN:
             un_leveled_questions_count = interview.questions.filter(level=0).count()
-            return Response({interview.id: f'در این پروژه تعداد {un_leveled_questions_count} سوال تعیین سطح نشده اند'})
+            return Response({interview.id: f'در این پروژه تعداد {un_leveled_questions_count} سوال تعیین سطح نشده اند'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
