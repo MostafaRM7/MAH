@@ -33,7 +33,7 @@ class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
             else:
                 interview = get_object_or_404(Interview, uuid=interview_uuid)
                 return interview.owner == request.user or request.user.is_staff or interview.interviewers.filter(
-                    request.user.id).exists()
+                    request.user).exists()
 
 
 class IsQuestionOwnerOrReadOnly(BasePermission):
