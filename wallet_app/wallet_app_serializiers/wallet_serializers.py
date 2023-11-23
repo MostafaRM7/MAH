@@ -10,7 +10,7 @@ class TransactionSerializer(ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['id', 'uuid', 'transaction_type', 'reason', 'amount', 'created_at', 'source', 'destination',
-                  'is_done', 'is_out', 'is_in']
+                  'is_done']
         read_only_fields = ['uuid', 'created_at', 'is_done', 'is_out', 'is_in', 'source', 'transaction_type']
 
     def to_representation(self, instance):
