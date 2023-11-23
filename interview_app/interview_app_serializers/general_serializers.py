@@ -10,6 +10,7 @@ from question_app.models import Answer, AnswerSet, DropDownOption, SortOption, O
     IntegerRangeQuestion, NumberAnswerQuestion, TextAnswerQuestion, DropDownQuestion, OptionalQuestion
 from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
 from question_app.validators import tag_remover
+from user_app.representors import represent_districts
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -508,8 +509,7 @@ class InterviewSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance: Interview):
         representation = super().to_representation(instance)
-        representation['districts'] = [{'id': district.id, 'name': district.name} for district in
-                                       instance.districts.all()]
+        representation['districts'] = represent_districts(instance)
         representation['interviewers'] = [
             {'id': interviewer.id, 'first_name': interviewer.first_name, 'last_name': interviewer.last_name,
              'phone_number': interviewer.phone_number} for interviewer in
