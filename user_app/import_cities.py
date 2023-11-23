@@ -1,7 +1,9 @@
 import os
 import json
 import django
+import sys
 
+sys.path.append('/home/ubuntu/porsline_config')
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "porsline_config.settings")
 django.setup()
 
