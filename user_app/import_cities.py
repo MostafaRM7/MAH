@@ -2,7 +2,7 @@ import os
 import json
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "../porsline_config.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "porsline_config.settings")
 django.setup()
 
 from user_app.models import Province, City, Country, District
