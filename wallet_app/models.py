@@ -45,8 +45,6 @@ class Transaction(models.Model):
     destination = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='destination', verbose_name='مقصد',
                                     null=True, blank=True)
     is_done = models.BooleanField(default=False, verbose_name='انجام شده')
-    is_out = models.BooleanField(default=False, verbose_name='برداشت شده')
-    is_in = models.BooleanField(default=False, verbose_name='واریز شده')
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
 
     def __str__(self):

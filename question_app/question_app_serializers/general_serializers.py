@@ -188,13 +188,12 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
         model = Questionnaire
         fields = ('id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active')
 
-
     def to_representation(self, instance):
-
         representation = super().to_representation(instance)
         if self.context.get('is_interview'):
             representation['approval_status'] = instance.interview.approval_status
         return representation
+
     def get_answer_count(self, obj):
         return obj.answer_sets.exclude(answers=None).count()
 

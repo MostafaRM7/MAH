@@ -20,6 +20,7 @@ from porsline_config.paginators import MainPagination
 from question_app.models import AnswerSet
 from result_app.filtersets import AnswerSetFilterSet
 from user_app.models import Profile
+from wallet_app.models import Transaction
 
 
 class InterviewViewSet(viewsets.ModelViewSet):
@@ -526,10 +527,30 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
         answers.save()
         price = answer_set.questionnaire.interview.price_pack.price
         if price:
-            request.user.profile.wallet.balance += price
-            answer_set.questionnaire.owner.wallet.balance -= price
+            interviewer_wallet = request.user.profile.wallet
+            employer_wallet = answer_set.questionnaire.owner.wallet
+            interviewer_wallet.balance += price
+            employer_wallet.balance -= price
             request.user.profile.wallet.save()
             answer_set.questionnaire.owner.wallet.save()
+            Transaction.objects.create(
+                source=employer_wallet,
+                destination=interviewer_wallet,
+                is_done=True,
+                reason='i',
+                transaction_type='i',
+                amount=price,
+                wallet=interviewer_wallet
+            )
+            Transaction.objects.create(
+                source=employer_wallet,
+                destination=interviewer_wallet,
+                is_done=True,
+                reason='i',
+                transaction_type='o',
+                amount=price,
+                wallet=employer_wallet
+            )
         answer_set.refresh_from_db()
         return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
 
