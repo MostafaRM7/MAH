@@ -30,6 +30,6 @@ def populate_database(data):
 
 
 if __name__ == "__main__":
-    file_path = "~/state_cities.json"  # Update with the actual path to your JSON file
+    file_path = "/home/ubuntu/state_cities.json"  # Update with the actual path to your JSON file
     data = read_json_file(file_path)
     populate_database(data)
