@@ -21,7 +21,7 @@ from user_app.utils import validate_user_info
 
 
 class PricePackViewSet(viewsets.ModelViewSet):
-    queryset = PricePack.objects.all()
+    queryset = PricePack.objects.prefetch_related('interviews').all()
     serializer_class = PricePackSerializer
     permission_classes = (IsAdminUser,)
 
