@@ -11,10 +11,14 @@ class InterviewFilterSet(django_filters.FilterSet):
     approval_status = django_filters.CharFilter(field_name='approval_status', lookup_expr='exact')
     owner = django_filters.NumberFilter(field_name='owner', lookup_expr='exact', method='filter_owner')
     has_interviewer = django_filters.BooleanFilter(method='filter_has_interviewer')
+    price_pack_id = django_filters.NumberFilter(method='filter_price_pack_id')
 
     class Meta:
         model = Interview
         fields = ['created_at', 'approval_status']
+
+    def filter_price_pack_id(self, queryset, name, value):
+        return queryset.filter(price_pack__id=value)
 
     def filter_owner(self, queryset, name, value):
         return queryset.filter(owner__id=value)

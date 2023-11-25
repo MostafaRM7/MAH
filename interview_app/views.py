@@ -212,6 +212,21 @@ class OptionalQuestionViewSet(viewsets.ModelViewSet):
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 class DropDownQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = DropDownQuestionSerializer

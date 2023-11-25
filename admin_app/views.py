@@ -36,7 +36,6 @@ class InterviewViewSet(viewsets.ModelViewSet):
     filterset_class = InterviewFilterSet
     ordering_fields = ('created_at', 'pub_date', 'end_date', 'goal_start_date', 'goal_end_date', 'answer_count_goal')
     lookup_field = 'uuid'
-
     @action(detail=False, methods=['get'], url_path='search-questions')
     def search_in_questions(self, request, *args, **kwargs):
         search = request.query_params.get('search')
