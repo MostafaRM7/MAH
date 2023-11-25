@@ -48,8 +48,12 @@ class InterviewSerializer(serializers.ModelSerializer):
         if instance.questions.count() > 0:
             if not instance.questions.filter(level=0).exists():
                 if instance.approval_status == Interview.PENDING_LEVEL_ADMIN:
-                    instance.approval_status = Interview.PENDING_PRICE_ADMIN
-                    instance.save()
+                    if instance.price_pack:
+                        instance.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
+                        instance.save()
+                    else:
+                        instance.approval_status = Interview.PENDING_PRICE_ADMIN
+                        instance.save()
                 return True
             else:
                 instance.approval_status = Interview.PENDING_LEVEL_ADMIN
