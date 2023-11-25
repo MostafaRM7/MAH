@@ -82,8 +82,11 @@ class InterviewViewSet(viewsets.ModelViewSet):
         if user not in obj.interviewers.all():
             obj.interviewers.add(user)
             obj.save()
+            if obj.interviewers.count() == obj.required_interviewer_count:
+                obj.approval_status = Interview.REACHED_INTERVIEWER_COUNT
+                obj.save()
             return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
-        return Response({'detail': 'شما در حال حاضر این پروژه را برداشتید'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'شما در حال حاضر این پروژه را برداشته اید'}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'], url_path='my-interviews', permission_classes=[IsInterviewer])
     def my_interviews(self, request, *args, **kwargs):
@@ -733,6 +736,11 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                 amount=price,
                 wallet=employer_wallet
             )
+        if answer_set.questionnaire.interview.answer_count_goal:
+            if answer_set.questionnaire.interview.answer_count_goal == answer_set.questionnaire.interview.answer_sets.filter(
+                    answered_by__isnull=False).count():
+                answer_set.questionnaire.interview.approval_status = Interview.REACHED_ANSWER_COUNT
+                answer_set.questionnaire.interview.save()
         answer_set.refresh_from_db()
         return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
 

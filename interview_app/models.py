@@ -13,19 +13,15 @@ def get_current_date():
 # Create your models here.
 
 class Interview(Questionnaire):
-    # 0
     PENDING_CONTENT_ADMIN = 'pending_content_admin'
     REJECTED_CONTENT_ADMIN = 'rejected_content_admin'
-    # 1
     PENDING_LEVEL_ADMIN = 'pending_level_admin'
-    # 2
     PENDING_PRICE_ADMIN = 'pending_price_admin'
-    # 3
     PENDING_PRICE_EMPLOYER = 'pending_price_employer'
-    # 4
     REJECTED_PRICE_EMPLOYER = 'rejected_price_employer'
-    # 5
     SEARCHING_FOR_INTERVIEWERS = 'searching_for_interviewers'
+    REACHED_INTERVIEWER_COUNT = 'reached_interviewer_count'
+    REACHED_ANSWER_COUNT = 'reached_answer_count'
     APPROVAL_STATUS = (
         (PENDING_CONTENT_ADMIN, 'در انتظار تایید محتوا توسط ادمین'),
         (PENDING_LEVEL_ADMIN, 'در انتظار تعیین سطح ادمین'),
@@ -33,7 +29,9 @@ class Interview(Questionnaire):
         (REJECTED_CONTENT_ADMIN, 'رد محتوا شده توسط ادمین'),
         (PENDING_PRICE_EMPLOYER, 'در انتظار تایید قیمت توسط کارفرما'),
         (REJECTED_PRICE_EMPLOYER, 'رد قیمت شده توسط کارفرما'),
-        (SEARCHING_FOR_INTERVIEWERS, 'در جست و جوی پرسشگر')
+        (SEARCHING_FOR_INTERVIEWERS, 'در جست و جوی پرسشگر'),
+        (REACHED_INTERVIEWER_COUNT, 'دارای پرسشگر مورد نیاز'),
+        (REACHED_ANSWER_COUNT, 'دارای تعداد پاسخ مورد نیاز'),
     )
     interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True)
     approval_status = models.CharField(max_length=255, choices=APPROVAL_STATUS, default=PENDING_CONTENT_ADMIN,
