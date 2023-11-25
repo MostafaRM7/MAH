@@ -28,7 +28,7 @@ class PricePackViewSet(viewsets.ModelViewSet):
 class InterviewViewSet(viewsets.ModelViewSet):
     queryset = Interview.objects.prefetch_related('interviewers', 'questions', 'districts').select_related('price_pack',
                                                                                                            'owner').filter(
-        is_delete=False)
+        is_delete=False).order_by('-created_at')
     serializer_class = InterviewSerializer
     permission_classes = (IsAdminUser,)
     pagination_class = MainPagination
