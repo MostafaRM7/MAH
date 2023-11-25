@@ -88,10 +88,12 @@ class InterviewViewSet(viewsets.ModelViewSet):
                 interview.approval_status = Interview.PENDING_PRICE_EMPLOYER
                 interview.save()
                 return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
+            else:
+                return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
         elif interview.approval_status == Interview.PENDING_LEVEL_ADMIN:
             un_leveled_questions_count = interview.questions.filter(level=0).count()
             return Response({interview.id: f'در این پروژه تعداد {un_leveled_questions_count} سوال تعیین سطح نشده اند'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({interview.id: 'لطفا ابتدا پرسشنامه را تعیین سطح یا محتوای آن را تایید کنید'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
