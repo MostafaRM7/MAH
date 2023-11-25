@@ -12,6 +12,12 @@ class PricePackSerializer(serializers.ModelSerializer):
         model = PricePack
         fields = ('id', 'name', 'price', 'description', 'created_at')
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['interviews'] = [{'id': interview.id, 'name': interview.name} for interview in
+                                        instance.interviews.all()]
+        return representation
+
 
 class InterviewSerializer(serializers.ModelSerializer):
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
@@ -66,6 +72,7 @@ class InterviewSerializer(serializers.ModelSerializer):
 
     def get_interviewers_count(self, instance: Interview):
         return instance.interviewers.count() if instance.interviewers else 0
+
     @transaction.atomic
     def create(self, validated_data):
         districts = validated_data.pop('districts')
