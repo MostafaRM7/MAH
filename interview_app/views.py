@@ -27,7 +27,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
     permission_classes = (InterviewOwnerOrInterviewerReadOnly,)
     lookup_field = 'uuid'
-    queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').filter(is_delete=False)
+    queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').filter(is_delete=False).order_by('-created_at')
     pagination_class = MainPagination
 
     @action(detail=True, methods=['get'], url_path='search-questions')
