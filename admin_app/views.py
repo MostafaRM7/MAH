@@ -234,7 +234,7 @@ class TicketViewSet(viewsets.ModelViewSet):
     pagination_class = MainPagination
 
     def get_queryset(self):
-        queryset = Ticket.objects.filter(receiver__isnull=True).order_by('sent_at')
+        queryset = Ticket.objects.filter(receiver__isnull=True).order_by('-sent_at')
         try:
             interview_id = int(self.request.query_params.get('interview_id', None))
             interview = Interview.objects.get(id=interview_id)

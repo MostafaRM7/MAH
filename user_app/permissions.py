@@ -28,7 +28,6 @@ class IsOwner(BasePermission):
             user_id = int(view.kwargs.get('user_pk')) if view.kwargs.get('user_pk') else None
         except ValueError:
             user_id = None
-        print(user_id)
         if request.user.is_authenticated:
             if user_id:
                 print(request.user.id)
