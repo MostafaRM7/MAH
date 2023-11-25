@@ -52,6 +52,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         question = get_object_or_404(Question, id=question_id, questionnaire=self.get_object())
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
     #
     # .exclude(
     #     pk__in=request.user.profile.interviews.all().values_list('pk', flat=True))
@@ -71,7 +72,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
             serializer.is_valid()
             return self.get_paginated_response(serializer.data)
         else:
-            return Response({"detail": "لطفا ابتدا مناطق مورد علاقه خود را مشخص کنید"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "لطفا ابتدا مناطق مورد علاقه خود را مشخص کنید"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='add-interviewer', permission_classes=[IsInterviewer])
     def add_interviewer(self, request, *args, **kwargs):
@@ -244,6 +246,21 @@ class DropDownQuestionViewSet(viewsets.ModelViewSet):
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 class SortQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = SortQuestionSerializer
@@ -261,6 +278,21 @@ class SortQuestionViewSet(viewsets.ModelViewSet):
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 class TextAnswerQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = TextAnswerQuestionSerializer
@@ -276,6 +308,21 @@ class TextAnswerQuestionViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
+
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
 
 
 class NumberAnswerQuestionViewSet(viewsets.ModelViewSet):
@@ -293,6 +340,21 @@ class NumberAnswerQuestionViewSet(viewsets.ModelViewSet):
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 class IntegerRangeQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = IntegerRangeQuestionSerializer
@@ -309,6 +371,21 @@ class IntegerRangeQuestionViewSet(viewsets.ModelViewSet):
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 class IntegerSelectiveQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = IntegerSelectiveQuestionSerializer
@@ -324,6 +401,21 @@ class IntegerSelectiveQuestionViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
+
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
 
 
 class PictureFieldQuestionViewSet(viewsets.ModelViewSet):
@@ -357,6 +449,21 @@ class EmailFieldQuestionViewSet(viewsets.ModelViewSet):
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 class LinkQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = LinkQuestionSerializer
@@ -373,6 +480,21 @@ class LinkQuestionViewSet(viewsets.ModelViewSet):
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 class FileQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = FileQuestionSerializer
@@ -388,6 +510,21 @@ class FileQuestionViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
+
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
 
 
 class QuestionGroupViewSet(viewsets.ModelViewSet):
@@ -406,6 +543,21 @@ class QuestionGroupViewSet(viewsets.ModelViewSet):
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+
 
 class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = NoAnswerQuestionSerializer
@@ -420,6 +572,21 @@ class NoAnswerQuestionViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context.update({'interview_uuid': self.kwargs['interview_uuid']})
         return context
+
+    @action(detail=True, methods=['post'], url_path='set-level')
+    def set_level(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            level = int(request.data.get('level'))
+        except ValueError:
+            return Response({"detail": "سطح سوال باید عدد باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        if level is None:
+            return Response({"detail": "لطفا سطح سوال را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if level not in [1, 2, 3]:
+            return Response({"detail": "سطح سوال باید 1 یا 2 یا 3 باشد"}, status=status.HTTP_400_BAD_REQUEST)
+        obj.level = level
+        obj.save()
+        return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
 
 
 class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
@@ -587,7 +754,8 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         interview_id = self.request.query_params.get('interview_id')
-        queryset = Ticket.objects.filter(Q(receiver=self.request.user) | Q(sender=self.request.user)).order_by('-sent_at')
+        queryset = Ticket.objects.filter(Q(receiver=self.request.user) | Q(sender=self.request.user)).order_by(
+            '-sent_at')
         try:
             interview_id = int(interview_id)
             interview = Interview.objects.get(id=interview_id)
