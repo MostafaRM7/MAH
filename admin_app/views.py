@@ -82,10 +82,11 @@ class InterviewViewSet(viewsets.ModelViewSet):
         if interview.approval_status == Interview.PENDING_PRICE_ADMIN:
             try:
                 price_pack = int(request.data.get('price_pack'))
+                price_pack = get_object_or_404(PricePack, pk=price_pack)
             except ValueError:
                 price_pack = None
             if price_pack:
-                interview.price_pack = get_object_or_404(PricePack, pk=price_pack)
+                interview.price_pack = price_pack
                 interview.approval_status = Interview.PENDING_PRICE_EMPLOYER
                 interview.save()
                 return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
