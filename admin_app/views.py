@@ -1,4 +1,5 @@
 # Create your views here.
+from django.db import transaction
 from django.db.models.functions import Cast
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, CharField, F
@@ -74,7 +75,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         Ticket.objects.create(sender=request.user.profile, interview=interview, receiver=interview.owner, text=text)
         interview.save()
         return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
-
+    @transaction.atomic
     @action(detail=True, methods=['post'], url_path='set-price-pack')
     def set_price_pack(self, request, uuid):
         interview = self.get_object()
