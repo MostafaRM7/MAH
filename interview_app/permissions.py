@@ -21,6 +21,7 @@ class InterviewOwnerOrInterviewerReadOnly(BasePermission):
 class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
     def has_permission(self, request, view):
         is_detail = view.kwargs.get('pk')
+        interview_uuid = str(view.kwargs.get('interview_uuid'))
         if request.user.is_authenticated:
             if is_detail:
                 answer_set = view.get_object()
@@ -30,7 +31,7 @@ class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
                     if request.user.profile in answer_set.questionnaire.interview.interviewers.all():
                         return True
             else:
-                interview = view.get_object().questionnaire.interview
+                interview = get_object_or_404(Interview, uuid=interview_uuid)
                 return interview.owner == request.user or request.user.is_staff or request.user.profile in interview.interviewers.all()
 
 
