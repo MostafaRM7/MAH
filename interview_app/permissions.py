@@ -25,7 +25,7 @@ class InterviewOwnerOrInterviewerAddAnswer(BasePermission):
         if request.user.is_authenticated:
             if is_detail:
                 answer_set = view.get_object()
-                if answer_set.questionnaire.owner == request.user or request.user.is_staff:
+                if answer_set.questionnaire.owner == request.user.profile or request.user.is_staff:
                     return True
                 else:
                     if request.user.profile in answer_set.questionnaire.interview.interviewers.all():
