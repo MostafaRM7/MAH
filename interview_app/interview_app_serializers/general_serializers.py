@@ -524,12 +524,13 @@ class InterviewSerializer(serializers.ModelSerializer):
         return representation
 
     def get_difficulty(self, instance: Interview):
-        try:
-            return sum(
-                [question.level for question in instance.questions.all()]) / instance.questions.filter(
-                level__gt=0).count() * 100
-        except ZeroDivisionError:
-            return 0
+        levels = instance.questions.values_list('level', flat=True)
+        if levels:
+            try:
+                return sum(levels) / len(levels) * 100
+            except ZeroDivisionError:
+                return 0
+        return 0
 
     def validate(self, data):
         folder = data.get('folder')
