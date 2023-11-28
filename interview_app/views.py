@@ -710,8 +710,11 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
         answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set, 'request': request})
         answers.is_valid(raise_exception=True)
         answers.save()
-        price = answer_set.questionnaire.interview.price_pack.price
-        if price:
+        interview = answer_set.questionnaire.interview
+        if interview.approval_status not in [Interview.SEARCHING_FOR_INTERVIEWERS, Interview.REACHED_INTERVIEWER_COUNT]:
+            return Response({"detail": "نمی توانید برای این پروژه پاسخی ثبت کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        if interview.price_pack:
+            price = interview.price_pack.price
             interviewer_wallet = request.user.profile.wallet
             employer_wallet = answer_set.questionnaire.owner.wallet
             interviewer_wallet.balance += price
@@ -736,6 +739,8 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
                 amount=price,
                 wallet=employer_wallet
             )
+        else:
+            return Response({"detail": "نمی توانید برای این پروژه پاسخی ثبت کنید"}, status=status.HTTP_400_BAD_REQUEST)
         if answer_set.questionnaire.interview.answer_count_goal:
             if answer_set.questionnaire.interview.answer_count_goal == answer_set.questionnaire.interview.answer_sets.filter(
                     answered_by__isnull=False).count():
