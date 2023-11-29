@@ -8,15 +8,20 @@ from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
 
 class PricePackSerializer(serializers.ModelSerializer):
+    display_price = serializers.SerializerMethodField(method_name='get_display_price')
+
     class Meta:
         model = PricePack
-        fields = ('id', 'name', 'price', 'description', 'created_at')
+        fields = ('id', 'name', 'price', 'description', 'created_at', 'display_price')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['interviews'] = [{'id': interview.id, 'name': interview.name} for interview in
                                         instance.interviews.all()]
         return representation
+
+    def get_display_price(self, instance):
+        return '{:,}'.format(instance.price)
 
 
 class InterviewSerializer(serializers.ModelSerializer):
