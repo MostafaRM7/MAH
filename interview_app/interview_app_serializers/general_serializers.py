@@ -527,7 +527,7 @@ class InterviewSerializer(serializers.ModelSerializer):
         levels = instance.questions.values_list('level', flat=True)
         if levels:
             try:
-                return sum(levels) / len(levels) * 100
+                return int(sum(levels) / len(levels))
             except ZeroDivisionError:
                 return 0
         return 0
