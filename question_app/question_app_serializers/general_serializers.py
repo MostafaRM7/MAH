@@ -151,13 +151,13 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
                 )
             if name is not None:
                 if request.method == 'POST':
-                    if Questionnaire.objects.filter(folder=folder, name=name).exists():
+                    if Questionnaire.objects.filter(folder=folder, name=name, is_delete=False).exists():
                         raise serializers.ValidationError(
                             {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
                             status.HTTP_400_BAD_REQUEST
                         )
                 elif request.method in ['PUT', 'PATCH']:
-                    if Questionnaire.objects.filter(folder=folder, name=name).exclude(pk=self.instance.id).exists():
+                    if Questionnaire.objects.filter(folder=folder, name=name, is_delete=False).exclude(pk=self.instance.id).exists():
                         raise serializers.ValidationError(
                             {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
                             status.HTTP_400_BAD_REQUEST

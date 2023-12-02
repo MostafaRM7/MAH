@@ -72,7 +72,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
             serializer.is_valid()
             return self.get_paginated_response(serializer.data)
         else:
-            return Response({"detail": "لطفا ابتدا مناطق مورد علاقه خود را مشخص کنید"},
+            return Response({"detail": "لطفا ابتدا مناطق مورد علاقه خود را از بخش حساب کاربری مشخص کنید"},
                             status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='add-interviewer', permission_classes=[IsInterviewer])
