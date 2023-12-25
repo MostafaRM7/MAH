@@ -34,9 +34,6 @@ class OTPToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
     try_count = models.PositiveIntegerField(default=0, verbose_name='تعداد تلاش ها')
 
-    def save(self, *args, **kwargs):
-        self.token = randint(10000, 99999)
-        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.user} - {self.token}'

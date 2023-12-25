@@ -19,7 +19,7 @@ class GateWaySerializer(serializers.Serializer):
         if otp.exists():
             otp.delete()
         user = Profile.objects.get_or_create(phone_number=validated_data.get('phone_number'))
-        otp = OTPToken.objects.create(user=user[0])
+        otp = OTPToken.objects.create(token=randint(10000, 99999), user=user[0])
         send_otp.delay(otp.token, validated_data.get('phone_number'))
         return validated_data
 
@@ -52,6 +52,7 @@ class OTPCheckSerializer(serializers.Serializer):
         phone_number = validated_data.get('phone_number')
         token = validated_data.get('token')
         otp = OTPToken.objects.filter(user__phone_number=phone_number)
+        print(otp.values_list('token', flat=True))
         if otp.exists():
             otp = otp.first()
             otp.try_count += 1
@@ -61,6 +62,8 @@ class OTPCheckSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     "تعداد تلاش‌ هابیش از حد مجاز است، لطفا مجددا برای دریافت کد اقدام کنید.")
             if otp.token != token:
+                print(token)
+                print(otp.token)
                 raise serializers.ValidationError("کد فعال سازی منقضی شده یا اشتباه است.")
             if timezone.now() - otp.created_at > timezone.timedelta(minutes=settings.OTP_LIFE_TIME):
                 otp.delete()
