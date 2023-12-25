@@ -9,9 +9,9 @@ def send_otp(otp_token, phone_number):
     password = config('SMS_PASSWORD')
     api = Rest(username, password)
     _from = config('SMS_HOST')
-    text = f"{otp_token}"
+    # text = f"{otp_token}"
     to = phone_number
-    response = api.send_by_base_number(to=to, text=text, bodyId=182413)
+    response = api.send_by_base_number(to=to, text=otp_token, bodyId=182413)
     print(otp_token)
     print(phone_number)
     print(response)

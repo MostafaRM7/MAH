@@ -34,6 +34,10 @@ class OTPToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
     try_count = models.PositiveIntegerField(default=0, verbose_name='تعداد تلاش ها')
 
+    def save(self, *args, **kwargs):
+        self.token = randint(10000, 99999)
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.user} - {self.token}'
 
@@ -52,7 +56,8 @@ class Profile(User):
     avatar = models.ImageField(upload_to='avatars/', verbose_name='تصویر پروفایل', null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name='زمان آخرین بروزرسانی')
     ask_for_interview_role = models.BooleanField(default=False, verbose_name='درخواست نقش پرسشگر')
-    is_interview_role_accepted = models.BooleanField(verbose_name='درخواست پرسشگری تایید شده/نشده', null=True, blank=True)
+    is_interview_role_accepted = models.BooleanField(verbose_name='درخواست پرسشگری تایید شده/نشده', null=True,
+                                                     blank=True)
 
 
 class Country(models.Model):
