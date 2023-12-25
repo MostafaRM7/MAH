@@ -12,5 +12,7 @@ def send_otp(otp_token, phone_number):
     text = f"{otp_token}"
     to = phone_number
     response = api.send_by_base_number(to=to, text=text, bodyId=182413)
+    print(otp_token)
+    print(phone_number)
     print(response)
     return response
