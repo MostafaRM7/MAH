@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from django.db import transaction
-from django.db.models import Q, F, Count
+from django.db import transaction, models
+from django.db.models import Q, F, Count, Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -27,7 +27,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
     permission_classes = (InterviewOwnerOrInterviewerReadOnly,)
     lookup_field = 'uuid'
-    queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').filter(is_delete=False).order_by('-created_at')
+    queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').filter(
+        is_delete=False).order_by('-created_at')
     pagination_class = MainPagination
 
     @action(detail=True, methods=['get'], url_path='search-questions')
@@ -102,8 +103,16 @@ class InterviewViewSet(viewsets.ModelViewSet):
         user = request.user.profile
         if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
             if obj.answer_count_goal:
-                needed_balance = (obj.answer_count_goal - obj.answer_sets.filter(
-                    answered_by__isnull=False).count()) * obj.price_pack.price
+                # finding all interviews that owned by the user and still undone and with price
+                undone_interviews = Interview.objects.filter(
+                    Q(owner=user) &
+                    Q(interview__approval_status=Interview.REACHED_INTERVIEWER_COUNT) |
+                    Q(interview__approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
+                )
+                needed_balance = undone_interviews.annotate(
+                    remaining_needed_answer_count=F('answer_count_goal') - Count('answer_sets')).aggregate(
+                    remaining_needed_answer_cost=Sum(
+                        F('remaining_needed_answer_count') * F('price_pack__price'), output_field=models.FloatField()))
                 if user.wallet.balance >= needed_balance:
                     obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
                     obj.save()
@@ -707,12 +716,12 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
     @transaction.atomic
     def add_answer(self, request, interview_uuid, pk):
         answer_set = self.get_object()
-        answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set, 'request': request})
-        answers.is_valid(raise_exception=True)
-        answers.save()
         interview = answer_set.questionnaire.interview
         if interview.approval_status not in [Interview.SEARCHING_FOR_INTERVIEWERS, Interview.REACHED_INTERVIEWER_COUNT]:
             return Response({"detail": "نمی توانید برای این پروژه پاسخی ثبت کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set, 'request': request})
+        answers.is_valid(raise_exception=True)
+        answers.save()
         if interview.price_pack:
             price = interview.price_pack.price
             interviewer_wallet = request.user.profile.wallet
