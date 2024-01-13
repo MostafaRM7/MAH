@@ -40,8 +40,8 @@ class Interview(Questionnaire):
     goal_start_date = models.DateField(default=get_current_date, verbose_name='تاریخ شروع هدف', null=True, blank=True)
     goal_end_date = models.DateField(default=get_current_date, verbose_name='تاریخ پایان هدف', null=True, blank=True)
     answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف', null=True, blank=True)
-    price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت', related_name='interviews' , null=True, blank=True)
-    required_interviewer_count = models.PositiveIntegerField(null=True, blank=True, verbose_name='تعداد پرسشگر مورد نیاز')
+    required_interviewer_count = models.PositiveIntegerField(null=True, blank=True,
+                                                             verbose_name='تعداد پرسشگر مورد نیاز')
 
     def __str__(self):
         return self.name
@@ -50,7 +50,8 @@ class Interview(Questionnaire):
 class Ticket(models.Model):
     text = models.TextField(verbose_name='متن')
     sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='sent_tickets', verbose_name='فرستنده')
-    receiver = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='received_tickets', verbose_name='دریافت کننده', null=True, blank=True)
+    receiver = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='received_tickets',
+                                 verbose_name='دریافت کننده', null=True, blank=True)
     interview = models.ForeignKey(Interview, on_delete=models.CASCADE, null=True, blank=True, related_name='tickets',
                                   verbose_name='پروژه پرسشگری')
     is_read = models.BooleanField(default=False, verbose_name='خوانده شده')

@@ -254,7 +254,7 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         options_data = validated_data.pop('options')
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         optional_question = OptionalQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        options = [Option(optional_question=optional_question, **option_data) for option_data in options_data]
+        options = [Option(optional_question=optional_question, number=index+1, **option_data) for index, option_data in enumerate(options_data)]
         Option.objects.bulk_create(options)
         return optional_question
 

@@ -244,7 +244,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError, Interview.DoesNotExist):
             interview = None
         try:
-            sender_id = int(self.request.query_params.get('receiver_id', None))
+            sender_id = int(self.request.query_params.get('sender_id', None))
             sender = Profile.objects.get(id=sender_id)
         except (ValueError, TypeError, Profile.DoesNotExist):
             sender = None

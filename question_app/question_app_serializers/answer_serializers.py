@@ -404,7 +404,7 @@ class AnswerSerializer(serializers.ModelSerializer):
                     answer = validated_data.pop('answer')
                     selected_options = answer.get('selected_options')
                     options = Option.objects.filter(id__in=selected_options)
-                    json_answer = {'selected_options': list(options.values('id', 'text'))}
+                    json_answer = {'selected_options': list(options.values('id', 'text', 'number'))}
                     if question.optionalquestion.other_options:
                         other_option = answer.get('other_text')
                         if other_option is not None:

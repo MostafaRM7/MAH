@@ -11,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from interview_app.models import Interview
+from wallet_app.models import Transaction
 from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer, AnswerSerializer
 from .question_app_serializers.general_serializers import *
@@ -347,6 +349,57 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
         answers.is_valid(raise_exception=True)
         answers.save()
         answer_set.refresh_from_db()
+        return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['post'], detail=True, permission_classes=[IsAuthenticated], url_path='add-payed-answer')
+    def add_payed_answer(self, request, questionnaire_uuid, pk):
+        answer_set: AnswerSet = self.get_object()
+        answer_set.answered_by = request.user.profile
+        answer_set.save()
+        questionnaire = answer_set.questionnaire
+        answers = AnswerSerializer(data=request.data, many=True, context={'answer_set': answer_set, 'request': request})
+        answers.is_valid(raise_exception=True)
+        answers.save()
+        if questionnaire.price_pack:
+            price = questionnaire.price_pack.price
+            user_wallet = request.user.profile.wallet
+            employer_wallet = answer_set.questionnaire.owner.wallet
+            user_wallet.balance += price
+            employer_wallet.balance -= price
+            request.user.profile.wallet.save()
+            answer_set.questionnaire.owner.wallet.save()
+            Transaction.objects.create(
+                source=employer_wallet,
+                destination=user_wallet,
+                is_done=True,
+                reason='i',
+                transaction_type='i',
+                amount=price,
+                wallet=user_wallet
+            )
+            Transaction.objects.create(
+                source=employer_wallet,
+                destination=user_wallet,
+                is_done=True,
+                reason='i',
+                transaction_type='o',
+                amount=price,
+                wallet=employer_wallet
+            )
+        else:
+            return Response({"detail": "پرسشنامه تعیین قیمت نشده است"}, status=status.HTTP_400_BAD_REQUEST)
+        answer_set.refresh_from_db()
+        bates = questionnaire.bate_questions
+        if len(bates) > 0:
+            bate_answers = answer_set.answers.filter(question__pk__in=bates).values_list('answer', flat=True)
+            option_numbers = []
+            for answer in bate_answers:
+                for selected_option in answer.get('selected_options'):
+                    option_numbers.append(selected_option.get('number'))
+            if len(set(option_numbers)) > 1:
+                answer_set.delete()
+                return Response({"detail": "پاسخ های شما با هم تناقض دارند"}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):

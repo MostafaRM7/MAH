@@ -1,8 +1,10 @@
 from uuid import uuid4
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
+from admin_app.models import PricePack
 from user_app.models import Profile, District
 
 
@@ -32,6 +34,9 @@ class Questionnaire(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
     show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', editable=False)
+    bate_questions = ArrayField(models.PositiveIntegerField(), null=True, blank=True)
+    price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت',
+                                   related_name='interviews', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -126,6 +131,7 @@ class Option(models.Model):
     optional_question = models.ForeignKey(OptionalQuestion, on_delete=models.CASCADE, related_name='options',
                                           verbose_name='سوال چند گزینه ای ')
     text = models.CharField(max_length=250, verbose_name='متن گزینه')
+    number = models.PositiveIntegerField(null=True, blank=True, verbose_name='شماره گزینه')
 
     def __str__(self):
         return f'{self.optional_question} - {self.text}'
@@ -322,6 +328,7 @@ class FileQuestion(Question):
 
     def __str__(self):
         return self.title
+
 
 # TODO add answered where to answer set for interviews
 class AnswerSet(models.Model):
