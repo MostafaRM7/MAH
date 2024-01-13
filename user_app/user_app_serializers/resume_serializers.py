@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import ModelSerializer
 from user_app.models import Resume, ResearchHistory, Achievement, Skill, EducationalBackground, WorkBackground, Profile
-
+from question_app.validators import url_validator
 
 class WorkBackgroundSerializer(ModelSerializer):
     class Meta:
@@ -147,6 +147,11 @@ class ResumeSerializer(ModelSerializer):
     def validate(self, data):
         user_pk = self.context.get('user_pk')
         request = self.context.get('request')
+        if data.get('linkedin'):
+            if not url_validator(data.get('linkedin')):
+                raise serializers.ValidationError(
+                    {'linkedin': 'لینک لینکدین نامعتبر است'},
+                )
         if Resume.objects.filter(owner_id=user_pk).exists() and request.method in ['POST']:
             raise serializers.ValidationError(
                 {'resume': 'شما قبلا رزومه‌ای ثبت کرده‌اید'},
