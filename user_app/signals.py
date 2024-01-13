@@ -8,4 +8,4 @@ from wallet_app.models import Wallet
 @receiver(post_save, sender=Profile)
 def create_profile(sender, instance, created, **kwargs):
     if created:
-        Wallet.objects.create(user=instance, card_number='1234567891234567891', IBAN='IR123456789123456789123456')
+        Wallet.objects.create(owner=instance, card_number='1234567891234567891', IBAN='IR123456789123456789123456')
