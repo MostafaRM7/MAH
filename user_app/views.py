@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models import Q
 from rest_framework import status, permissions
 from rest_framework import viewsets
@@ -110,9 +112,9 @@ class OTPCheckViewSet(CreateModelMixin, GenericViewSet):
         #                     status=status.HTTP_201_CREATED, headers=headers)
         response = Response({'access': access, 'refresh': refresh, 'role': role}, status=status.HTTP_201_CREATED, headers=headers)
         response.set_cookie('access_token', access, secure=True, httponly=True,
-                            expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
+                            expires=datetime.now() + settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
         response.set_cookie('refresh_token', refresh, secure=True, httponly=True,
-                            expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
+                            expires=datetime.now() + settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
         return response
 
 
@@ -166,9 +168,9 @@ class RefreshTokenView(APIView):
             }
             response = Response(data=data, status=status.HTTP_201_CREATED)
             response.set_cookie('access_token', data['access'], secure=True, httponly=True,
-                                expires=settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
+                                expires=datetime.now() + settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME'))
             response.set_cookie('refresh_token', data['refresh'], secure=True, httponly=True,
-                                expires=settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
+                                expires=datetime.now() + settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME'))
             return response
 
 
