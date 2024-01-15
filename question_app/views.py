@@ -78,10 +78,26 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
 
-    @action(detail=False, methods=['get'], url_path='get-random-questionnaires', permission_classes=[AllowAny], serializer_class=NoQuestionQuestionnaireSerializer)
+    @action(detail=False, methods=['get'], url_path='get-random-questionnaires', permission_classes=[AllowAny],
+            serializer_class=NoQuestionQuestionnaireSerializer)
     def get_random_questionnaires(self, request, *args, **kwargs):
         queryset = Questionnaire.objects.all()[:4]
-        return Response(self.get_serializer(queryset, many=True).data)
+        base_response = {
+            'id': 1,
+            'name': 'Fool',
+            'owner': 2,
+        }
+        questionnaires = []
+        for obj in queryset:
+            questionnaires.append(
+                {
+                    'id': obj.id,
+                    'name': obj.name,
+                    'uuid': obj.uuid
+                }
+            )
+        base_response.update({'questionnaires': questionnaires})
+        return Response([base_response])
 
     @action(detail=True, methods=['get'], url_path='search-questions',
             permission_classes=(IsQuestionnaireOwnerOrReadOnly,))
