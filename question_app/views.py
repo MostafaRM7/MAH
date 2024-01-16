@@ -93,7 +93,12 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
                 {
                     'id': obj.id,
                     'name': obj.name,
-                    'uuid': obj.uuid
+                    'uuid': obj.uuid,
+                    'pub_date': obj.pub_date,
+                    'created_at': obj.created_at,
+                    'answer_count': 10,
+                    'question_count': obj.questions.count(),
+                    'is_active': obj.is_active,
                 }
             )
         base_response.update({'questionnaires': questionnaires})
