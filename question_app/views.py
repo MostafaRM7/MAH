@@ -417,7 +417,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
             return Response({"detail": "پرسشنامه تعیین قیمت نشده است"}, status=status.HTTP_400_BAD_REQUEST)
         answer_set.refresh_from_db()
         bates = questionnaire.bate_questions
-        if len(bates) > 0:
+        if bates is not None and len(bates) > 0:
             bate_answers = answer_set.answers.filter(question__pk__in=bates).values_list('answer', flat=True)
             option_numbers = []
             for answer in bate_answers:
