@@ -81,7 +81,8 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='get-random-questionnaires', permission_classes=[AllowAny],
             serializer_class=NoQuestionQuestionnaireSerializer)
     def get_random_questionnaires(self, request, *args, **kwargs):
-        queryset = Questionnaire.objects.all()[:4]
+        uuids = ['c168ea52-7796-4a17-b7df-74a66d2df53a', '3dd74926-8cf8-4b09-8325-42c2851c6980', '9c821d02-4f2d-4409-a10d-43e21ba5ff16']
+        queryset = Questionnaire.objects.filter(uuid__in=uuids)
         base_response = {
             'id': 1,
             'name': 'Fool',
