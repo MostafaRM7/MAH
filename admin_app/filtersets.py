@@ -18,13 +18,13 @@ class InterviewFilterSet(django_filters.FilterSet):
         fields = ['created_at', 'approval_status']
 
     def filter_price_pack_id(self, queryset, name, value):
-        return queryset.filter(price_pack__id=value)
+        return queryset.filter(price_pack__id=value).distinct()
 
     def filter_owner(self, queryset, name, value):
-        return queryset.filter(owner__id=value)
+        return queryset.filter(owner__id=value).distinct()
 
     def filter_has_interviewer(self, queryset, name,  value):
-        return queryset.filter(interviewers__isnull=value, approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
+        return queryset.filter(interviewers__isnull=value, approval_status=Interview.SEARCHING_FOR_INTERVIEWERS).distinct()
 
 
 class ProfileFilterSet(django_filters.FilterSet):
@@ -47,21 +47,21 @@ class ProfileFilterSet(django_filters.FilterSet):
     def filter_interviewer_role_request_status(self, queryset, name, value):
         if value == 'a':
             return queryset.filter(ask_for_interview_role=False, is_interview_role_accepted=True,
-                                   role__in=['i', 'ie'])
+                                   role__in=['i', 'ie']).distinct()
         elif value == 'r':
-            return queryset.filter(ask_for_interview_role=False, is_interview_role_accepted=False, role__in=['e', 'n'])
+            return queryset.filter(ask_for_interview_role=False, is_interview_role_accepted=False, role__in=['e', 'n']).distinct()
         elif value == 'p':
-            return queryset.filter(ask_for_interview_role=True, is_interview_role_accepted=None, role__in=['e', 'n'])
+            return queryset.filter(ask_for_interview_role=True, is_interview_role_accepted=None, role__in=['e', 'n']).distinct()
         elif value == 'n':
-            return queryset.filter(ask_for_interview_role=False, is_interview_role_accepted=None, role__in=['e', 'n'])
+            return queryset.filter(ask_for_interview_role=False, is_interview_role_accepted=None, role__in=['e', 'n']).distinct()
         else:
-            return queryset
+            return queryset.distinct()
 
     def filter_by_interview_name(self, queryset, name, value):
-        return queryset.filter(interviews__name__icontains=value)
+        return queryset.filter(interviews__name__icontains=value).distinct()
 
     def filter_role(self, queryset, name, value):
-        return queryset.filter(role=value)
+        return queryset.filter(role=value).distinct()
 
     class Meta:
         model = Profile
