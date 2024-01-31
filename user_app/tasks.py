@@ -11,7 +11,8 @@ def send_otp(otp_token, phone_number):
     _from = config('SMS_HOST')
     # text = f"{otp_token}"
     to = phone_number
-    response = api.send_by_base_number(to=to, text=otp_token, bodyId=192372)
+    #192599  182413  192372
+    response = api.send_by_base_number(to=to, text=otp_token, bodyId=192599)
     print(otp_token)
     print(phone_number)
     print(response)
