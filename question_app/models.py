@@ -37,6 +37,7 @@ class Questionnaire(models.Model):
     bate_questions = ArrayField(models.PositiveIntegerField(), null=True, blank=True)
     price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت',
                                    related_name='interviews', null=True, blank=True)
+    category = models.ForeignKey('Category', on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -446,3 +447,7 @@ class ThanksPage(models.Model):
     sorush = models.BooleanField(default=False, verbose_name='اشتراک در سروش')
     questionnaire = models.OneToOneField(Questionnaire, on_delete=models.CASCADE, related_name='thanks_page',
                                          verbose_name='پرسشنامه')
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=255, verbose_name='نام')
