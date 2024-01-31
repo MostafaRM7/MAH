@@ -503,7 +503,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
             'interviewers', 'approval_status', 'required_interviewer_count', 'price_pack',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
-            'folder'
+            'folder', 'category'
         )
         read_only_fields = ('owner', 'questions', 'approval_status')
 
@@ -515,6 +515,7 @@ class InterviewSerializer(serializers.ModelSerializer):
              'phone_number': interviewer.phone_number} for interviewer in
             instance.interviewers.all()]
         representation['folder'] = instance.folder.name if instance.folder else None
+        representation['category'] = instance.category.name if instance.category else None
         representation['owner'] = {
             'id': instance.owner.id,
             'first_name': instance.owner.first_name,

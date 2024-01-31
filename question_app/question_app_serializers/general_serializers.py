@@ -81,7 +81,7 @@ class PublicQuestionnaireSerializer(serializers.ModelSerializer):
         model = Questionnaire
         fields = (
             'uuid', 'is_active', 'show_number', 'previous_button', 'progress_bar', 'show_question_in_pages',
-            'questions',
+            'questions','category',
             'welcome_page', 'thanks_page')
 
 
@@ -96,13 +96,14 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'is_active', 'answer_count', 'previous_button', 'pub_date', 'end_date', 'timer',
             'show_question_in_pages', 'created_at',
-            'progress_bar', 'show_number',
+            'progress_bar', 'show_number', 'category',
             'folder', 'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page')
         read_only_fields = ('owner', 'questions', 'welcome_page', 'thanks_page')
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         ret['folder'] = instance.folder.name if instance.folder else None
+        ret['category'] = instance.category.name if instance.category else None
         return ret
 
     def get_answer_set_count(self, obj):
@@ -157,7 +158,8 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
                             status.HTTP_400_BAD_REQUEST
                         )
                 elif request.method in ['PUT', 'PATCH']:
-                    if Questionnaire.objects.filter(folder=folder, name=name, is_delete=False).exclude(pk=self.instance.id).exists():
+                    if Questionnaire.objects.filter(folder=folder, name=name, is_delete=False).exclude(
+                            pk=self.instance.id).exists():
                         raise serializers.ValidationError(
                             {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
                             status.HTTP_400_BAD_REQUEST
@@ -186,7 +188,7 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active')
+        fields = ('id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active', 'category')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

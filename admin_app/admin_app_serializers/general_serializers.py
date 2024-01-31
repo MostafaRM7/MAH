@@ -35,7 +35,7 @@ class InterviewSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
             'interviewers', 'approval_status', 'price_pack', 'districts', 'answer_count', 'required_interviewer_count',
-            'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty', 'is_leveled'
+            'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty', 'is_leveled', 'category'
         )
         read_only_fields = ('owner', 'questions', 'approval_status')
         ref_name = 'admin_app_interviews'
@@ -47,6 +47,7 @@ class InterviewSerializer(serializers.ModelSerializer):
         representation['owner'] = {'id': instance.owner.id, 'first_name': instance.owner.first_name,
                                    'last_name': instance.owner.last_name, 'phone_number': instance.owner.phone_number}
         representation['price_pack'] = PricePackSerializer(instance.price_pack).data
+        representation['category'] = instance.category.name if instance.category else None
         return representation
 
     def get_is_leveled(self, instance: Interview):
