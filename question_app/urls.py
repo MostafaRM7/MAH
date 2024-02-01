@@ -8,6 +8,7 @@ router.register('', views.PublicQuestionnaireViewSet)
 
 base_router = routers.DefaultRouter()
 base_router.register('questionnaires', views.QuestionnaireViewSet)
+base_router.register('categories', views.CategoryViewSet)
 
 questionnaire_router = routers.NestedDefaultRouter(base_router, 'questionnaires', lookup='questionnaire')
 questionnaire_router.register(WelcomePage.URL_PREFIX, views.WelcomePageViewSet, basename='welcome_pages')

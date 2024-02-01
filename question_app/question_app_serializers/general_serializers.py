@@ -81,7 +81,7 @@ class PublicQuestionnaireSerializer(serializers.ModelSerializer):
         model = Questionnaire
         fields = (
             'uuid', 'is_active', 'show_number', 'previous_button', 'progress_bar', 'show_question_in_pages',
-            'questions','category',
+            'questions', 'category',
             'welcome_page', 'thanks_page')
 
 
@@ -188,7 +188,8 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active', 'category')
+        fields = (
+        'id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active', 'category')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -201,3 +202,9 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
 
     def get_question_count(self, obj):
         return obj.questions.count()
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('id', 'name')
