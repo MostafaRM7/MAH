@@ -188,8 +188,7 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = (
-        'id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active', 'category')
+        fields = ('id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active', 'category')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -208,3 +207,4 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('id', 'name')
+

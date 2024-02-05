@@ -38,11 +38,25 @@ class Questionnaire(models.Model):
     price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت',
                                    related_name='interviews', null=True, blank=True)
     category = models.ForeignKey('Category', on_delete=models.PROTECT, null=True, blank=True)
+    is_template = models.BooleanField(default=False, verbose_name='قالب/غیرقالب')
 
     def __str__(self):
         return self.name
-
-    # TODO - add property for aggregating the level
+    @property
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'is_active': self.is_active,
+            'previous_button': self.previous_button,
+            'pub_date': self.pub_date,
+            'end_date': self.end_date,
+            'timer': self.timer,
+            'show_question_in_pages': self.show_question_in_pages,
+            'created_at': self.created_at,
+            'progress_bar': self.progress_bar,
+            'show_number': self.show_number,
+            'category': self.category.id if self.category else None
+        }
 
     def delete(self, using=None, keep_parents=False):
         self.is_delete = True
@@ -127,6 +141,30 @@ class OptionalQuestion(Question):
     def __str__(self):
         return self.title
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'multiple_choice': self.multiple_choice,
+            'additional_options': self.additional_options,
+            'max_selected_options': self.max_selected_options,
+            'min_selected_options': self.min_selected_options,
+            'all_options': self.all_options,
+            'nothing_selected': self.nothing_selected,
+            'other_options': self.other_options,
+            'is_vertical': self.is_vertical,
+            'is_random_options': self.is_random_options
+        }
+
 
 class Option(models.Model):
     optional_question = models.ForeignKey(OptionalQuestion, on_delete=models.CASCADE, related_name='options',
@@ -137,6 +175,13 @@ class Option(models.Model):
     def __str__(self):
         return f'{self.optional_question} - {self.text}'
 
+    @property
+    def to_dict(self):
+        return {
+            'text': self.text,
+            'number': self.number
+        }
+
 
 class DropDownQuestion(Question):
     URL_PREFIX = 'dropdown-questions'
@@ -146,6 +191,25 @@ class DropDownQuestion(Question):
     is_alphabetic_order = models.BooleanField(default=False, verbose_name='مرتب سازی بر اساس حروف الفبا')
     is_random_options = models.BooleanField(default=False, verbose_name='ترتیب تصادفی گزینه ها')
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'multiple_choice': self.multiple_choice,
+            'max_selected_options': self.max_selected_options,
+            'min_selected_options': self.min_selected_options,
+            'is_alphabetic_order': self.is_alphabetic_order,
+            'is_random_options': self.is_random_options
+        }
     def save(self, *args, **kwargs):
         self.question_type = 'drop_down'
         super(DropDownQuestion, self).save(*args, **kwargs)
@@ -159,6 +223,11 @@ class DropDownOption(models.Model):
                                            verbose_name='سوال کشویی')
     text = models.CharField(max_length=250, verbose_name='متن گزینه')
 
+    @property
+    def to_dict(self):
+        return {
+            'text': self.text
+        }
     def __str__(self):
         return f'{self.drop_down_question} - {self.text}'
 
@@ -167,6 +236,21 @@ class SortQuestion(Question):
     URL_PREFIX = 'sort-questions'
     is_random_options = models.BooleanField(default=False, verbose_name='ترتیب تصادفی گزینه ها')
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'is_random_options': self.is_random_options
+        }
     def save(self, *args, **kwargs):
         self.question_type = 'sort'
         super(SortQuestion, self).save(*args, **kwargs)
@@ -180,6 +264,11 @@ class SortOption(models.Model):
                                       verbose_name='سوال اولویت دهی')
     text = models.CharField(max_length=250, verbose_name='متن گزینه')
 
+    @property
+    def to_dict(self):
+        return {
+            'text': self.text
+        }
 
 class TextAnswerQuestion(Question):
     URL_PREFIX = 'textanswer-questions'
@@ -207,6 +296,25 @@ class TextAnswerQuestion(Question):
     min = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداقل طول جواب')
     max = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر طول جواب')
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'answer_template': self.answer_template,
+            'pattern': self.pattern,
+            'min': self.min,
+            'max': self.max
+        }
+
     def save(self, *args, **kwargs):
         self.question_type = 'text_answer'
         super(TextAnswerQuestion, self).save(*args, **kwargs)
@@ -221,6 +329,25 @@ class NumberAnswerQuestion(Question):
     max = models.IntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
     accept_negative = models.BooleanField(default=True, verbose_name='جواب می تواند منفی باشد')
     accept_float = models.BooleanField(default=True, verbose_name='جواب می تواند اعشاری باشد')
+
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'min': self.min,
+            'max': self.max,
+            'accept_negative': self.accept_negative,
+            'accept_float': self.accept_float
+        }
 
     def save(self, *args, **kwargs):
         self.is_required = False
@@ -245,6 +372,25 @@ class IntegerRangeQuestion(Question):
     mid_label = models.CharField(max_length=50, null=True, blank=True, verbose_name='برچسب وسط')
     max_label = models.CharField(max_length=50, null=True, blank=True, verbose_name='برچسب راست')
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'min': self.min,
+            'max': self.max,
+            'min_label': self.min_label,
+            'mid_label': self.mid_label,
+            'max_label': self.max_label
+        }
     def save(self, *args, **kwargs):
         self.question_type = 'integer_range'
         super(IntegerRangeQuestion, self).save(*args, **kwargs)
@@ -272,6 +418,23 @@ class IntegerSelectiveQuestion(Question):
     shape = models.CharField(choices=STYLE_CHOICES, default=STAR, max_length=2, verbose_name='شکل دکمه')
     max = models.PositiveIntegerField(null=True, blank=True, verbose_name='حداکثر مقدار')
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'shape': self.shape,
+            'max': self.max
+        }
+
     def save(self, *args, **kwargs):
         self.question_type = 'integer_selective'
         super(IntegerSelectiveQuestion, self).save(*args, **kwargs)
@@ -293,6 +456,22 @@ class PictureFieldQuestion(Question):
 class EmailFieldQuestion(Question):
     URL_PREFIX = 'email-questions'
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement
+        }
+
+
     def save(self, *args, **kwargs):
         self.question_type = 'email_field'
         super(EmailFieldQuestion, self).save(*args, **kwargs)
@@ -304,6 +483,20 @@ class EmailFieldQuestion(Question):
 class LinkQuestion(Question):
     URL_PREFIX = 'link-questions'
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement
+        }
     def save(self, *args, **kwargs):
         self.question_type = 'link'
         super(LinkQuestion, self).save(*args, **kwargs)
@@ -322,6 +515,23 @@ class FileQuestion(Question):
     URL_PREFIX = 'file-questions'
     max_volume = models.PositiveIntegerField(default=30, verbose_name='حداکثر حجم')
     volume_unit = models.CharField(max_length=3, default=mega_byte, choices=UNIT_CHOICES, verbose_name='واحد حجم')
+
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'max_volume': self.max_volume,
+            'volume_unit': self.volume_unit
+        }
 
     def save(self, *args, **kwargs):
         self.question_type = 'file'
@@ -377,6 +587,20 @@ class QuestionGroup(Question):
     # is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')
     # button_text = models.CharField(max_length=100, verbose_name='متن دکمه')
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement
+        }
     def save(self, *args, **kwargs):
         self.is_required = False
         self.question_type = 'group'
@@ -397,6 +621,23 @@ class NoAnswerQuestion(Question):
     is_solid_button = models.BooleanField(default=False, verbose_name='دکمه تو پر/تو خالی')
     button_text = models.CharField(max_length=100, verbose_name='متن دکمه')
 
+    @property
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'description': self.description,
+            'question_type': self.question_type,
+            'is_required': self.is_required,
+            'is_finalized': self.is_finalized,
+            'media': self.media,
+            'double_picture_size': self.double_picture_size,
+            'group': self.group,
+            'level': self.level,
+            'placement': self.placement,
+            'button_shape': self.button_shape,
+            'is_solid_button': self.is_solid_button,
+            'button_text': self.button_text
+        }
     def save(self, *args, **kwargs):
         self.is_required = False
         self.question_type = 'no_answer'
@@ -451,3 +692,4 @@ class ThanksPage(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام')
+

@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 
 from interview_app.models import Interview
 from wallet_app.models import Transaction
+from .copy_template import copy_template
 from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer, AnswerSerializer
 from .question_app_serializers.general_serializers import *
@@ -37,7 +38,7 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     #         end_date__isnull=True,
     #         is_active=True)
     # )
-    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions').all()
+    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions', 'category').filter(interview__isnull=True, is_delete=False, folder__isnull=False, is_template=False)
     serializer_class = PublicQuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (AllowAny,)
@@ -73,7 +74,7 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         This view is for creating, retrieving, deleting and listing questionnaires
     """
     queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'owner', 'questions',
-                                                      'folder').filter(is_delete=False, folder__isnull=False)
+                                                      'folder', 'category').filter(is_delete=False, folder__isnull=False, interview__isnull=True)
     serializer_class = QuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
@@ -106,6 +107,13 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         base_response.update({'questionnaires': questionnaires})
         return Response([base_response])
 
+    @action(detail=True, methods=['post'], url_path='fork', permission_classes=[IsAuthenticated])
+    def fork_questionnaire(self, request, *args, **kwargs):
+        questionnaire = self.get_object()
+        if not questionnaire.is_template:
+            return Response({"detail": " نمی توانید پرسشنامه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        copied_questionnaire = copy_template(questionnaire, request.user.profile)
+        return Response(QuestionnaireSerializer(copied_questionnaire, context={'request': request}).data, status=status.HTTP_201_CREATED)
     @action(detail=True, methods=['get'], url_path='search-questions',
             permission_classes=(IsQuestionnaireOwnerOrReadOnly,))
     def search_in_questions(self, request, *args, **kwargs):
@@ -478,6 +486,21 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     lookup_field = 'id'
     permission_classes = (AllowAny,)
+
+
+class TemplateViewSet(viewsets.ModelViewSet):
+    queryset = Questionnaire.objects.filter(is_template=True)
+    serializer_class = QuestionnaireSerializer
+    lookup_field = 'uuid'
+    permission_classes = (IsAuthenticated,)
+
+    def initial(self, request, *args, **kwargs):
+        if kwargs.get('uuid'):
+            try:
+                UUID(kwargs.get('uuid'))
+            except ValueError:
+                return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
+        return super(TemplateViewSet, self).initial(request, *args, **kwargs)
 
 
 class ChangeQuestionsPlacements(APIView):
