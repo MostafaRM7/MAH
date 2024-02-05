@@ -38,7 +38,7 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     #         end_date__isnull=True,
     #         is_active=True)
     # )
-    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions', 'category').filter(interview__isnull=True, is_delete=False, folder__isnull=False, is_template=False)
+    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions', 'category').filter(interview__isnull=True, is_delete=False, folder__isnull=False)
     serializer_class = PublicQuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (AllowAny,)
