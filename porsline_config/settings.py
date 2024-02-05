@@ -25,7 +25,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['mah-api.codintofuture.ir', '127.0.0.1']
+ALLOWED_HOSTS = ['mah-api.codintofuture.ir', '127.0.0.1', '193.176.241.151']
 
 # Application definition
 
