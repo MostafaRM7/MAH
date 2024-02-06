@@ -38,7 +38,7 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     #         end_date__isnull=True,
     #         is_active=True)
     # )
-    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions', 'category').filter(interview__isnull=True, is_delete=False, folder__isnull=False)
+    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions', 'category').filter(is_delete=False, folder__isnull=False)
     serializer_class = PublicQuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (AllowAny,)
@@ -74,7 +74,7 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         This view is for creating, retrieving, deleting and listing questionnaires
     """
     queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'owner', 'questions',
-                                                      'folder', 'category').filter(is_delete=False, folder__isnull=False, interview__isnull=True)
+                                                      'folder', 'category').filter(is_delete=False, folder__isnull=False)
     serializer_class = QuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
