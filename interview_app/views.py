@@ -17,7 +17,8 @@ from interview_app.models import Interview, Ticket
 from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerOrInterviewerReadOnly, IsInterviewer, \
     InterviewOwnerOrInterviewerAddAnswer
 from porsline_config.paginators import MainPagination
-from question_app.models import AnswerSet
+from question_app.copy_template import copy_template_interview
+from question_app.models import AnswerSet, Folder
 from result_app.filtersets import AnswerSetFilterSet
 from user_app.models import Profile
 from wallet_app.models import Transaction
@@ -40,6 +41,24 @@ class InterviewViewSet(viewsets.ModelViewSet):
             return Response(NoGroupQuestionSerializer(result, many=True, context={'request': request}).data)
         else:
             return Response([])
+
+    @action(detail=True, methods=['post'], url_path='fork', permission_classes=[IsAuthenticated])
+    def fork_interview(self, request, *args, **kwargs):
+        folder_id = request.data.get('folder_id', None)
+        if folder_id:
+            try:
+                folder = Folder.objects.get(id=folder_id)
+                if folder.owner != request.user.profile:
+                    return Response({"detail": "شما مالک پوشه انتخابی نیستید"}, status=status.HTTP_403_FORBIDDEN)
+            except Folder.DoesNotExist:
+                return Response({"detail": "پوشه مورد نظر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            folder = None
+        interview = self.get_object()
+        if not interview.is_template:
+            return Response({"detail": " نمی توانید پروژه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        copied_questionnaire = copy_template_interview(interview, request.user.profile, folder)
+        return Response(InterviewSerializer(copied_questionnaire, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['delete'], url_path='delete-question')
     def delete_question(self, request, *args, **kwargs):

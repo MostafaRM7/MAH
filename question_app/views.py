@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from interview_app.models import Interview
 from wallet_app.models import Transaction
-from .copy_template import copy_template
+from .copy_template import copy_template_questionnaire
 from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer, AnswerSerializer
 from .question_app_serializers.general_serializers import *
@@ -109,10 +109,20 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='fork', permission_classes=[IsAuthenticated])
     def fork_questionnaire(self, request, *args, **kwargs):
+        folder_id = request.data.get('folder_id', None)
+        if folder_id:
+            try:
+                folder = Folder.objects.get(id=folder_id)
+                if folder.owner != request.user.profile:
+                    return Response({"detail": "شما مالک پوشه انتخابی نیستید"}, status=status.HTTP_403_FORBIDDEN)
+            except Folder.DoesNotExist:
+                return Response({"detail": "پوشه مورد نظر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            folder = None
         questionnaire = self.get_object()
         if not questionnaire.is_template:
             return Response({"detail": " نمی توانید پرسشنامه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
-        copied_questionnaire = copy_template(questionnaire, request.user.profile)
+        copied_questionnaire = copy_template_questionnaire(questionnaire, request.user.profile, folder)
         return Response(QuestionnaireSerializer(copied_questionnaire, context={'request': request}).data, status=status.HTTP_201_CREATED)
     @action(detail=True, methods=['get'], url_path='search-questions',
             permission_classes=(IsQuestionnaireOwnerOrReadOnly,))

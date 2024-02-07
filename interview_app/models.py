@@ -46,6 +46,13 @@ class Interview(Questionnaire):
     def __str__(self):
         return self.name
 
+    @property
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'description': self.description,
+        }
+
 
 class Ticket(models.Model):
     text = models.TextField(verbose_name='متن')
