@@ -40,6 +40,9 @@ class Questionnaire(models.Model):
     category = models.ForeignKey('Category', on_delete=models.PROTECT, null=True, blank=True)
     is_template = models.BooleanField(default=False, verbose_name='قالب/غیرقالب')
 
+    class Meta:
+        ordering = '-created_at'
+
     def __str__(self):
         return self.name
     @property

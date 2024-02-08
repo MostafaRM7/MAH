@@ -43,6 +43,9 @@ class Interview(Questionnaire):
     required_interviewer_count = models.PositiveIntegerField(null=True, blank=True,
                                                              verbose_name='تعداد پرسشگر مورد نیاز')
 
+    class Meta:
+        ordering = '-created_at'
+
     def __str__(self):
         return self.name
 
