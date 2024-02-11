@@ -55,8 +55,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
         else:
             folder = None
         interview = self.get_object()
-        if not interview.is_template:
-            return Response({"detail": " نمی توانید پروژه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not interview.is_template:
+        #     return Response({"detail": " نمی توانید پروژه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
         copied_questionnaire = copy_template_interview(interview, request.user.profile, folder)
         return Response(InterviewSerializer(copied_questionnaire, context={'request': request}).data, status=status.HTTP_201_CREATED)
 

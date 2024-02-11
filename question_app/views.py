@@ -120,8 +120,8 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         else:
             folder = None
         questionnaire = self.get_object()
-        if not questionnaire.is_template:
-            return Response({"detail": " نمی توانید پرسشنامه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not questionnaire.is_template:
+        #     return Response({"detail": " نمی توانید پرسشنامه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
         copied_questionnaire = copy_template_questionnaire(questionnaire, request.user.profile, folder)
         return Response(QuestionnaireSerializer(copied_questionnaire, context={'request': request}).data, status=status.HTTP_201_CREATED)
     @action(detail=True, methods=['get'], url_path='search-questions',

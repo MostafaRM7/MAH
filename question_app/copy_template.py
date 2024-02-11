@@ -21,6 +21,7 @@ QUESTION_TYPES = (
 )
 
 def copy_template_questionnaire(template:Questionnaire, owner:Profile, folder:Folder=None):
+    copied_question = None
     groups = {}
     if folder is None:
         folder = Folder.objects.create(name='پیش فرض', owner=owner)
@@ -65,20 +66,23 @@ def copy_template_questionnaire(template:Questionnaire, owner:Profile, folder:Fo
                 copied_question = FileQuestion.objects.create(questionnaire=copied_questionnaire, **file_question.to_dict)
             case 'no_answer':
                 copied_question = NoAnswerQuestion.objects.create(questionnaire=copied_questionnaire, **question.noanswerquestion.to_dict)
-        if question.group is not None:
-            if groups.get(question.group.id) is not None and isinstance(groups.get(question.group.id), list):
-                groups[question.group.id].append(copied_question)
-            else:
-                groups[question.group.id] = [copied_question]
-    for group_id in groups.keys():
-        group = template.questions.get(id=group_id).groupquestion
-        copied_group = QuestionGroup.objects.create(questionnaire=copied_questionnaire, **group.to_dict)
-        copied_group.child_questions.set(groups[group_id])
+        if copied_question:
+            if question.group is not None:
+                if groups.get(question.group.id) is not None and isinstance(groups.get(question.group.id), list):
+                    groups[question.group.id].append(copied_question)
+                else:
+                    groups[question.group.id] = [copied_question]
+    if len(groups.keys()) > 0:
+        for group_id in groups.keys():
+            group = template.questions.get(id=group_id).groupquestion
+            copied_group = QuestionGroup.objects.create(questionnaire=copied_questionnaire, **group.to_dict)
+            copied_group.child_questions.set(groups[group_id])
 
     return copied_questionnaire
 
 
 def copy_template_interview(template:Interview, owner:Profile, folder:Folder=None):
+    copied_question = None
     groups = {}
     if folder is None:
         folder = Folder.objects.create(name='پیش فرض', owner=owner)
@@ -88,9 +92,6 @@ def copy_template_interview(template:Interview, owner:Profile, folder:Folder=Non
             case 'optional':
                 optional_question = question.optionalquestion
                 copied_question = OptionalQuestion.objects.create(questionnaire=copied_interview, **optional_question.to_dict)
-                if copied_question.level == 0:
-                    copied_question.level = 2
-                    copied_question.save()
                 for option in optional_question.options.all():
                     copied_question.options.create(**option.to_dict)
             case 'drop_down':
@@ -126,17 +127,18 @@ def copy_template_interview(template:Interview, owner:Profile, folder:Folder=Non
                 copied_question = FileQuestion.objects.create(questionnaire=copied_interview, **file_question.to_dict)
             case 'no_answer':
                 copied_question = NoAnswerQuestion.objects.create(questionnaire=copied_interview, **question.noanswerquestion.to_dict)
-        if question.group is not None:
-            if groups.get(question.group.id) is not None and isinstance(groups.get(question.group.id), list):
-                groups[question.group.id].append(copied_question)
-            else:
-                groups[question.group.id] = [copied_question]
-        if copied_question.level == 0:
-            copied_question.level = 2
-            copied_question.save()
-    for group_id in groups.keys():
-        group = template.questions.get(id=group_id).groupquestion
-        copied_group = QuestionGroup.objects.create(questionnaire=copied_interview, **group.to_dict)
-        copied_group.child_questions.set(groups[group_id])
-
+        if copied_question:
+            if question.group is not None:
+                if groups.get(question.group.id) is not None and isinstance(groups.get(question.group.id), list):
+                    groups[question.group.id].append(copied_question)
+                else:
+                    groups[question.group.id] = [copied_question]
+            if copied_question.level == 0:
+                copied_question.level = 2
+                copied_question.save()
+    if len(groups.keys()) > 0:
+        for group_id in groups.keys():
+            group = template.questions.get(id=group_id).groupquestion
+            copied_group = QuestionGroup.objects.create(questionnaire=copied_interview, **group.to_dict)
+            copied_group.child_questions.set(groups[group_id])
     return copied_interview
