@@ -13,6 +13,7 @@ class FolderSerializer(serializers.ModelSerializer):
 
     def get_questionnaires(self, instance):
         is_interview = self.context.get('is_interview')
+        print(self.context)
         return general_serializers.NoQuestionQuestionnaireSerializer(
             instance.questionnaires.filter(is_delete=False, interview__isnull=not is_interview),
             many=True, read_only=True, context=self.context).data
