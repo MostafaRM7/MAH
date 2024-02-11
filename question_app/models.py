@@ -41,7 +41,7 @@ class Questionnaire(models.Model):
     is_template = models.BooleanField(default=False, verbose_name='قالب/غیرقالب')
 
     class Meta:
-        ordering = '-created_at'
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.name
