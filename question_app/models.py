@@ -48,7 +48,7 @@ class Questionnaire(models.Model):
     @property
     def to_dict(self):
         return {
-            'name': self.name + ' - کپی',
+            'name': self.name,
             'is_active': self.is_active,
             'previous_button': self.previous_button,
             'pub_date': self.pub_date,
