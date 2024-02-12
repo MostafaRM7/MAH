@@ -28,7 +28,7 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = MainPagination
 
     @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwner],
-            filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet, url_path='excel-data')
+            filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
     def excel_data(self, request, questionnaire_uuid):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = AnswerSetSerializer(queryset, many=True, context={'questionnaire_uuid': questionnaire_uuid})
