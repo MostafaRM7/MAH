@@ -7,10 +7,6 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ReadOnlyModelViewSet
-from drf_excel.mixins import XLSXFileMixin
-from drf_excel.renderers import XLSXRenderer
-
 from question_app.models import AnswerSet, Questionnaire
 from result_app.filtersets import AnswerSetFilterSet
 from result_app.serializers import AnswerSetSerializer
@@ -21,14 +17,6 @@ from .serializers import NumberQuestionPlotSerializer, ChoiceQuestionPlotSeriali
 
 # Create your views here.
 
-class AnswerSetExcelViewSet(XLSXFileMixin, ReadOnlyModelViewSet):
-    queryset = AnswerSet.objects.all()
-    serializer_class = AnswerSetSerializer
-    renderer_classes = (XLSXRenderer,)
-    filename = 'my_export.xlsx'
-    sheet_view_options = {
-        'rightToLeft': True
-    }
 
 
 class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
@@ -40,7 +28,11 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = MainPagination
 
     @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwner],
-            filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
+            filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet, url_path='excel-data')
+    def excel_data(self, request, questionnaire_uuid):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = AnswerSetSerializer(queryset, many=True, context={'questionnaire_uuid': questionnaire_uuid})
+        return Response(serializer.data, status=status.HTTP_200_OK)
     def search(self, request, questionnaire_uuid):
         search = request.query_params.get('search', None)
         if search is None:
