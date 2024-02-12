@@ -5,7 +5,7 @@ class MainPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 50
     choices = [7, 25, 50, 100, 150]
-    page_size = 150
+    page_size = 7
 
     def get_page_size(self, request):
         if self.page_size_query_param:
