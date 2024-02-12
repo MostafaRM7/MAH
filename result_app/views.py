@@ -7,6 +7,9 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ReadOnlyModelViewSet
+from drf_excel.mixins import XLSXFileMixin
+from drf_excel.renderers import XLSXRenderer
 
 from question_app.models import AnswerSet, Questionnaire
 from result_app.filtersets import AnswerSetFilterSet
@@ -17,6 +20,15 @@ from .serializers import NumberQuestionPlotSerializer, ChoiceQuestionPlotSeriali
 
 
 # Create your views here.
+
+class AnswerSetExcelViewSet(XLSXFileMixin, ReadOnlyModelViewSet):
+    queryset = AnswerSet.objects.all()
+    serializer_class = AnswerSetSerializer
+    renderer_classes = (XLSXRenderer,)
+    filename = 'my_export.xlsx'
+    sheet_view_options = {
+        'rightToLeft': True
+    }
 
 
 class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
