@@ -125,8 +125,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
                 # finding all interviews that owned by the user and still undone and with price
                 undone_interviews = Interview.objects.filter(
                     Q(owner=user) &
-                    Q(interview__approval_status=Interview.REACHED_INTERVIEWER_COUNT) |
-                    Q(interview__approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
+                    Q(approval_status=Interview.REACHED_INTERVIEWER_COUNT) |
+                    Q(approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
                 )
                 needed_balance = undone_interviews.annotate(
                     remaining_needed_answer_count=F('answer_count_goal') - Count('answer_sets')).aggregate(
