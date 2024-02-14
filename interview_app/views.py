@@ -122,23 +122,24 @@ class InterviewViewSet(viewsets.ModelViewSet):
         user = request.user.profile
         if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
             if obj.answer_count_goal:
-                # finding all interviews that owned by the user and still undone and with price
-                undone_interviews = Interview.objects.filter(
-                    Q(owner=user) &
-                    Q(approval_status=Interview.REACHED_INTERVIEWER_COUNT) |
-                    Q(approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
-                )
-                needed_balance = undone_interviews.annotate(
-                    remaining_needed_answer_count=F('answer_count_goal') - Count('answer_sets')).aggregate(
-                    remaining_needed_answer_cost=Sum(
-                        F('remaining_needed_answer_count') * F('price_pack__price'), output_field=models.FloatField()))
-                if user.wallet.balance >= needed_balance.remaining_needed_answer_cost:
-                    obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
-                    obj.save()
-                    return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
-                else:
-                    return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                pass
+                # # finding all interviews that owned by the user and still undone and with price
+                # undone_interviews = Interview.objects.filter(
+                #     Q(owner=user) &
+                #     Q(approval_status=Interview.REACHED_INTERVIEWER_COUNT) |
+                #     Q(approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
+                # )
+                # needed_balance = undone_interviews.annotate(
+                #     remaining_needed_answer_count=F('answer_count_goal') - Count('answer_sets')).aggregate(
+                #     remaining_needed_answer_cost=Sum(
+                #         F('remaining_needed_answer_count') * F('price_pack__price'), output_field=models.FloatField()))
+                # if user.wallet.balance >= needed_balance.remaining_needed_answer_cost:
+                #     obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
+                #     obj.save()
+                #     return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+                # else:
+                #     return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"},
+                #                     status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({"detail": "اول تعداد پاسخ های مورد نظر خود را وارد کنید"})
         else:
