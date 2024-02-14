@@ -132,7 +132,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
                     remaining_needed_answer_count=F('answer_count_goal') - Count('answer_sets')).aggregate(
                     remaining_needed_answer_cost=Sum(
                         F('remaining_needed_answer_count') * F('price_pack__price'), output_field=models.FloatField()))
-                if user.wallet.balance >= needed_balance:
+                if user.wallet.balance >= needed_balance.remaining_needed_answer_cost:
                     obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
                     obj.save()
                     return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
