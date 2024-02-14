@@ -122,8 +122,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         user = request.user.profile
         if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
             if obj.answer_count_goal:
-                pass
-                # # finding all interviews that owned by the user and still undone and with price
+                # finding all interviews that owned by the user and still undone and with price
                 # undone_interviews = Interview.objects.filter(
                 #     Q(owner=user) &
                 #     Q(approval_status=Interview.REACHED_INTERVIEWER_COUNT) |
@@ -134,9 +133,9 @@ class InterviewViewSet(viewsets.ModelViewSet):
                 #     remaining_needed_answer_cost=Sum(
                 #         F('remaining_needed_answer_count') * F('price_pack__price'), output_field=models.FloatField()))
                 # if user.wallet.balance >= needed_balance.remaining_needed_answer_cost:
-                #     obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
-                #     obj.save()
-                #     return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+                obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
+                obj.save()
+                return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
                 # else:
                 #     return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"},
                 #                     status=status.HTTP_400_BAD_REQUEST)
