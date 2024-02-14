@@ -110,7 +110,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='my-interviews', permission_classes=[IsInterviewer])
     def my_interviews(self, request, *args, **kwargs):
-        queryset = self.request.user.profile.interviews.filter(is_delete=True)
+        queryset = self.request.user.profile.interviews.filter(is_delete=False)
         paginated_queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(data=paginated_queryset, many=True)
         serializer.is_valid()
