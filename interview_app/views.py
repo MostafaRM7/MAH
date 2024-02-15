@@ -780,6 +780,9 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
     def get_queryset(self):
         queryset = AnswerSet.objects.prefetch_related('answers__question', 'answers').filter(
             questionnaire__uuid=self.kwargs['interview_uuid'])
+        user = self.request.query_params.get('user')
+        if user:
+            queryset = queryset.filter(answered_by_id=user)
         return queryset
 
     def get_serializer_context(self):
