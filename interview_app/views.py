@@ -780,7 +780,7 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
     def get_queryset(self):
         queryset = AnswerSet.objects.prefetch_related('answers__question', 'answers').filter(
             questionnaire__uuid=self.kwargs['interview_uuid'])
-        interview = queryset.first().questionnaire
+        interview = queryset.first().questionnaire.interview
         user = self.request.user.profile
         if not user == interview.owner and user in interview.interviewers.all():
             queryset = queryset.filter(answered_by=user)
