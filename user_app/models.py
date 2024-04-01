@@ -1,21 +1,39 @@
-from random import randint
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
-from django.db import models
 from django.core.validators import RegexValidator
+from django.db import models
+from django.utils import timezone
+
+
+class VipSubscription(models.Model):
+    SUBS_CHOICES = (
+        ('g', 'طلایی'),
+        ('s', 'نقره ای'),
+        ('b', 'برنزی')
+    )
+    vip_subscription = models.CharField(max_length=1, choices=SUBS_CHOICES, verbose_name='نوع اشتراک ')
+    period = models.PositiveIntegerField(max_length=2, default=90, verbose_name='بازه زمانی')
+    price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='قیمت')
+
+    def __str__(self):
+        return self.get_vip_subscription_display()
 
 
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('i', 'پرسشگر'),
         ('e', 'کارفرما'),
+        ('es', 'کارفرماسوپر'),
+        ('se', 'کارفرماسوپر و پرسشگر'),
         ('ie', 'پرسشگر و کارفرما'),
         ('n', 'بدون نقش'),
     )
     phone_number = models.CharField(max_length=20, validators=[
         RegexValidator(regex='^09[0-9]{9}$', message='شماره تلفن همراه وارد شده صحیح نمی باشد')], unique=True,
                                     verbose_name='شماره تلفن همراه')
+    # password = models.CharField(max_length=1000, verbose_name='رمز عبور')
     username = None
     USERNAME_FIELD = 'phone_number'
     role = models.CharField(max_length=2, choices=ROLE_CHOICES, verbose_name='نقش', default='n')
@@ -26,6 +44,24 @@ class User(AbstractUser):
         return self.phone_number
 
 
+class VipSubscriptionHistory(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, verbose_name='کاربر')
+    vip_subscription = models.ForeignKey(VipSubscription, on_delete=models.CASCADE, verbose_name='اشتراک')
+    price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='قیمت')
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.end_date = timezone.now() + timedelta(days=self.vip_subscription.period)
+            self.price = self.vip_subscription.price
+        super().save(*args, **kwargs)
+
+    @property
+    def remaining_days(self):
+        return max((self.end_date - timezone.now()).days, 0)
+
+
 class OTPToken(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='otp_token',
                                 verbose_name='کاربر')
@@ -33,7 +69,6 @@ class OTPToken(models.Model):
                              verbose_name='کد فعال سازی', editable=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
     try_count = models.PositiveIntegerField(default=0, verbose_name='تعداد تلاش ها')
-
 
     def __str__(self):
         return f'{self.user} - {self.token}'
@@ -53,8 +88,11 @@ class Profile(User):
     avatar = models.ImageField(upload_to='avatars/', verbose_name='تصویر پروفایل', null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name='زمان آخرین بروزرسانی')
     ask_for_interview_role = models.BooleanField(default=False, verbose_name='درخواست نقش پرسشگر')
+    has_employer_request = models.BooleanField(default=False, verbose_name='ثبت درخواست کارفرمایی')
     is_interview_role_accepted = models.BooleanField(verbose_name='درخواست پرسشگری تایید شده/نشده', null=True,
                                                      blank=True)
+    is_employer_role_accepted = models.BooleanField(verbose_name='درخواست کارفرمایی تایید شده/نشده', null=True,
+                                                    blank=True)
 
 
 class Country(models.Model):

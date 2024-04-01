@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_filters',
     'corsheaders',
+    "azbankgateways",
+
 ]
 
 MIDDLEWARE = [
@@ -174,3 +176,18 @@ OTP_LIFE_TIME = 2
 
 OTP_TRY_COUNT = 3
 
+AZ_IRANIAN_BANK_GATEWAYS = {
+    'GATEWAYS': {
+        'ZARINPAL': {
+            'MERCHANT_CODE': config('MERCHANT_CODE'),
+            'METHOD': 'POST',
+            'X_SANDBOX': 1,  # 0 disable, 1 active
+        },
+    },
+    'IS_SAMPLE_FORM_ENABLE': True,
+    'DEFAULT': 'ZARINPAL',
+    'CURRENCY': 'IRR',
+    'TRACKING_CODE_QUERY_PARAM': 'tc',
+    'TRACKING_CODE_LENGTH': 16,
+    'SETTING_VALUE_READER_CLASS': 'azbankgateways.readers.DefaultReader',
+}

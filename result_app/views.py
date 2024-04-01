@@ -1,6 +1,12 @@
 import statistics
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from django.http import FileResponse
+import pandas as pd
+import pyreadstat
 from collections import Counter
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -15,10 +21,6 @@ from .permissions import IsQuestionnaireOwner
 from .serializers import NumberQuestionPlotSerializer, ChoiceQuestionPlotSerializer
 
 
-# Create your views here.
-
-
-
 class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AnswerSet.objects.all().order_by('answered_at')
     serializer_class = AnswerSetSerializer
@@ -27,12 +29,23 @@ class AnswerSetViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = AnswerSetFilterSet
     pagination_class = MainPagination
 
+    @action(detail=False, methods=['get'])
+    def export_spss(self, request, questionnaire_uuid, variable_labels):
+        queryset = self.get_queryset()
+        data = AnswerSetSerializer(queryset, many=True).data
+        df = pd.DataFrame(data)
+        filename = 'exported_data.sav'
+        pyreadstat.write_sav(df, filename, variable_labels=variable_labels)
+        response = FileResponse(open(filename, 'rb'))
+        return response
+
     @action(methods=['get'], detail=False, permission_classes=[IsQuestionnaireOwner],
             filter_backends=[DjangoFilterBackend], filterset_class=AnswerSetFilterSet)
     def excel_data(self, request, questionnaire_uuid):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = AnswerSetSerializer(queryset, many=True, context={'questionnaire_uuid': questionnaire_uuid})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
     def search(self, request, questionnaire_uuid):
         search = request.query_params.get('search', None)
         if search is None:
@@ -159,7 +172,11 @@ class PlotAPIView(APIView):
                     if answers.exists():
                         match question.question_type:
                             case 'integer_range':
-                                answer_list = [answer.answer.get('integer_range') for answer in answers if answer.answer is not None and (isinstance(answer.answer.get('integer_range'), int) or isinstance(answer.answer.get('integer_range'), float))]
+                                answer_list = [answer.answer.get('integer_range') for answer in answers if
+                                               answer.answer is not None and (
+                                                       isinstance(answer.answer.get('integer_range'),
+                                                                  int) or isinstance(
+                                                   answer.answer.get('integer_range'), float))]
                                 if len(answer_list) != 0:
                                     if len(answer_list) > 1:
                                         to_serializer = {
@@ -199,7 +216,11 @@ class PlotAPIView(APIView):
                                         }
                                     result.append(NumberQuestionPlotSerializer(to_serializer).data)
                             case 'integer_selective':
-                                answer_list = [answer.answer.get('integer_selective') for answer in answers if answer.answer is not None and (isinstance(answer.answer.get('integer_selective'), int) or isinstance(answer.answer.get('integer_selective'), float))]
+                                answer_list = [answer.answer.get('integer_selective') for answer in answers if
+                                               answer.answer is not None and (
+                                                       isinstance(answer.answer.get('integer_selective'),
+                                                                  int) or isinstance(
+                                                   answer.answer.get('integer_selective'), float))]
                                 if len(answer_list) != 0:
                                     if len(answer_list) > 1:
                                         to_serializer = {
@@ -242,7 +263,11 @@ class PlotAPIView(APIView):
                                                                                         'shape': question.integerselectivequestion.shape}).data)
                             # AVG
                             case 'number_answer':
-                                answer_list = [answer.answer.get('number_answer') for answer in answers if answer.answer is not None and (isinstance(answer.answer.get('number_answer'), int) or isinstance(answer.answer.get('number_answer'), float))]
+                                answer_list = [answer.answer.get('number_answer') for answer in answers if
+                                               answer.answer is not None and (
+                                                       isinstance(answer.answer.get('number_answer'),
+                                                                  int) or isinstance(
+                                                   answer.answer.get('number_answer'), float))]
                                 if len(answer_list) != 0:
                                     if len(answer_list) > 1:
                                         to_serializer = {

@@ -1,9 +1,8 @@
 from uuid import UUID
 
-from django.db import transaction, models
-from django.db.models import Q, F, Count, Sum
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -11,17 +10,38 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer, \
-    AnswerSerializer, TicketSerializer
+    AnswerSerializer, TicketSerializer, AddUserSerializer, PrivateInterviewSerializer
 from interview_app.interview_app_serializers.question_serializers import *
 from interview_app.models import Interview, Ticket
 from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerOrInterviewerReadOnly, IsInterviewer, \
-    InterviewOwnerOrInterviewerAddAnswer
+    InterviewOwnerOrInterviewerAddAnswer, IsSuperEmployerOrSuperUser, CanListUsers
 from porsline_config.paginators import MainPagination
 from question_app.copy_template import copy_template_interview
 from question_app.models import AnswerSet, Folder
 from result_app.filtersets import AnswerSetFilterSet
-from user_app.models import Profile
+from user_app.models import User
 from wallet_app.models import Transaction
+
+
+class PrivateInterviewViewSet(viewsets.ModelViewSet):
+    serializer_class = PrivateInterviewSerializer
+    permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
+    lookup_field = 'uuid'
+    queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').filter(
+        is_delete=False).order_by('-created_at')
+    pagination_class = MainPagination
+
+    @action(detail=True, methods=['post'], url_path='add-user')
+    def add_user(self, request, *args, **kwargs):
+        phone_number = request.data.get('phone_number')
+        if phone_number:
+            try:
+                user = User.objects.get(phone_number=phone_number)
+                return Response(AddUserSerializer(user).data)
+            except User.DoesNotExist:
+                return Response({"detail": "چنین کاربری در سامانه موجود نیست"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({"detail": "لطفا شماره تلفن را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class InterviewViewSet(viewsets.ModelViewSet):
@@ -58,7 +78,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
         # if not interview.is_template:
         #     return Response({"detail": " نمی توانید پروژه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
         copied_questionnaire = copy_template_interview(interview, request.user.profile, folder)
-        return Response(InterviewSerializer(copied_questionnaire, context={'request': request}).data, status=status.HTTP_201_CREATED)
+        return Response(InterviewSerializer(copied_questionnaire, context={'request': request}).data,
+                        status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['delete'], url_path='delete-question')
     def delete_question(self, request, *args, **kwargs):
@@ -81,9 +102,9 @@ class InterviewViewSet(viewsets.ModelViewSet):
         if request.user.profile.preferred_districts.all().exists():
             queryset = Interview.objects.filter(districts__in=request.user.profile.preferred_districts.all(),
                                                 is_delete=False, is_active=True,
-                                                approval_status=Interview.SEARCHING_FOR_INTERVIEWERS
+                                                approval_status=Interview.SEARCHING_FOR_INTERVIEWER
                                                 ).distinct()
-            # filter the query set that return the interviews that the user has not taken yet
+            # filter the query set that return the interviews that the user has not take
             queryset = queryset.filter(~Q(interviewers=request.user.profile))
             # filter the query set that return the interviews that their current interviewrs count are blow the requiered count
             # queryset = queryset.annotate(interviewers_count=Count('interviewers')).filter(~Q(interviewers_count__lt=F('required_interviewer_count')))

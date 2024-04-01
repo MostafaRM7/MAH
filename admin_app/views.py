@@ -37,6 +37,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
     filterset_class = InterviewFilterSet
     ordering_fields = ('created_at', 'pub_date', 'end_date', 'goal_start_date', 'goal_end_date', 'answer_count_goal')
     lookup_field = 'uuid'
+
     @action(detail=False, methods=['get'], url_path='search-questions')
     def search_in_questions(self, request, *args, **kwargs):
         search = request.query_params.get('search')
@@ -63,7 +64,8 @@ class InterviewViewSet(viewsets.ModelViewSet):
                 interview.approval_status = Interview.PENDING_LEVEL_ADMIN
             interview.save()
             return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
-        return Response({interview.id: 'کارفرما باید تعداد پرسشگر مورد نیاز و تعداد پاسخ مورد نیاز را وارد کند'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({interview.id: 'کارفرما باید تعداد پرسشگر مورد نیاز و تعداد پاسخ مورد نیاز را وارد کند'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='reject-content')
     def reject_content(self, request, uuid):
@@ -75,6 +77,7 @@ class InterviewViewSet(viewsets.ModelViewSet):
         Ticket.objects.create(sender=request.user.profile, interview=interview, receiver=interview.owner, text=text)
         interview.save()
         return Response(self.get_serializer(interview).data, status=status.HTTP_200_OK)
+
     @transaction.atomic
     @action(detail=True, methods=['post'], url_path='set-price-pack')
     def set_price_pack(self, request, uuid):
@@ -94,8 +97,10 @@ class InterviewViewSet(viewsets.ModelViewSet):
                 return Response({interview.id: 'لطفا بسته قیمت را انتخاب کنید'}, status=status.HTTP_400_BAD_REQUEST)
         elif interview.approval_status == Interview.PENDING_LEVEL_ADMIN:
             un_leveled_questions_count = interview.questions.filter(level=0).count()
-            return Response({interview.id: f'در این پروژه تعداد {un_leveled_questions_count} سوال تعیین سطح نشده اند'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({interview.id: 'لطفا ابتدا پرسشنامه را تعیین سطح یا محتوای آن را تایید کنید'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({interview.id: f'در این پروژه تعداد {un_leveled_questions_count} سوال تعیین سطح نشده اند'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return Response({interview.id: 'لطفا ابتدا پرسشنامه را تعیین سطح یا محتوای آن را تایید کنید'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
@@ -130,6 +135,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         return Response([])
 
+    #  تایید ادمین
     @action(detail=True, methods=['post'], url_path='grant-interviewer-role')
     def grant_interviewer_role(self, request, pk):
         profile = self.get_object()

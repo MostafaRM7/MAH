@@ -7,13 +7,13 @@ from question_app.models import OptionalQuestion, DropDownQuestion, SortQuestion
 
 base_router = routers.DefaultRouter()
 base_router.register('interviews', views.InterviewViewSet, basename='interviews')
+base_router.register('privet-interviews', views.PrivateInterviewViewSet, basename='privet-interviews')
 base_router.register('tickets', views.TicketViewSet, basename='tickets')
 
-interview_router = routers.NestedDefaultRouter(base_router, 'interviews', lookup='interview')
-# interview_router.register(WelcomePage.URL_PREFIX, views.WelcomePageViewSet, basename='welcome_pages')
-# interview_router.register(ThanksPage.URL_PREFIX, views.ThanksPageViewSet, basename='thanks_pages')
+interview_router = routers.NestedDefaultRouter(base_router, 'interviews', lookup='intervinterviewsiew')
 interview_router.register('answer-sets', views.AnswerSetViewSet, basename='answer_sets')
-interview_router.register(OptionalQuestion.URL_PREFIX, views.OptionalQuestionViewSet, basename='optional_questions')
+interview_router.register(OptionalQuestion.URL_PREFIX, views.OptionalQuestionViewSet,
+                          basename='optioninterviewsal_questions')
 interview_router.register(DropDownQuestion.URL_PREFIX, views.DropDownQuestionViewSet, basename='dropdown_questions')
 interview_router.register(SortQuestion.URL_PREFIX, views.SortQuestionViewSet, basename='sort_questions')
 interview_router.register(TextAnswerQuestion.URL_PREFIX, views.TextAnswerQuestionViewSet,
@@ -37,6 +37,4 @@ urlpatterns = [
          name='search_questionnaire'),
     path('', include(base_router.urls)),
     path('', include(interview_router.urls)),
-    # path('<int:user_pk>/tickets/', views.TicketViewSet.as_view({'get': 'list', 'post': 'create'}), name='tickets'),
-    # path('<int:user_pk>/tickets/<int:pk>/', views.TicketViewSet.as_view({'get': 'retrieve'}), name='ticket'),
 ]

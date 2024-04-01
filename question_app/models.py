@@ -3,7 +3,6 @@ from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-
 from admin_app.models import PricePack
 from user_app.models import Profile, District
 
@@ -45,6 +44,7 @@ class Questionnaire(models.Model):
 
     def __str__(self):
         return self.name
+
     @property
     def to_dict(self):
         return {
@@ -213,6 +213,7 @@ class DropDownQuestion(Question):
             'is_alphabetic_order': self.is_alphabetic_order,
             'is_random_options': self.is_random_options
         }
+
     def save(self, *args, **kwargs):
         self.question_type = 'drop_down'
         super(DropDownQuestion, self).save(*args, **kwargs)
@@ -231,6 +232,7 @@ class DropDownOption(models.Model):
         return {
             'text': self.text
         }
+
     def __str__(self):
         return f'{self.drop_down_question} - {self.text}'
 
@@ -254,6 +256,7 @@ class SortQuestion(Question):
             'placement': self.placement,
             'is_random_options': self.is_random_options
         }
+
     def save(self, *args, **kwargs):
         self.question_type = 'sort'
         super(SortQuestion, self).save(*args, **kwargs)
@@ -272,6 +275,7 @@ class SortOption(models.Model):
         return {
             'text': self.text
         }
+
 
 class TextAnswerQuestion(Question):
     URL_PREFIX = 'textanswer-questions'
@@ -394,6 +398,7 @@ class IntegerRangeQuestion(Question):
             'mid_label': self.mid_label,
             'max_label': self.max_label
         }
+
     def save(self, *args, **kwargs):
         self.question_type = 'integer_range'
         super(IntegerRangeQuestion, self).save(*args, **kwargs)
@@ -474,7 +479,6 @@ class EmailFieldQuestion(Question):
             'placement': self.placement
         }
 
-
     def save(self, *args, **kwargs):
         self.question_type = 'email_field'
         super(EmailFieldQuestion, self).save(*args, **kwargs)
@@ -500,6 +504,7 @@ class LinkQuestion(Question):
             'level': self.level,
             'placement': self.placement
         }
+
     def save(self, *args, **kwargs):
         self.question_type = 'link'
         super(LinkQuestion, self).save(*args, **kwargs)
@@ -604,6 +609,7 @@ class QuestionGroup(Question):
             'level': self.level,
             'placement': self.placement
         }
+
     def save(self, *args, **kwargs):
         self.is_required = False
         self.question_type = 'group'
@@ -641,6 +647,7 @@ class NoAnswerQuestion(Question):
             'is_solid_button': self.is_solid_button,
             'button_text': self.button_text
         }
+
     def save(self, *args, **kwargs):
         self.is_required = False
         self.question_type = 'no_answer'
@@ -695,4 +702,3 @@ class ThanksPage(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام')
-

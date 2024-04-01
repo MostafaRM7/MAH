@@ -1,16 +1,15 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
-
 from admin_app.models import PricePack
 from question_app.models import Questionnaire
 from user_app.models import Profile, District
+from django.core.exceptions import ValidationError
 
 
 def get_current_date():
     return timezone.now().date()
 
-
-# Create your models here.
 
 class Interview(Questionnaire):
     PENDING_CONTENT_ADMIN = 'pending_content_admin'
@@ -42,6 +41,10 @@ class Interview(Questionnaire):
     answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف', null=True, blank=True)
     required_interviewer_count = models.PositiveIntegerField(null=True, blank=True,
                                                              verbose_name='تعداد پرسشگر مورد نیاز')
+    protocol = models.FileField(upload_to='media/', verbose_name='پروتکل ')
+    # , validators = [
+    #     FileExtensionValidator(['.pdf', '.doc', '.docx', '.jpg', '.png'])]
+    is_privet = models.BooleanField(default=False, verbose_name='خصوصی ')
 
     class Meta:
         ordering = ['-created_at']

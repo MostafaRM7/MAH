@@ -1,18 +1,19 @@
 import re
 from random import randint
-
 from django.utils import timezone
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from user_app.tasks import send_otp
-from user_app.models import OTPToken, Profile
+from user_app.models import OTPToken, Profile, User
 from porsline_config import settings
+from django.contrib.auth.hashers import make_password
 
 
+# باید پسورد اضافه شود
 class GateWaySerializer(serializers.Serializer):
-    phone_number = serializers.CharField(max_length=20, min_length=11, required=True)
+    phone_number = serializers.CharField(max_length=20, min_length=11, required=True, label='شماره تلفن ')
 
     def create(self, validated_data):
         otp = OTPToken.objects.filter(user__phone_number=validated_data.get('phone_number'))
@@ -28,6 +29,7 @@ class GateWaySerializer(serializers.Serializer):
         phone_number = attrs.get('phone_number')
         if not re.match(r'^09\d{9}$', phone_number):
             raise serializers.ValidationError("فرمت شماره تلفن صحیح نمی‌باشد.")
+
         return attrs
 
 
@@ -38,6 +40,7 @@ class OTPCheckSerializer(serializers.Serializer):
     access = serializers.CharField(read_only=True)
     role = serializers.CharField(read_only=True)
 
+    # todo باید این ارور حل شود
     def validate(self, data):
         token = data.get('token')
         phone_number = data.get('phone_number')

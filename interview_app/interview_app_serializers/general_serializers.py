@@ -1,16 +1,20 @@
 from django.db import models, transaction
 from django.utils import timezone
-from rest_framework import serializers, status
+from rest_framework import serializers, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-
+from rest_framework.response import Response
 from admin_app.admin_app_serializers.general_serializers import PricePackSerializer
 from interview_app.models import Interview, Ticket
+from porsline_config.paginators import MainPagination
 from question_app import validators
 from question_app.models import Answer, AnswerSet, DropDownOption, SortOption, Option, FileQuestion, \
     IntegerRangeQuestion, NumberAnswerQuestion, TextAnswerQuestion, DropDownQuestion, OptionalQuestion
 from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
 from question_app.validators import tag_remover
+from user_app.models import User
 from user_app.representors import represent_districts
+from user_app.user_app_serializers.general_serializers import UserSerializer
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -469,7 +473,8 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerSet
-        fields = ('id', 'questionnaire', 'answered_at', 'answers', 'answered_at_time', 'answered_at_date',  'answered_by')
+        fields = (
+            'id', 'questionnaire', 'answered_at', 'answers', 'answered_at_time', 'answered_at_date', 'answered_by')
         read_only_fields = ('id', 'questionnaire', 'answered_at_time', 'answered_at_date', 'answers', 'answered_by')
         ref_name = 'interview_app_answer_set'
 
@@ -492,6 +497,144 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         return representation
 
 
+class AddUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['phone_number']
+
+
+class PrivateInterviewSerializer(serializers.ModelSerializer):
+    questions = NoGroupQuestionSerializer(many=True, read_only=True)
+    difficulty = serializers.SerializerMethodField(method_name='get_difficulty')
+    price_pack = PricePackSerializer(read_only=True)
+    users = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Interview
+        fields = (
+            'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
+            'interviewers', 'approval_status', 'required_interviewer_count', 'price_pack',
+            'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
+            'folder', 'category', 'protocol', 'users'
+        )
+        read_only_fields = ('owner', 'questions', 'approval_status')
+
+    def get_users(self, instance):
+        users = User.objects.filter(role__in=['i', 'e', 'es', 'se', 'ie'])
+        return UserSerializer(users, many=True).data
+
+    def get_difficulty(self, instance: Interview):
+        levels = instance.questions.values_list('level', flat=True)
+        if levels:
+            try:
+                return int(sum(levels) / len(levels))
+            except ZeroDivisionError:
+                return 0
+        return 0
+
+    def validate(self, data):
+        folder = data.get('folder')
+        name = data.get('name')
+        request = self.context.get('request')
+        pub_date = data.get('pub_date')
+        end_date = data.get('end_date')
+        if pub_date:
+            if request.method == 'POST':
+                if pub_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {'pub_date': 'تاریخ شروع پرسشنامه نمی تواند قبل از زمان حال باشد'}
+                    )
+            elif request.method in ['PUT', 'PATCH']:
+                if pub_date != self.instance.pub_date and pub_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {
+                            'pub_date': 'نمی توانید تاریخ شروع پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ شروع قبلی یا تاریخی پس از زمان حال است'}
+                    )
+        if end_date:
+            if request.method == 'POST':
+                if end_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {'end_date': 'تاریخ پایان پرسشنامه نمی تواند قبل از زمان حال باشد'}
+                    )
+            elif request.method in ['PUT', 'PATCH']:
+                if end_date != self.instance.end_date and end_date < timezone.now():
+                    raise serializers.ValidationError(
+                        {
+                            'end_date': 'نمی توانید تاریخ پایان پرسشنامه را به تاریخی قبل از زمان حال تغییر دهید تنها تاریخ مورد قبول تاریخ پایان قبلی یا تاریخی پس از زمان حال است'}
+                    )
+        if end_date and pub_date:
+            if end_date < pub_date:
+                raise serializers.ValidationError(
+                    {'date': 'تاریخ شروع پرسشنامه نمی تواند بعد از تاریخ پایان باشد'}
+                )
+        if folder is not None:
+            if request.user.profile != folder.owner:
+                raise serializers.ValidationError(
+                    {'folder': 'سازنده پرسشنامه با سازنده پوشه مطابقت ندارد'},
+                    status.HTTP_400_BAD_REQUEST
+                )
+            if name is not None:
+                if request.method == 'POST':
+                    if Interview.objects.filter(folder=folder, name=name, is_delete=False).exists():
+                        raise serializers.ValidationError(
+                            {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
+                elif request.method in ['PUT', 'PATCH']:
+                    if Interview.objects.filter(folder=folder, name=name, is_delete=False).exclude(
+                            pk=self.instance.id).exists():
+                        raise serializers.ValidationError(
+                            {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
+                            status.HTTP_400_BAD_REQUEST
+                        )
+        else:
+            if request.method != 'PATCH':
+                raise serializers.ValidationError(
+                    {'folder': 'یک پوشه انتخاب کنید'}
+                )
+            elif request.method == 'PATCH' and self.instance.folder is None:
+                raise serializers.ValidationError(
+                    {'folder': 'یک پوشه انتخاب کنید'}
+                )
+
+        return data
+
+    def create(self, validated_data):
+        districts = validated_data.pop('districts', None)
+        interviewers = validated_data.pop('interviewers', None)
+        owner = self.context['request'].user.profile
+        interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()),
+                                             **validated_data)
+        if districts:
+            interview.districts.set(districts)
+        if interviewers:
+            interview.interviewers.set(interviewers)
+        return interview
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.approval_status = Interview.PENDING_CONTENT_ADMIN
+        instance.save()
+        return instance
+
+    def to_representation(self, instance: Interview):
+        representation = super().to_representation(instance)
+        representation['districts'] = represent_districts(instance)
+        representation['interviewers'] = [
+            {'id': interviewer.id, 'first_name': interviewer.first_name, 'last_name': interviewer.last_name,
+             'phone_number': interviewer.phone_number} for interviewer in
+            instance.interviewers.all()]
+        representation['folder'] = instance.folder.name if instance.folder else None
+        representation['category'] = instance.category.name if instance.category else None
+        representation['owner'] = {
+            'id': instance.owner.id,
+            'first_name': instance.owner.first_name,
+            'last_name': instance.owner.last_name,
+            'phone_number': instance.owner.phone_number
+        }
+        return representation
+
+
 class InterviewSerializer(serializers.ModelSerializer):
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
     difficulty = serializers.SerializerMethodField(method_name='get_difficulty')
@@ -503,7 +646,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
             'interviewers', 'approval_status', 'required_interviewer_count', 'price_pack',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
-            'folder', 'category'
+            'folder', 'category', 'protocol'
         )
         read_only_fields = ('owner', 'questions', 'approval_status')
 
@@ -582,7 +725,8 @@ class InterviewSerializer(serializers.ModelSerializer):
                             status.HTTP_400_BAD_REQUEST
                         )
                 elif request.method in ['PUT', 'PATCH']:
-                    if Interview.objects.filter(folder=folder, name=name, is_delete=False).exclude(pk=self.instance.id).exists():
+                    if Interview.objects.filter(folder=folder, name=name, is_delete=False).exclude(
+                            pk=self.instance.id).exists():
                         raise serializers.ValidationError(
                             {'name': 'پرسشنامه با این نام در این پوشه وجود دارد'},
                             status.HTTP_400_BAD_REQUEST
@@ -601,11 +745,14 @@ class InterviewSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         districts = validated_data.pop('districts', None)
+        interviewers = validated_data.pop('interviewers', None)
         owner = self.context['request'].user.profile
         interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()),
                                              **validated_data)
         if districts:
             interview.districts.set(districts)
+        if interviewers:
+            interview.interviewers.set(interviewers)
         return interview
 
     def update(self, instance, validated_data):

@@ -1,6 +1,13 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import permissions
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from .models import Profile
+
+
+class IsAdminOrSuperUser(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return request.user and (request.user.is_staff or request.user.is_superuser)
 
 
 class IsUserOrReadOnly(BasePermission):

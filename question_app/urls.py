@@ -17,7 +17,8 @@ questionnaire_router.register('answer-sets', views.AnswerSetViewSet, basename='a
 questionnaire_router.register(OptionalQuestion.URL_PREFIX, views.OptionalQuestionViewSet, basename='optional_questions')
 questionnaire_router.register(DropDownQuestion.URL_PREFIX, views.DropDownQuestionViewSet, basename='dropdown_questions')
 questionnaire_router.register(SortQuestion.URL_PREFIX, views.SortQuestionViewSet, basename='sort_questions')
-questionnaire_router.register(TextAnswerQuestion.URL_PREFIX, views.TextAnswerQuestionViewSet, basename='textanswer_questions')
+questionnaire_router.register(TextAnswerQuestion.URL_PREFIX, views.TextAnswerQuestionViewSet,
+                              basename='textanswer_questions')
 questionnaire_router.register(NumberAnswerQuestion.URL_PREFIX, views.NumberAnswerQuestionViewSet,
                               basename='numberanswer_questions')
 questionnaire_router.register(IntegerRangeQuestion.URL_PREFIX, views.IntegerRangeQuestionViewSet,
@@ -26,7 +27,8 @@ questionnaire_router.register(IntegerSelectiveQuestion.URL_PREFIX, views.Integer
                               basename='integerselective_qustions')
 questionnaire_router.register('picture-questions', views.PictureFieldQuestionViewSet,
                               basename='picture_qustions')
-questionnaire_router.register(EmailFieldQuestion.URL_PREFIX, views.EmailFieldQuestionViewSet, basename='email_questions')
+questionnaire_router.register(EmailFieldQuestion.URL_PREFIX, views.EmailFieldQuestionViewSet,
+                              basename='email_questions')
 questionnaire_router.register(LinkQuestion.URL_PREFIX, views.LinkQuestionViewSet, basename='link_questions')
 questionnaire_router.register(FileQuestion.URL_PREFIX, views.FileQuestionViewSet, basename='file_questions')
 questionnaire_router.register(QuestionGroup.URL_PREFIX, views.QuestionGroupViewSet, basename='question_groups')
@@ -41,5 +43,4 @@ urlpatterns = [
     path('questionnaires/<str:questionnaire_uuid>/change-questions-placements/',
          views.ChangeQuestionsPlacements.as_view(),
          name='change_questions_placements'),
-    # path('interviews/', views.InterviewViewSet.as_view({'get': 'list'}), name='interviews'),
 ]

@@ -1,7 +1,6 @@
 from django.db import transaction
 from django.http import HttpRequest
 from rest_framework import serializers, status
-
 from interview_app.models import Interview
 from porsline_config import settings
 from question_app.models import Questionnaire, NoAnswerQuestion, QuestionGroup, FileQuestion, LinkQuestion, \

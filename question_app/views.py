@@ -1,5 +1,4 @@
 from uuid import UUID
-
 from django.db.models import Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,7 +9,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from interview_app.models import Interview
 from wallet_app.models import Transaction
 from .copy_template import copy_template_questionnaire
@@ -38,7 +36,8 @@ class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.Ge
     #         end_date__isnull=True,
     #         is_active=True)
     # )
-    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions', 'category').filter(is_delete=False, folder__isnull=False)
+    queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'questions', 'category').filter(
+        is_delete=False, folder__isnull=False)
     serializer_class = PublicQuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (AllowAny,)
@@ -74,7 +73,8 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         This view is for creating, retrieving, deleting and listing questionnaires
     """
     queryset = Questionnaire.objects.prefetch_related('welcome_page', 'thanks_page', 'owner', 'questions',
-                                                      'folder', 'category').filter(is_delete=False, folder__isnull=False)
+                                                      'folder', 'category').filter(is_delete=False,
+                                                                                   folder__isnull=False)
     serializer_class = QuestionnaireSerializer
     lookup_field = 'uuid'
     permission_classes = (IsQuestionnaireOwnerOrReadOnly,)
@@ -123,7 +123,9 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         # if not questionnaire.is_template:
         #     return Response({"detail": " نمی توانید پرسشنامه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
         copied_questionnaire = copy_template_questionnaire(questionnaire, request.user.profile, folder)
-        return Response(QuestionnaireSerializer(copied_questionnaire, context={'request': request}).data, status=status.HTTP_201_CREATED)
+        return Response(QuestionnaireSerializer(copied_questionnaire, context={'request': request}).data,
+                        status=status.HTTP_201_CREATED)
+
     @action(detail=True, methods=['get'], url_path='search-questions',
             permission_classes=(IsQuestionnaireOwnerOrReadOnly,))
     def search_in_questions(self, request, *args, **kwargs):

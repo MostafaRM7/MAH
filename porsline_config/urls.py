@@ -1,3 +1,4 @@
+from azbankgateways.urls import az_bank_gateways_urls
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -21,6 +22,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('question-api/', include('question_app.urls')),
     path('result-api/', include('result_app.urls')),
+    path("bankgateways/", az_bank_gateways_urls()),
     # path('admin/', admin.site.urls),
     path('admin-api/', include('admin_app.urls')),
     path('__debug__/', include('debug_toolbar.urls')),

@@ -1,16 +1,17 @@
 from django.urls import path, include
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenVerifyView
-from .views import UserViewSet, FolderViewSet, GateWayViewSet, OTPCheckViewSet, RefreshTokenView, LogoutView, \
-    LogoutAllView, CountryViewSet, ProvinceViewSet, CityViewSet, DistrictViewSet, ResumeViewSet, WorkBackgroundViewSet, \
-    AchievementViewSet, SkillViewSet, EducationalBackgroundViewSet, ResearchHistoryViewSet, CountryNestedAPIView
+from .views import *
 
 base_router = routers.DefaultRouter()
+vip_subscription_router = routers.DefaultRouter()
 base_router.register('users', UserViewSet, basename='users')
 base_router.register('folders', FolderViewSet, basename='folders')
 base_router.register('auth/gateway', GateWayViewSet, basename='login/register')
 base_router.register('auth/verify-otp', OTPCheckViewSet, basename='verify-otp')
 base_router.register('countries', CountryViewSet, basename='countries')
+# vip_subscription_router.register('buy-vip-subscription', VipSubscriptionHistoryViewSet, basename='buy-vip-subscription')
+vip_subscription_router.register('vip-subscription', VipSubscriptionViewSet, basename='vip-subscription')
 
 country_router = routers.NestedDefaultRouter(base_router, 'countries', lookup='country')
 country_router.register('provinces', ProvinceViewSet, basename='provinces')
@@ -39,6 +40,9 @@ urlpatterns = [
     path('', include(country_router.urls)),
     path('', include(province_router.urls)),
     path('', include(city_router.urls)),
+    path('', include(city_router.urls)),
+    path('', include(vip_subscription_router.urls)),
+    path('buy-vip-subscription', BuyVipSubscription.as_view(), name='buy-vip-subscription'),
     path('nested-countries/', CountryNestedAPIView.as_view(), name='nested-countries'),
     path('auth/verify-token/', TokenVerifyView.as_view(), name='token-verify'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),

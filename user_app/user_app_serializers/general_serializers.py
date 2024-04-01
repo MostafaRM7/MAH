@@ -1,11 +1,26 @@
-from user_app.representors import represent_prefrred_districts
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from question_app.models import Folder
 from question_app.question_app_serializers import general_serializers
-from user_app.models import Profile, Country, Province, City, District
+from user_app.models import Profile, Country, Province, City, District, VipSubscriptionHistory, VipSubscription
+from user_app.representors import represent_prefrred_districts
 from user_app.user_app_serializers.resume_serializers import ResumeSerializer
+
+
+class VipSubscriptionHistorySerializer(serializers.ModelSerializer):
+    remaining_days = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = VipSubscriptionHistory
+        fields = ['id', 'vip_subscription', 'start_date', 'end_date', 'remaining_days', 'price']
+        read_only_fields = ('start_date', 'end_date', 'price')
+
+
+class VipSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VipSubscription
+        fields = ['id', 'vip_subscription', 'period', 'price']
 
 
 class FolderSerializer(serializers.ModelSerializer):
@@ -52,6 +67,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ('id', 'first_name', 'last_name', 'email', 'phone_number', 'folders')
+        # extra_kwargs = {
+        #     'password': {'write_only': True}
+        # }
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -60,19 +78,27 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
+        # todo preferred_districts باید به فیلد های سریالایزر اصافه شود
         fields = (
-            'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
-            'address', 'nationality', 'province', 'preferred_districts', 'resume', 'updated_at', 'date_joined',
-            'is_staff', 'ask_for_interview_role', 'has_wallet')
+            'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date',
+            'avatar',
+            'address', 'nationality', 'province', 'resume', 'updated_at', 'date_joined',
+            'is_staff', 'ask_for_interview_role', 'has_employer_request', 'has_wallet')
         read_only_fields = ('role', 'updated_at', 'date_joined', 'is_staff')
 
     def get_has_wallet(self, instance):
+
         user = instance
+
         try:
+
             if user.wallet is None:
                 return False
+
         except:
+
             return False
+
         return True
 
     def validate(self, data):

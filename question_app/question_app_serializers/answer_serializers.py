@@ -440,18 +440,19 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         fields = ('id', 'questionnaire', 'answered_at', 'answers', 'answered_by')
         read_only_fields = ('questionnaire', 'answered_at', 'answered_by')
 
-    def validate(self, data):
-        questionnaire = get_object_or_404(Questionnaire, uuid=self.context.get('questionnaire_uuid'))
-        if questionnaire.is_active and questionnaire.pub_date <= timezone.now():
-            if questionnaire.end_date:
-                if questionnaire.end_date >= timezone.now():
-                    raise serializers.ValidationError(
-                        {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
-                    )
-        else:
-            raise serializers.ValidationError(
-                {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"})
-        return data
+    # todo باید از کامنت در بیاید
+    # def validate(self, data):
+    #     questionnaire = get_object_or_404(Questionnaire, uuid=self.context.get('questionnaire_uuid'))
+    #     if questionnaire.is_active and questionnaire.pub_date <= timezone.now():
+    #         if questionnaire.end_date:
+    #             if questionnaire.end_date >= timezone.now():
+    #                 raise serializers.ValidationError(
+    #                     {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
+    #                 )
+    #     else:
+    #         raise serializers.ValidationError(
+    #             {"questionnaire": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"})
+    #     return data
 
     @transaction.atomic()
     def create(self, validated_data):

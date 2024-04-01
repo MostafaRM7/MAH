@@ -4,6 +4,7 @@ amqp==5.1.1
 asgiref==3.6.0
 async-timeout==4.0.2
 attrs==23.1.0
+az-iranian-bank-gateways==2.0.5
 billiard==3.6.4.0
 celery==5.2.7
 certifi==2022.12.7
@@ -44,8 +45,10 @@ MarkupSafe==2.1.2
 maxminddb==2.4.0
 model-bakery==1.11.0
 multidict==6.0.4
+numpy==1.26.4
 oauthlib==3.2.2
 packaging==23.0
+pandas==2.2.1
 Pillow==9.4.0
 platformdirs==3.5.1
 pluggy==1.0.0
@@ -53,10 +56,13 @@ prompt-toolkit==3.0.38
 psycopg2-binary==2.9.6
 pycountry==22.3.5
 pycparser==2.21
+pycryptodome==3.20.0
 PyJWT==2.6.0
+pyreadstat==1.2.7
 pytest==7.3.1
 pytest-django==4.5.2
 pytest-dotenv==0.5.2
+python-dateutil==2.9.0.post0
 python-decouple==3.8
 python-dotenv==1.0.0
 python3-openid==3.2.0
@@ -73,6 +79,7 @@ social-auth-app-django==4.0.0
 social-auth-core==4.3.0
 sqlparse==0.4.3
 tomli==2.0.1
+tzdata==2024.1
 uritemplate==4.1.1
 urllib3==1.26.15
 vine==5.0.0

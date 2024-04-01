@@ -11,6 +11,7 @@ def question_created(sender, instance: OptionalQuestion, created, **kwargs):
     if not created:
         sender.objects.filter(id=instance.id).update(level=0)
 
+
 @receiver(post_save, sender=DropDownQuestion)
 def question_created(sender, instance: DropDownQuestion, created, **kwargs):
     print('question_created')
