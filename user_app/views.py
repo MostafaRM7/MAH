@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from azbankgateways import bankfactories
+from azbankgateways.bankfactories import BankFactory
 from azbankgateways.exceptions import AZBankGatewaysException
 from django.db.models import Q
 from rest_framework import status, permissions
@@ -67,24 +68,24 @@ class BuyVipSubscription(APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            vip_subscription = serializer.validated_data['vip_subscription']
-        else:
+        if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        vip_subscription = serializer.validated_data['vip_subscription']
+        # price = vip_subscription.price
         user_mobile_number = request.user.username
-        factory = bankfactories.BankFactory()
+        factory = BankFactory()
         try:
             bank = factory.create()
             bank.set_request(request)
-            bank.set_amount(vip_subscription.price)
+            bank.set_amount(99000)
             bank.set_client_callback_url('https://translate.google.com/?sl=en&tl=fa&op=translate')
             bank.set_mobile_number(user_mobile_number)
             vip_subscription_history = VipSubscriptionHistory.objects.create(
                 user=request.user,
                 vip_subscription=vip_subscription,
-                price=vip_subscription.price,
+                price=99000,
             )
-            bank_record = bank.ready()
+            bank.ready()
             return bank.redirect_gateway()
         except AZBankGatewaysException as e:
             logging.critical(e)
@@ -94,7 +95,7 @@ class BuyVipSubscription(APIView):
 class VipSubscriptionViewSet(viewsets.ModelViewSet):
     queryset = VipSubscription.objects.all()
     serializer_class = VipSubscriptionSerializer
-    permission_classes = [IsAdminOrSuperUser, ]
+    permission_classes = [permissions.IsAdminUser]
 
 
 class UserViewSet(viewsets.ModelViewSet):

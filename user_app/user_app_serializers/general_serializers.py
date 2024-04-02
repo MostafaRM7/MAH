@@ -83,8 +83,10 @@ class ProfileSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date',
             'avatar',
             'address', 'nationality', 'province', 'resume', 'updated_at', 'date_joined',
-            'is_staff', 'ask_for_interview_role', 'has_employer_request', 'has_wallet')
-        read_only_fields = ('role', 'updated_at', 'date_joined', 'is_staff')
+            'is_staff', 'ask_for_interview_role', 'has_employer_request', 'has_wallet', 'interview_code')
+        read_only_fields = (
+
+            'role', 'updated_at', 'date_joined', 'is_staff', 'interview_code')
 
     def get_has_wallet(self, instance):
 
@@ -135,6 +137,15 @@ class ProfileSerializer(serializers.ModelSerializer):
             'name': instance.province.name
         } if instance.province else None
         representation['preferred_districts'] = represent_prefrred_districts(instance)
+        vip_subscription = VipSubscriptionHistory.objects.filter(user=instance).first()
+        if vip_subscription:
+            representation['vip_subscription'] = {
+                'id': vip_subscription.id,
+                'start_date': vip_subscription.start_date,
+                'end_date': vip_subscription.end_date,
+                'remaining_days': vip_subscription.remaining_days,
+                'price': vip_subscription.price
+            }
         return representation
 
 
