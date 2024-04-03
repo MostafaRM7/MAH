@@ -16,7 +16,7 @@ class VipSubscription(models.Model):
     )
     vip_subscription = models.CharField(max_length=1, choices=SUBS_CHOICES, verbose_name='نوع اشتراک ')
     period = models.PositiveIntegerField(max_length=2, default=90, verbose_name='بازه زمانی')
-    price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='قیمت')
+    price = models.IntegerField(verbose_name='قیمت')
 
     def __str__(self):
         return self.get_vip_subscription_display()
@@ -48,7 +48,7 @@ class User(AbstractUser):
 class VipSubscriptionHistory(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, verbose_name='کاربر')
     vip_subscription = models.ForeignKey(VipSubscription, on_delete=models.CASCADE, verbose_name='اشتراک')
-    price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='قیمت')
+    price = models.IntegerField(verbose_name='قیمت')
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True)
 

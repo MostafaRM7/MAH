@@ -42,7 +42,7 @@ urlpatterns = [
     path('', include(city_router.urls)),
     path('', include(city_router.urls)),
     path('', include(vip_subscription_router.urls)),
-    path('buy-vip-subscription', BuyVipSubscription.as_view(), name='buy-vip-subscription'),
+    path('buy-vip-subscription/', BuyVipSubscription.as_view(), name='buy-vip-subscription'),
     path('nested-countries/', CountryNestedAPIView.as_view(), name='nested-countries'),
     path('auth/verify-token/', TokenVerifyView.as_view(), name='token-verify'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),

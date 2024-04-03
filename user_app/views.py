@@ -71,19 +71,19 @@ class BuyVipSubscription(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         vip_subscription = serializer.validated_data['vip_subscription']
-        # price = vip_subscription.price
+        price = vip_subscription.price
         user_mobile_number = request.user.username
         factory = BankFactory()
         try:
             bank = factory.create()
             bank.set_request(request)
-            bank.set_amount(99000)
+            bank.set_amount(price)
             bank.set_client_callback_url('https://translate.google.com/?sl=en&tl=fa&op=translate')
             bank.set_mobile_number(user_mobile_number)
             vip_subscription_history = VipSubscriptionHistory.objects.create(
                 user=request.user,
                 vip_subscription=vip_subscription,
-                price=99000,
+                price=price,
             )
             bank.ready()
             return bank.redirect_gateway()

@@ -10,7 +10,6 @@ class CanListUsers(permissions.BasePermission):
         return request.user.role in ['e', 'es', 'se', 'ie']
 
 
-
 class InterviewOwnerOrInterviewerReadOnly(BasePermission):
     def has_permission(self, request, view):
         uuid = view.kwargs.get('uuid')
