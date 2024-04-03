@@ -1,7 +1,5 @@
 import logging
 from datetime import datetime
-
-from azbankgateways import bankfactories
 from azbankgateways.bankfactories import BankFactory
 from azbankgateways.exceptions import AZBankGatewaysException
 from django.db.models import Q
@@ -14,7 +12,6 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from porsline_config import settings
 from question_app.models import AnswerSet
 from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
@@ -24,43 +21,10 @@ from user_app.user_app_serializers.general_serializers import FolderSerializer, 
     VipSubscriptionHistorySerializer, VipSubscriptionSerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
     Skill, EducationalBackground, Resume, VipSubscriptionHistory, VipSubscription
-from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly, IsAdminOrSuperUser
+from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly
 from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
     ResearchHistorySerializer, SkillSerializer, EducationalBackgroundSerializer, ResumeSerializer
 
-
-# class VipSubscriptionHistoryViewSet(viewsets.ModelViewSet):
-#     serializer_class = VipSubscriptionHistorySerializer
-#     permission_classes = [permissions.IsAuthenticated]
-#
-#     def get_queryset(self):
-#         return VipSubscriptionHistory.objects.filter(user=self.request.user)
-#
-#     def perform_create(self, serializer):
-#         serializer.save(user=self.request.user)
-# class BuyVipSubscription(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-#     serializer_class = VipSubscriptionHistorySerializer
-#
-#     def post(self, request):
-#         # serializer = self.serializer_class(data=request.data)
-#         # if serializer.is_valid():
-#         #     vip_subscription = serializer.validated_data['vip_subscription']
-#         # else:
-#         #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#         user = request.user.username
-#         factory = bankfactories.BankFactory()
-#         try:
-#             bank = factory.create()
-#             bank.set_request(request)
-#             bank.set_amount(12000)
-#             bank.set_client_callback_url('https://translate.google.com/?sl=en&tl=fa&op=translate')
-#             bank.set_mobile_number(user)
-#             bank_record = bank.ready()
-#             return bank.redirect_gateway()
-#         except AZBankGatewaysException as e:
-#             logging.critical(e)
-#             return Response({'error': str(e)})
 
 class BuyVipSubscription(APIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -1,6 +1,5 @@
 import random
 from datetime import timedelta
-from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
@@ -99,7 +98,7 @@ class Profile(User):
     def save(self, *args, **kwargs):
         if self.is_interview_role_accepted and not self.interview_code:
             while True:
-                code = ''.join(random.choice('0123456789') for i in range(8))
+                code = str(random.randint(1000000, 99999999))
                 if not Profile.objects.filter(interview_code=code).exists():
                     self.interview_code = code
                     break

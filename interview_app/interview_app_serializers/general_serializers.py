@@ -507,21 +507,16 @@ class PrivateInterviewSerializer(serializers.ModelSerializer):
     questions = NoGroupQuestionSerializer(many=True, read_only=True)
     difficulty = serializers.SerializerMethodField(method_name='get_difficulty')
     price_pack = PricePackSerializer(read_only=True)
-    users = serializers.SerializerMethodField()
 
     class Meta:
         model = Interview
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
-            'interviewers', 'approval_status', 'required_interviewer_count', 'price_pack',
+            'approval_status', 'required_interviewer_count', 'price_pack',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
-            'folder', 'category', 'protocol', 'users'
+            'folder', 'category', 'protocol'
         )
         read_only_fields = ('owner', 'questions', 'approval_status')
-
-    def get_users(self, instance):
-        users = User.objects.filter(role__in=['i', 'e', 'es', 'se', 'ie'])
-        return UserSerializer(users, many=True).data
 
     def get_difficulty(self, instance: Interview):
         levels = instance.questions.values_list('level', flat=True)

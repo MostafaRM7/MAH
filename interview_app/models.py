@@ -32,7 +32,8 @@ class Interview(Questionnaire):
         (REACHED_INTERVIEWER_COUNT, 'دارای پرسشگر مورد نیاز'),
         (REACHED_ANSWER_COUNT, 'دارای تعداد پاسخ مورد نیاز'),
     )
-    interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True)
+    interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True,
+                                          null=True)
     approval_status = models.CharField(max_length=255, choices=APPROVAL_STATUS, default=PENDING_CONTENT_ADMIN,
                                        verbose_name='وضعیت تایید')
     districts = models.ManyToManyField(District, related_name='interviews', verbose_name='مناطق', null=True, blank=True)
