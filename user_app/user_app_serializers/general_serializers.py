@@ -1,48 +1,18 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-
 from question_app.models import Folder
 from question_app.question_app_serializers import general_serializers
 from user_app.models import Profile, Country, Province, City, District, VipSubscriptionHistory, VipSubscription
 from user_app.representors import represent_prefrred_districts
 from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
-from azbankgateways.exceptions import AZBankGatewaysException, SafeSettingsEnabled
-
-from azbankgateways import bankfactories, models as bank_models, default_settings
-from azbankgateways.models import PaymentStatus
-from django.urls import reverse
-from rest_framework.response import Response
-import logging
-from pedarbozorg import settings
-def bank_gateway(amount: int, reverse_url: str, url_kwargs: str, request):
-    settings.GATEWAY_CONFIG['GATEWAYS']['ZARINPAL']['SANDBOX'] = 1 if request.user.is_superuser else 0
-    factory = bankfactories.BankFactory()
-    amount = amount
-    try:
-        bank = factory.auto_create()
-        bank.set_request(request=request)
-        bank.set_amount(amount)
-        bank.set_client_callback_url(reverse(
-            f'{reverse_url}') + f"?{url_kwargs}")
-        bank_record = bank.ready()
-        bank._verify_payment_expiry()
-        if default_settings.IS_SAFE_GET_GATEWAY_PAYMENT:
-            raise SafeSettingsEnabled()
-        logging.debug("Redirect to bank")
-        bank._set_payment_status(PaymentStatus.REDIRECT_TO_BANK)
-        return Response({'url': bank.get_gateway_payment_url()})
-    except AZBankGatewaysException as e:
-        logging.critical(e)
-        return Response({'message': [
-            'متاسفانه مشکلی در سامانه پرداخت وجود دارد. پس از اطمینان حاصل کردن از سرعت اینترنت خود مجددا تلاش نمایید!']})
-    except Exception as e:
-        return Response(
-            {'message': [
-                'متاسفانه مشکلی در سامانه پرداخت وجود دارد. پس از اطمینان حاصل کردن از سرعت اینترنت خود مجددا تلاش نمایید!']})
 
 class VipSubscriptionHistorySerializer(serializers.ModelSerializer):
     remaining_days = serializers.IntegerField(read_only=True)
+    vip_subscription = serializers.SlugRelatedField(
+        queryset=VipSubscription.objects.all(),
+        slug_field='vip_subscription'
+    )
 
     class Meta:
         model = VipSubscriptionHistory
