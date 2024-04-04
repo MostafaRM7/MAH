@@ -9,15 +9,27 @@ from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
 class VipSubscriptionHistorySerializer(serializers.ModelSerializer):
     remaining_days = serializers.IntegerField(read_only=True)
-    vip_subscription = serializers.SlugRelatedField(
-        queryset=VipSubscription.objects.all(),
-        slug_field='vip_subscription'
-    )
+    subscription_type = serializers.SerializerMethodField()
+    subscription_type_code = serializers.SerializerMethodField()
 
     class Meta:
         model = VipSubscriptionHistory
-        fields = ['id', 'vip_subscription', 'start_date', 'end_date', 'remaining_days', 'price']
+        fields = ['id', 'vip_subscription', 'start_date', 'end_date', 'remaining_days', 'price', 'subscription_type',
+                  'subscription_type_code']
         read_only_fields = ('start_date', 'end_date', 'price')
+
+    def get_subscription_type(self, obj):
+        if obj.vip_subscription.vip_subscription == 'g':
+            return 'طلایی'
+        elif obj.vip_subscription.vip_subscription == 's':
+            return 'نقره ای'
+        elif obj.vip_subscription.vip_subscription == 'b':
+            return 'برنزی'
+        else:
+            return 'نامشخص'
+
+    def get_subscription_type_code(self, obj):
+        return obj.vip_subscription.vip_subscription
 
 
 class VipSubscriptionSerializer(serializers.ModelSerializer):

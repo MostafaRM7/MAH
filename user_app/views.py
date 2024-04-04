@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+
 from azbankgateways.bankfactories import BankFactory
 from azbankgateways.exceptions import AZBankGatewaysException
 from django.db.models import Q
@@ -12,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from porsline_config import settings
 from question_app.models import AnswerSet
 from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
@@ -34,7 +36,9 @@ class BuyVipSubscription(APIView):
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # print(serializer.validated_data)
         vip_subscription = serializer.validated_data['vip_subscription']
+        # print(vip_subscription)
         price = vip_subscription.price
         user_mobile_number = request.user.username
         factory = BankFactory()

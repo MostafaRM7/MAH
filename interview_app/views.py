@@ -10,17 +10,35 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer, \
-    AnswerSerializer, TicketSerializer, AddUserSerializer, PrivateInterviewSerializer
+    AnswerSerializer, TicketSerializer, PrivateInterviewSerializer, AddInterViewersSerializer, \
+    PrivetInterviewersListSerializer
 from interview_app.interview_app_serializers.question_serializers import *
-from interview_app.models import Interview, Ticket
+from interview_app.models import Interview, Ticket, PrivateInterviewer
 from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerOrInterviewerReadOnly, IsInterviewer, \
-    InterviewOwnerOrInterviewerAddAnswer, IsSuperEmployerOrSuperUser, CanListUsers
+    InterviewOwnerOrInterviewerAddAnswer, CanListUsers
 from porsline_config.paginators import MainPagination
 from question_app.copy_template import copy_template_interview
 from question_app.models import AnswerSet, Folder
 from result_app.filtersets import AnswerSetFilterSet
-from user_app.models import User
 from wallet_app.models import Transaction
+
+
+# باید تبدیل به اکشن شود
+class PrivateInterviewListViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PrivetInterviewersListSerializer
+    queryset = PrivateInterviewer.objects.all()
+    permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
+
+
+class AddInterViewersViewSet(APIView):
+    serializer_class = AddInterViewersSerializer
+    permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PrivateInterviewViewSet(viewsets.ModelViewSet):
@@ -31,18 +49,6 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
         is_delete=False).order_by('-created_at')
     pagination_class = MainPagination
 
-    @action(detail=True, methods=['post'], url_path='add-user')
-    def add_user(self, request, *args, **kwargs):
-        phone_number = request.data.get('phone_number')
-        if phone_number:
-            try:
-                user = User.objects.get(phone_number=phone_number)
-                return Response(AddUserSerializer(user).data)
-            except User.DoesNotExist:
-                return Response({"detail": "چنین کاربری در سامانه موجود نیست"}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({"detail": "لطفا شماره تلفن را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
-
     @action(detail=True, methods=['get'], url_path='search-questions')
     def search_in_questions(self, request, *args, **kwargs):
         search = request.query_params.get('search')
@@ -52,25 +58,6 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
             return Response(NoGroupQuestionSerializer(result, many=True, context={'request': request}).data)
         else:
             return Response([])
-
-    @action(detail=True, methods=['post'], url_path='fork', permission_classes=[IsAuthenticated])
-    def fork_interview(self, request, *args, **kwargs):
-        folder_id = request.data.get('folder_id', None)
-        if folder_id:
-            try:
-                folder = Folder.objects.get(id=folder_id)
-                if folder.owner != request.user.profile:
-                    return Response({"detail": "شما مالک پوشه انتخابی نیستید"}, status=status.HTTP_403_FORBIDDEN)
-            except Folder.DoesNotExist:
-                return Response({"detail": "پوشه مورد نظر یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            folder = None
-        interview = self.get_object()
-        # if not interview.is_template:
-        #     return Response({"detail": " نمی توانید پروژه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
-        copied_questionnaire = copy_template_interview(interview, request.user.profile, folder)
-        return Response(InterviewSerializer(copied_questionnaire, context={'request': request}).data,
-                        status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['delete'], url_path='delete-question')
     def delete_question(self, request, *args, **kwargs):
@@ -85,19 +72,6 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
         question.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post'], url_path='add-interviewer', permission_classes=[IsInterviewer])
-    def add_interviewer(self, request, *args, **kwargs):
-        obj = self.get_object()
-        user = request.user.profile
-        if user not in obj.interviewers.all():
-            obj.interviewers.add(user)
-            obj.save()
-            if obj.interviewers.count() == obj.required_interviewer_count:
-                obj.approval_status = Interview.REACHED_INTERVIEWER_COUNT
-                obj.save()
-            return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
-        return Response({'detail': 'شما در حال حاضر این پروژه را برداشته اید'}, status=status.HTTP_400_BAD_REQUEST)
-
     @action(detail=False, methods=['get'], url_path='my-interviews', permission_classes=[IsInterviewer])
     def my_interviews(self, request, *args, **kwargs):
         queryset = self.request.user.profile.interviews.filter(is_delete=False)
@@ -105,34 +79,6 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=paginated_queryset, many=True)
         serializer.is_valid()
         return self.get_paginated_response(serializer.data)
-
-    @action(detail=True, methods=['post'], url_path='approve-price')
-    def approve_price(self, request, *args, **kwargs):
-        obj = self.get_object()
-        user = request.user.profile
-        if obj.approval_status == Interview.PENDING_PRICE_EMPLOYER:
-            if obj.answer_count_goal:
-                # finding all interviews that owned by the user and still undone and with price
-                # undone_interviews = Interview.objects.filter(
-                #     Q(owner=user) &
-                #     Q(approval_status=Interview.REACHED_INTERVIEWER_COUNT) |
-                #     Q(approval_status=Interview.SEARCHING_FOR_INTERVIEWERS)
-                # )
-                # needed_balance = undone_interviews.annotate(
-                #     remaining_needed_answer_count=F('answer_count_goal') - Count('answer_sets')).aggregate(
-                #     remaining_needed_answer_cost=Sum(
-                #         F('remaining_needed_answer_count') * F('price_pack__price'), output_field=models.FloatField()))
-                # if user.wallet.balance >= needed_balance.remaining_needed_answer_cost:
-                obj.approval_status = Interview.SEARCHING_FOR_INTERVIEWERS
-                obj.save()
-                return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
-                # else:
-                #     return Response({"detail": f"موجودی کیف پول شما باید حداقل {needed_balance} تومان باشد"},
-                #                     status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({"detail": "اول تعداد پاسخ های مورد نظر خود را وارد کنید"})
-        else:
-            return Response({"detail": "پروژه شما هنوز توسط ادمین تایید نشده"}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], url_path='reject-price')
     def reject_price(self, request, *args, **kwargs):
@@ -158,22 +104,6 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "یافت نشد."}, status.HTTP_404_NOT_FOUND)
 
         super(PrivateInterviewViewSet, self).initial(request, *args, **kwargs)
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     if instance.is_active and instance.pub_date <= timezone.now():
-    #         if instance.end_date:
-    #             if instance.end_date >= timezone.now():
-    #                 serializer = self.get_serializer(instance)
-    #                 return Response(serializer.data)
-    #             else:
-    #                 return Response({"detail": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
-    #                                 status.HTTP_403_FORBIDDEN)
-    #         serializer = self.get_serializer(instance)
-    #         return Response(serializer.data)
-    #     else:
-    #         return Response({"detail": "پرسشنامه فعال نیست یا امکان پاسخ دهی به آن وجود ندارد"},
-    #                         status.HTTP_403_FORBIDDEN)
 
 
 class InterviewViewSet(viewsets.ModelViewSet):

@@ -1,14 +1,28 @@
-from django.core.validators import FileExtensionValidator
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 from admin_app.models import PricePack
 from question_app.models import Questionnaire
 from user_app.models import Profile, District
-from django.core.exceptions import ValidationError
 
 
 def get_current_date():
     return timezone.now().date()
+
+
+class PrivateInterviewer(models.Model):
+    phone_number = models.CharField(
+        max_length=20,
+        validators=[RegexValidator(regex='^09[0-9]{9}$', message='شماره تلفن همراه وارد شده صحیح نمی باشد')],
+        unique=True,
+        verbose_name='شماره تلفن همراه'
+    )
+    interview_code = models.CharField(max_length=20, verbose_name='کد پرسشگری')
+    first_name = models.CharField(max_length=30, verbose_name='نام')
+    last_name = models.CharField(max_length=30, verbose_name='نام خانوادگی')
+
+    def __str__(self):
+        return self.phone_number
 
 
 class Interview(Questionnaire):
@@ -21,6 +35,7 @@ class Interview(Questionnaire):
     SEARCHING_FOR_INTERVIEWERS = 'searching_for_interviewers'
     REACHED_INTERVIEWER_COUNT = 'reached_interviewer_count'
     REACHED_ANSWER_COUNT = 'reached_answer_count'
+    APPROVED_BY_ADMIN = 'approved_by_admin'
     APPROVAL_STATUS = (
         (PENDING_CONTENT_ADMIN, 'در انتظار تایید محتوا توسط ادمین'),
         (PENDING_LEVEL_ADMIN, 'در انتظار تعیین سطح ادمین'),
@@ -31,9 +46,13 @@ class Interview(Questionnaire):
         (SEARCHING_FOR_INTERVIEWERS, 'در جست و جوی پرسشگر'),
         (REACHED_INTERVIEWER_COUNT, 'دارای پرسشگر مورد نیاز'),
         (REACHED_ANSWER_COUNT, 'دارای تعداد پاسخ مورد نیاز'),
+        (APPROVED_BY_ADMIN, 'تایید شده توسط ادمین'),
     )
     interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True,
                                           null=True)
+    privet_interviewers = models.ManyToManyField(PrivateInterviewer, related_name='privet_interviews',
+                                                 verbose_name='مصاحبه کنندگان خصوصی', blank=True,
+                                                 null=True)
     approval_status = models.CharField(max_length=255, choices=APPROVAL_STATUS, default=PENDING_CONTENT_ADMIN,
                                        verbose_name='وضعیت تایید')
     districts = models.ManyToManyField(District, related_name='interviews', verbose_name='مناطق', null=True, blank=True)

@@ -1,20 +1,19 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 from django.utils import timezone
-from rest_framework import serializers, status, viewsets
-from rest_framework.decorators import action
+from rest_framework import serializers
+from rest_framework import status
 from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
+
 from admin_app.admin_app_serializers.general_serializers import PricePackSerializer
-from interview_app.models import Interview, Ticket
-from porsline_config.paginators import MainPagination
+from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
+from interview_app.models import Interview, Ticket, PrivateInterviewer
 from question_app import validators
 from question_app.models import Answer, AnswerSet, DropDownOption, SortOption, Option, FileQuestion, \
     IntegerRangeQuestion, NumberAnswerQuestion, TextAnswerQuestion, DropDownQuestion, OptionalQuestion
-from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
 from question_app.validators import tag_remover
-from user_app.models import User
+from user_app.models import Profile
 from user_app.representors import represent_districts
-from user_app.user_app_serializers.general_serializers import UserSerializer
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -497,10 +496,37 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         return representation
 
 
-class AddUserSerializer(serializers.ModelSerializer):
+class PrivetInterviewersListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['phone_number']
+        model = PrivateInterviewer
+        fields = ['phone_number', 'first_name', 'last_name', 'interview_code']
+        read_only_fields = ('phone_number', 'first_name', 'last_name', 'interview_code')
+
+
+class AddInterViewersSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=20)
+    interview_code = serializers.CharField(max_length=20)
+
+    def validate(self, data):
+        phone_number = data.get('phone_number')
+        interview_code = data.get('interview_code')
+        try:
+            user = Profile.objects.get(phone_number=phone_number, interview_code=interview_code)
+            PrivateInterviewer.objects.create(
+                phone_number=user.phone_number,
+                interview_code=user.interview_code,
+                first_name=user.first_name,
+                last_name=user.last_name,
+            )
+            return {
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'phone_number': user.phone_number,
+                'interview_code': user.interview_code,
+            }
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError("کاربری با این مشخصات یافت نشد")
+        return data
 
 
 class PrivateInterviewSerializer(serializers.ModelSerializer):
@@ -512,7 +538,7 @@ class PrivateInterviewSerializer(serializers.ModelSerializer):
         model = Interview
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
-            'approval_status', 'required_interviewer_count', 'price_pack',
+            'approval_status', 'privet_interviewers', 'required_interviewer_count', 'price_pack',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
             'folder', 'category', 'protocol'
         )
@@ -526,6 +552,44 @@ class PrivateInterviewSerializer(serializers.ModelSerializer):
             except ZeroDivisionError:
                 return 0
         return 0
+
+    def create(self, validated_data):
+        districts = validated_data.pop('districts', None)
+        privet_interviewers = validated_data.pop('privet_interviewers', None)
+        owner = self.context['request'].user.profile
+        interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()),
+                                             is_privet=True,
+                                             **validated_data)
+        if districts:
+            interview.districts.set(districts)
+        if privet_interviewers:
+            interview.privet_interviewers.set(privet_interviewers)
+        return interview
+
+    # todo  باید محتوای  کارفرما سوپر بدون تایید انتشار شود
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.approval_status = Interview.APPROVED_BY_ADMIN
+        instance.save()
+        return instance
+
+    def to_representation(self, instance: Interview):
+        representation = super().to_representation(instance)
+        representation['districts'] = represent_districts(instance)
+        representation['privet_interviewers'] = [
+            {'id': privet_interviewers.id, 'first_name': privet_interviewers.first_name,
+             'last_name': privet_interviewers.last_name,
+             'phone_number': privet_interviewers.phone_number} for privet_interviewers in
+            instance.privet_interviewers.all()]
+        representation['folder'] = instance.folder.name if instance.folder else None
+        representation['category'] = instance.category.name if instance.category else None
+        representation['owner'] = {
+            'id': instance.owner.id,
+            'first_name': instance.owner.first_name,
+            'last_name': instance.owner.last_name,
+            'phone_number': instance.owner.phone_number
+        }
+        return representation
 
     def validate(self, data):
         folder = data.get('folder')
@@ -593,41 +657,6 @@ class PrivateInterviewSerializer(serializers.ModelSerializer):
                 )
 
         return data
-
-    def create(self, validated_data):
-        districts = validated_data.pop('districts', None)
-        interviewers = validated_data.pop('interviewers', None)
-        owner = self.context['request'].user.profile
-        interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()),
-                                             **validated_data)
-        if districts:
-            interview.districts.set(districts)
-        if interviewers:
-            interview.interviewers.set(interviewers)
-        return interview
-
-    def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
-        instance.approval_status = Interview.PENDING_CONTENT_ADMIN
-        instance.save()
-        return instance
-
-    def to_representation(self, instance: Interview):
-        representation = super().to_representation(instance)
-        representation['districts'] = represent_districts(instance)
-        representation['interviewers'] = [
-            {'id': interviewer.id, 'first_name': interviewer.first_name, 'last_name': interviewer.last_name,
-             'phone_number': interviewer.phone_number} for interviewer in
-            instance.interviewers.all()]
-        representation['folder'] = instance.folder.name if instance.folder else None
-        representation['category'] = instance.category.name if instance.category else None
-        representation['owner'] = {
-            'id': instance.owner.id,
-            'first_name': instance.owner.first_name,
-            'last_name': instance.owner.last_name,
-            'phone_number': instance.owner.phone_number
-        }
-        return representation
 
 
 class InterviewSerializer(serializers.ModelSerializer):
