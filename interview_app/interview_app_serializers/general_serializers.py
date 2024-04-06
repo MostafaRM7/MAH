@@ -540,9 +540,9 @@ class PrivateInterviewSerializer(serializers.ModelSerializer):
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
             'approval_status', 'privet_interviewers', 'required_interviewer_count', 'price_pack',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
-            'folder', 'category', 'protocol'
+            'folder', 'category', 'protocol', 'is_privet'
         )
-        read_only_fields = ('owner', 'questions', 'approval_status')
+        read_only_fields = ('owner', 'questions', 'approval_status', 'is_privet')
 
     def get_difficulty(self, instance: Interview):
         levels = instance.questions.values_list('level', flat=True)

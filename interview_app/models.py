@@ -47,6 +47,7 @@ class Interview(Questionnaire):
         (REACHED_INTERVIEWER_COUNT, 'دارای پرسشگر مورد نیاز'),
         (REACHED_ANSWER_COUNT, 'دارای تعداد پاسخ مورد نیاز'),
         (APPROVED_BY_ADMIN, 'تایید شده توسط ادمین'),
+        # todo   از اقای کوتی بپرسم که در کدام بخش وقتی ادمین تایید میکنه محتوا منتشر میشه
     )
     interviewers = models.ManyToManyField(Profile, related_name='interviews', verbose_name='مصاحبه کنندگان', blank=True,
                                           null=True)
@@ -64,7 +65,7 @@ class Interview(Questionnaire):
     protocol = models.FileField(upload_to='media/', verbose_name='پروتکل ')
     # , validators = [
     #     FileExtensionValidator(['.pdf', '.doc', '.docx', '.jpg', '.png'])]
-    is_privet = models.BooleanField(default=False, verbose_name='خصوصی ')
+    is_privet = models.BooleanField(default=False, verbose_name='خصوصی ', null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']

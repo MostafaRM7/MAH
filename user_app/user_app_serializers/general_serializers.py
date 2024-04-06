@@ -157,6 +157,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             representation['vip_subscription'] = {
                 'id': vip_subscription.id,
                 'subscription_type': vip_subscription.vip_subscription.get_vip_subscription_display(),
+                'subscription_type_code': vip_subscription.vip_subscription.vip_subscription,
                 'start_date': vip_subscription.start_date,
                 'end_date': vip_subscription.end_date,
                 'remaining_days': vip_subscription.remaining_days,
