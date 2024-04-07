@@ -71,7 +71,7 @@ class BuyVipSubscription(APIView):
 class VipSubscriptionViewSet(viewsets.ModelViewSet):
     queryset = VipSubscription.objects.all()
     serializer_class = VipSubscriptionSerializer
-    permission_classes = [IsAdminOrSuperUser, ]
+    permission_classes = [IsAdminOrSuperUser,]
 
 
 class UserViewSet(viewsets.ModelViewSet):

@@ -62,10 +62,10 @@ class Interview(Questionnaire):
     answer_count_goal = models.PositiveIntegerField(verbose_name='تعداد پاسخ هدف', null=True, blank=True)
     required_interviewer_count = models.PositiveIntegerField(null=True, blank=True,
                                                              verbose_name='تعداد پرسشگر مورد نیاز')
-    protocol = models.FileField(upload_to='media/', verbose_name='پروتکل ')
+    protocol = models.FileField(upload_to='media/', verbose_name='پروتکل ', null=True, blank=True)
     # , validators = [
     #     FileExtensionValidator(['.pdf', '.doc', '.docx', '.jpg', '.png'])]
-    is_privet = models.BooleanField(default=False, verbose_name='خصوصی ', null=True, blank=True)
+    is_privet = models.BooleanField(default=False, verbose_name='خصوصی ')
 
     class Meta:
         ordering = ['-created_at']
