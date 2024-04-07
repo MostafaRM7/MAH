@@ -25,7 +25,7 @@ from user_app.user_app_serializers.general_serializers import FolderSerializer, 
     VipSubscriptionHistorySerializer, VipSubscriptionSerializer, BuySerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
     Skill, EducationalBackground, Resume, VipSubscriptionHistory, VipSubscription
-from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly
+from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly, IsAdminOrSuperUser
 from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
     ResearchHistorySerializer, SkillSerializer, EducationalBackgroundSerializer, ResumeSerializer
 
@@ -71,7 +71,7 @@ class BuyVipSubscription(APIView):
 class VipSubscriptionViewSet(viewsets.ModelViewSet):
     queryset = VipSubscription.objects.all()
     serializer_class = VipSubscriptionSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminOrSuperUser, ]
 
 
 class UserViewSet(viewsets.ModelViewSet):

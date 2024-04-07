@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+
 from question_app.models import Folder
 from question_app.question_app_serializers import general_serializers
 from user_app.models import Profile, Country, Province, City, District, VipSubscriptionHistory, VipSubscription
@@ -8,7 +9,7 @@ from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
 
 class BuySerializer(serializers.Serializer):
-    subscription = serializers.ChoiceField(choices=['g', 's'])
+    subscription = serializers.ChoiceField(choices=['g', 's', 'b'])
 
 
 class VipSubscriptionHistorySerializer(serializers.ModelSerializer):
