@@ -14,6 +14,7 @@ from question_app.models import Answer, AnswerSet, DropDownOption, SortOption, O
 from question_app.validators import tag_remover
 from user_app.models import Profile
 from user_app.representors import represent_districts
+# from user_app.representors import represent_districts
 
 
 class AnswerSerializer(serializers.ModelSerializer):
