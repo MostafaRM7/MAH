@@ -3,7 +3,8 @@ from django.db import models
 from django.utils import timezone
 from admin_app.models import PricePack
 from question_app.models import Questionnaire
-from user_app.models import Profile, District
+from user_app.models import Profile
+from user_app.models import District
 
 
 def get_current_date():
