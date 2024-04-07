@@ -6,6 +6,7 @@ from azbankgateways.bankfactories import BankFactory
 from azbankgateways.exceptions import AZBankGatewaysException, SafeSettingsEnabled
 from azbankgateways.models import PaymentStatus
 from django.db.models import Q
+from django.urls import reverse
 from rest_framework import status, permissions
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -22,9 +23,9 @@ from user_app.user_app_serializers.authentication_serializers import GateWaySeri
     RefreshTokenSerializer
 from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
     CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer, CountryNestedSerializer, \
-    VipSubscriptionHistorySerializer, VipSubscriptionSerializer, BuySerializer
+    VipSubscriptionSerializer, BuySerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
-    Skill, EducationalBackground, Resume, VipSubscriptionHistory, VipSubscription
+    Skill, EducationalBackground, Resume, VipSubscription
 from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly, IsAdminOrSuperUser
 from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
     ResearchHistorySerializer, SkillSerializer, EducationalBackgroundSerializer, ResumeSerializer
@@ -49,7 +50,7 @@ class BuyVipSubscription(APIView):
             bank = factory.create()
             bank.set_request(request)
             bank.set_amount(price)
-            bank.set_client_callback_url('https://translate.google.com/?sl=en&tl=fa&op=translate')
+            bank.set_client_callback_url(reverse)
             bank.set_mobile_number(user_mobile_number)
             bank.ready()
             bank._verify_payment_expiry()
