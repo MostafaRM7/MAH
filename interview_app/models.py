@@ -66,7 +66,6 @@ class Interview(Questionnaire):
     protocol = models.FileField(upload_to='media/', verbose_name='پروتکل ', null=True, blank=True)
     # , validators = [
     #     FileExtensionValidator(['.pdf', '.doc', '.docx', '.jpg', '.png'])]
-    is_privet = models.BooleanField(default=False, verbose_name='خصوصی ')
 
     class Meta:
         ordering = ['-created_at']

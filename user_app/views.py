@@ -51,11 +51,6 @@ class BuyVipSubscription(APIView):
             bank.set_amount(price)
             bank.set_client_callback_url('https://translate.google.com/?sl=en&tl=fa&op=translate')
             bank.set_mobile_number(user_mobile_number)
-            vip_subscription_history = VipSubscriptionHistory.objects.create(
-                user=request.user,
-                vip_subscription=vip_subscription,
-                price=price,
-            )
             bank.ready()
             bank._verify_payment_expiry()
             if default_settings.IS_SAFE_GET_GATEWAY_PAYMENT:
@@ -71,7 +66,7 @@ class BuyVipSubscription(APIView):
 class VipSubscriptionViewSet(viewsets.ModelViewSet):
     queryset = VipSubscription.objects.all()
     serializer_class = VipSubscriptionSerializer
-    permission_classes = [IsAdminOrSuperUser,]
+    permission_classes = [IsAdminOrSuperUser, ]
 
 
 class UserViewSet(viewsets.ModelViewSet):
