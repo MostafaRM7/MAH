@@ -1,8 +1,10 @@
 import logging
 from datetime import datetime
 
+from azbankgateways import default_settings
 from azbankgateways.bankfactories import BankFactory
-from azbankgateways.exceptions import AZBankGatewaysException
+from azbankgateways.exceptions import AZBankGatewaysException, SafeSettingsEnabled
+from azbankgateways.models import PaymentStatus
 from django.db.models import Q
 from rest_framework import status, permissions
 from rest_framework import viewsets
@@ -55,7 +57,12 @@ class BuyVipSubscription(APIView):
                 price=price,
             )
             bank.ready()
-            return bank.redirect_gateway()
+            bank._verify_payment_expiry()
+            if default_settings.IS_SAFE_GET_GATEWAY_PAYMENT:
+                raise SafeSettingsEnabled()
+            logging.debug("Redirect to bank")
+            bank._set_payment_status(PaymentStatus.REDIRECT_TO_BANK)
+            return Response({'url': bank.get_gateway_payment_url()})
         except AZBankGatewaysException as e:
             logging.critical(e)
             return Response({'error': str(e)})
