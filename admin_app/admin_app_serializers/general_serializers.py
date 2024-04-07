@@ -34,7 +34,8 @@ class InterviewSerializer(serializers.ModelSerializer):
         model = Interview
         fields = (
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
-            'interviewers', 'approval_status', 'price_pack', 'districts', 'answer_count', 'required_interviewer_count',
+            'interviewers', 'approval_status', 'price_pack', 'districts', 'privet_interviewers', 'answer_count',
+            'required_interviewer_count',
             'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty', 'is_leveled', 'category'
         )
         read_only_fields = ('owner', 'questions', 'approval_status')
@@ -101,8 +102,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'gender', 'birth_date', 'avatar',
             'address', 'nationality', 'province', 'resume', 'updated_at', 'date_joined', 'ask_for_interview_role',
-            'is_interview_role_accepted', 'is_active', 'questionnaires_count')
-        read_only_fields = ('role', 'updated_at', 'date_joined', 'is_interview_role_accepted')
+            'is_interview_role_accepted', 'has_employer_request',
+            'is_employer_role_accepted', 'interview_code', 'is_active', 'questionnaires_count')
+        read_only_fields = ('role', 'updated_at', 'date_joined', 'is_interview_role_accepted', 'interview_code')
         ref_name = 'admin_app_profile'
 
     def get_questionnaires_count(self, instance: Profile):

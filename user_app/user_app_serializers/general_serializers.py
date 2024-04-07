@@ -7,6 +7,10 @@ from user_app.representors import represent_prefrred_districts
 from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
 
+class BuySerializer(serializers.Serializer):
+    subscription = serializers.ChoiceField(choices=['g', 's'])
+
+
 class VipSubscriptionHistorySerializer(serializers.ModelSerializer):
     remaining_days = serializers.IntegerField(read_only=True)
     subscription_type = serializers.SerializerMethodField()

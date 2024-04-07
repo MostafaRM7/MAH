@@ -20,7 +20,7 @@ from user_app.user_app_serializers.authentication_serializers import GateWaySeri
     RefreshTokenSerializer
 from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
     CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer, CountryNestedSerializer, \
-    VipSubscriptionHistorySerializer, VipSubscriptionSerializer
+    VipSubscriptionHistorySerializer, VipSubscriptionSerializer, BuySerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
     Skill, EducationalBackground, Resume, VipSubscriptionHistory, VipSubscription
 from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly
@@ -30,15 +30,16 @@ from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, A
 
 class BuyVipSubscription(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = VipSubscriptionHistorySerializer
+    serializer_class = BuySerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         # print(serializer.validated_data)
-        vip_subscription = serializer.validated_data['vip_subscription']
+        vip_subscription_type = serializer.validated_data['subscription']
         # print(vip_subscription)
+        vip_subscription = VipSubscription.objects.filter(vip_subscription=vip_subscription_type).first()
         price = vip_subscription.price
         user_mobile_number = request.user.username
         factory = BankFactory()
