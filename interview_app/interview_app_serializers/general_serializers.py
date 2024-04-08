@@ -674,9 +674,9 @@ class InterviewSerializer(serializers.ModelSerializer):
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
             'interviewers', 'approval_status', 'required_interviewer_count', 'price_pack',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
-            'folder', 'category', 'protocol', 'is_privet'
+            'folder', 'category', 'protocol', 'is_private'
         )
-        read_only_fields = ('owner', 'questions', 'approval_status', 'is_privet')
+        read_only_fields = ('owner', 'questions', 'approval_status', 'is_private')
 
     def to_representation(self, instance: Interview):
         representation = super().to_representation(instance)
