@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
+from rest_framework.generics import get_object_or_404
 
 from admin_app.admin_app_serializers.general_serializers import PricePackSerializer
 from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
@@ -561,7 +562,7 @@ class PrivateInterviewSerializer(serializers.ModelSerializer):
         privet_interviewers = validated_data.pop('privet_interviewers', None)
         owner = self.context['request'].user.profile
         interview = Interview.objects.create(owner=owner, pub_date=validated_data.pop('pub_date', timezone.now()),
-                                             is_privet=True,
+                                             is_private=True,
                                              **validated_data)
         if districts:
             interview.districts.set(districts)
