@@ -24,10 +24,10 @@ from wallet_app.models import Transaction
 
 
 # باید تبدیل به اکشن شود
-class PrivateInterviewListViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = PrivetInterviewersListSerializer
-    queryset = PrivateInterviewer.objects.all()
-    permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
+# class PrivateInterviewListViewSet(viewsets.ReadOnlyModelViewSet):
+#     serializer_class = PrivetInterviewersListSerializer
+#     queryset = PrivateInterviewer.objects.all()
+#     permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
 
 
 class AddInterViewersViewSet(APIView):
@@ -48,6 +48,20 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
     queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').filter(
         is_delete=False).order_by('-created_at')
     pagination_class = MainPagination
+
+    @action(detail=False, methods=['get'], url_path='private-interviewers')
+    def private_interviewers(self, request):
+        phone_number = request.query_params.get('phone_number', None)
+        interview_code = request.query_params.get('interview_code', None)
+        queryset = PrivateInterviewer.objects.all()
+        if phone_number is not None:
+            queryset = queryset.filter(phone_number=phone_number)
+        if interview_code is not None:
+            queryset = queryset.filter(interview_code=interview_code)
+        if not queryset.exists():
+            return Response({"error": "متاسفانه پرسشگر خصوصی مورد نظر یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = PrivetInterviewersListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='search-questions')
     def search_in_questions(self, request, *args, **kwargs):

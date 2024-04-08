@@ -2,10 +2,17 @@ import logging
 from datetime import datetime
 
 from azbankgateways import default_settings
+from azbankgateways import (
+    models as bank_models,
+    default_settings as settings,
+)
 from azbankgateways.bankfactories import BankFactory
 from azbankgateways.exceptions import AZBankGatewaysException, SafeSettingsEnabled
 from azbankgateways.models import PaymentStatus
+from decouple import config
 from django.db.models import Q
+from django.http import Http404
+from django.shortcuts import redirect
 from django.urls import reverse
 from rest_framework import status, permissions
 from rest_framework import viewsets
@@ -25,7 +32,7 @@ from user_app.user_app_serializers.general_serializers import FolderSerializer, 
     CountrySerializer, ProvinceSerializer, CitySerializer, DistrictSerializer, CountryNestedSerializer, \
     VipSubscriptionSerializer, BuySerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
-    Skill, EducationalBackground, Resume, VipSubscription
+    Skill, EducationalBackground, Resume, VipSubscription, VipSubscriptionHistory
 from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly, IsAdminOrSuperUser
 from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
     ResearchHistorySerializer, SkillSerializer, EducationalBackgroundSerializer, ResumeSerializer
@@ -50,7 +57,9 @@ class BuyVipSubscription(APIView):
             bank = factory.create()
             bank.set_request(request)
             bank.set_amount(price)
-            bank.set_client_callback_url(reverse)
+            bank.set_client_callback_url(
+                reverse('payment_result') + f'?subscription={vip_subscription_type}&price={price}'
+            )
             bank.set_mobile_number(user_mobile_number)
             bank.ready()
             bank._verify_payment_expiry()
@@ -68,6 +77,32 @@ class VipSubscriptionViewSet(viewsets.ModelViewSet):
     queryset = VipSubscription.objects.all()
     serializer_class = VipSubscriptionSerializer
     permission_classes = [IsAdminOrSuperUser, ]
+
+
+class PaymentResult(APIView):
+    def get(self, request):
+        tracking_code = request.GET.get(default_settings.TRACKING_CODE_QUERY_PARAM, None)
+        if not tracking_code:
+            logging.debug("این لینک معتبر نیست.")
+            raise Http404
+        try:
+            bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
+        except bank_models.Bank.DoesNotExist:
+            logging.debug("این لینک معتبر نیست.")
+            raise Http404
+        if bank_record.is_success:
+            VipSubscriptionHistory.objects.create(
+                user=request.user,
+                vip_subscription=VipSubscription.objects.filter(
+                    vip_subscription=request.GET.get('subscription')).first(),
+                price=request.GET.get('price'))
+            return redirect(config('SUCCESSFUL_REDIRECT_URL'))
+        else:
+            subscription_type = request.GET.get('subscription')
+            # print(subscription_type)
+            price = request.GET.get('price')
+            # print(price)
+            return redirect(f'{config("FAILED_REDIRECT_URL")}?subscription={subscription_type}&price={price}')
 
 
 class UserViewSet(viewsets.ModelViewSet):

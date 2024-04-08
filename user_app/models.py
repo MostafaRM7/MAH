@@ -5,6 +5,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
+
+
 # from django.utils import timezone
 
 
@@ -51,12 +53,6 @@ class VipSubscriptionHistory(models.Model):
     price = models.IntegerField(verbose_name='قیمت')
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True)
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.end_date = timezone.now() + timedelta(days=self.vip_subscription.period)
-            self.price = self.vip_subscription.price
-        super().save(*args, **kwargs)
 
     @property
     def remaining_days(self):

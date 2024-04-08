@@ -64,6 +64,7 @@ class Interview(Questionnaire):
     required_interviewer_count = models.PositiveIntegerField(null=True, blank=True,
                                                              verbose_name='تعداد پرسشگر مورد نیاز')
     protocol = models.FileField(upload_to='media/', verbose_name='پروتکل ', null=True, blank=True)
+
     # , validators = [
     #     FileExtensionValidator(['.pdf', '.doc', '.docx', '.jpg', '.png'])]
 

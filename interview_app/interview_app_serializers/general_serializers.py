@@ -14,6 +14,8 @@ from question_app.models import Answer, AnswerSet, DropDownOption, SortOption, O
 from question_app.validators import tag_remover
 from user_app.models import Profile
 from user_app.representors import represent_districts
+
+
 # from user_app.representors import represent_districts
 
 
@@ -541,9 +543,9 @@ class PrivateInterviewSerializer(serializers.ModelSerializer):
             'id', 'name', 'is_active', 'pub_date', 'end_date', 'created_at', 'owner', 'uuid', 'questions',
             'approval_status', 'privet_interviewers', 'required_interviewer_count', 'price_pack',
             'districts', 'goal_start_date', 'goal_end_date', 'answer_count_goal', 'difficulty',
-            'folder', 'category', 'protocol', 'is_privet'
+            'folder', 'category', 'protocol', 'is_private'
         )
-        read_only_fields = ('owner', 'questions', 'approval_status', 'is_privet')
+        read_only_fields = ('owner', 'questions', 'approval_status', 'is_private')
 
     def get_difficulty(self, instance: Interview):
         levels = instance.questions.values_list('level', flat=True)

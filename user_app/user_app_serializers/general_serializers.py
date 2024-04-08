@@ -9,7 +9,7 @@ from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
 
 class BuySerializer(serializers.Serializer):
-    subscription = serializers.ChoiceField(choices=['g', 's', 'b'])
+    subscription = serializers.ChoiceField(choices=['g', 's'])
 
 
 class VipSubscriptionHistorySerializer(serializers.ModelSerializer):

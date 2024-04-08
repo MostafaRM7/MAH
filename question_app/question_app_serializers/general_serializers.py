@@ -82,8 +82,8 @@ class PublicQuestionnaireSerializer(serializers.ModelSerializer):
         fields = (
             'uuid', 'is_active', 'show_number', 'previous_button', 'progress_bar', 'show_question_in_pages',
             'questions', 'category',
-            'welcome_page', 'thanks_page', 'is_privet')
-        read_only_fields = ('is_privet',)
+            'welcome_page', 'thanks_page', 'is_private')
+        read_only_fields = ('is_private',)
 
 
 class QuestionnaireSerializer(serializers.ModelSerializer):
@@ -98,8 +98,8 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
             'id', 'name', 'is_active', 'answer_count', 'previous_button', 'pub_date', 'end_date', 'timer',
             'show_question_in_pages', 'created_at',
             'progress_bar', 'show_number', 'category',
-            'folder', 'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page', 'is_privet')
-        read_only_fields = ('owner', 'questions', 'welcome_page', 'thanks_page', 'is_privet')
+            'folder', 'owner', 'uuid', 'questions', 'welcome_page', 'thanks_page', 'is_private')
+        read_only_fields = ('owner', 'questions', 'welcome_page', 'thanks_page', 'is_private')
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -191,8 +191,8 @@ class NoQuestionQuestionnaireSerializer(serializers.ModelSerializer):
         model = Questionnaire
         fields = (
             'id', 'name', 'uuid', 'pub_date', 'created_at', 'answer_count', 'question_count', 'is_active', 'category',
-            'is_privet')
-        read_only_fields = ('is_privet',)
+            'is_private')
+        read_only_fields = ('is_private',)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

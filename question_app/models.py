@@ -38,7 +38,7 @@ class Questionnaire(models.Model):
                                    related_name='interviews', null=True, blank=True)
     category = models.ForeignKey('Category', on_delete=models.PROTECT, null=True, blank=True)
     is_template = models.BooleanField(default=False, verbose_name='قالب/غیرقالب')
-    is_privet = models.BooleanField(default=False, verbose_name='خصوصی ')
+    is_private = models.BooleanField(default=False, verbose_name='خصوصی ')
 
     class Meta:
         ordering = ['-created_at']
