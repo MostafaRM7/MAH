@@ -684,8 +684,11 @@ class InterviewSerializer(serializers.ModelSerializer):
         representation['interviewers'] = [
             {'id': interviewer.id, 'first_name': interviewer.first_name, 'last_name': interviewer.last_name,
              'phone_number': interviewer.phone_number,
-             'private_id': PrivateInterviewer.objects.get(privet_interviews=instance,
-                                                          phone_number=interviewer.phone_number)} for interviewer in
+             'private_id': PrivateInterviewer.objects.filter(privet_interviews=instance,
+                                                          phone_number=interviewer.phone_number).first().id
+                            if PrivateInterviewer.objects.filter(privet_interviews=instance,
+                                                          phone_number=interviewer.phone_number)
+             else None} for interviewer in
             instance.interviewers.all()]
         representation['folder'] = instance.folder.name if instance.folder else None
         representation['category'] = instance.category.name if instance.category else None
