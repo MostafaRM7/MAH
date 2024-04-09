@@ -91,17 +91,17 @@ class PaymentResult(APIView):
             logging.debug("این لینک معتبر نیست.")
             raise Http404
         if bank_record.is_success:
+            subscription_type = request.GET.get('subscription')
+            price = request.GET.get('price')
             VipSubscriptionHistory.objects.create(
                 user=request.user,
                 vip_subscription=VipSubscription.objects.filter(
-                    vip_subscription=request.GET.get('subscription')).first(),
-                price=request.GET.get('price'))
-            return redirect(config('SUCCESSFUL_REDIRECT_URL'))
+                    vip_subscription=subscription_type).first(),
+                price=price)
+            return redirect(f'{config("SUCCESSFUL_REDIRECT_URL")}?subscription={subscription_type}&price={price}')
         else:
             subscription_type = request.GET.get('subscription')
-            # print(subscription_type)
             price = request.GET.get('price')
-            # print(price)
             return redirect(f'{config("FAILED_REDIRECT_URL")}?subscription={subscription_type}&price={price}')
 
 
