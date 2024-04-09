@@ -171,13 +171,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         else:
             subscription = VipSubscription.objects.filter(vip_subscription='b')
             representation['vip_subscription'] = {
-                'id': vip_subscription.id,
-                'subscription_type': vip_subscription.vip_subscription.get_vip_subscription_display(),
-                'subscription_type_code': vip_subscription.vip_subscription.vip_subscription,
+                'id': subscription.id,
+                'subscription_type': subscription.vip_subscription.get_vip_subscription_display(),
+                'subscription_type_code': subscription.vip_subscription.vip_subscription,
                 'start_date': None,
                 'end_date': None,
-                'remaining_days': vip_subscription.remaining_days,
-                'price': vip_subscription.price
+                'remaining_days': subscription.remaining_days,
+                'price': subscription.price
             }
         return representation
 
