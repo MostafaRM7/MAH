@@ -33,7 +33,7 @@ from user_app.user_app_serializers.general_serializers import FolderSerializer, 
     VipSubscriptionSerializer, BuySerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
     Skill, EducationalBackground, Resume, VipSubscription, VipSubscriptionHistory
-from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly, IsAdminOrSuperUser
+from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly, IsAdminOrSuperUser, IsAdminOrSuperUserOrReadOnly
 from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
     ResearchHistorySerializer, SkillSerializer, EducationalBackgroundSerializer, ResumeSerializer
 
@@ -76,7 +76,7 @@ class BuyVipSubscription(APIView):
 class VipSubscriptionViewSet(viewsets.ModelViewSet):
     queryset = VipSubscription.objects.all()
     serializer_class = VipSubscriptionSerializer
-    permission_classes = [IsAdminOrSuperUser, ]
+    permission_classes = [IsAdminOrSuperUserOrReadOnly, ]
 
 
 class PaymentResult(APIView):
@@ -98,11 +98,13 @@ class PaymentResult(APIView):
                 vip_subscription=VipSubscription.objects.filter(
                     vip_subscription=subscription_type).first(),
                 price=price)
-            return redirect(f'{config("SUCCESSFUL_REDIRECT_URL")}?subscription={subscription_type}&price={price}')
+            return redirect(
+                f'{config("SUCCESSFUL_REDIRECT_URL")}?subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
         else:
             subscription_type = request.GET.get('subscription')
             price = request.GET.get('price')
-            return redirect(f'{config("FAILED_REDIRECT_URL")}?subscription={subscription_type}&price={price}')
+            return redirect(
+                f'{config("FAILED_REDIRECT_URL")}?subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
 
 
 class UserViewSet(viewsets.ModelViewSet):

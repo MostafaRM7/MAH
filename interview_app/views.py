@@ -36,7 +36,7 @@ class AddInterViewersViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyMode
     serializer_class = AddInterViewersSerializer
     permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
     def get_queryset(self):
-        return PrivateInterviewer.objects.filter(privet_interviews__uuid=self.kwargs.get('uuid'))
+        return PrivateInterviewer.objects.filter(privet_interviews=Interview.objects.get(uuid=self.kwargs.get('intervinterviewsiew_uuid')))
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -44,7 +44,7 @@ class AddInterViewersViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyMode
         return AddInterViewersSerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': self.request, 'view': self, 'uuid':self.kwargs.get('intervinterviewsiew_uuid')})
         if serializer.is_valid(raise_exception=True):
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

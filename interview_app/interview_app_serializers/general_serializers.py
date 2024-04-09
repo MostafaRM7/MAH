@@ -516,12 +516,15 @@ class AddInterViewersSerializer(serializers.Serializer):
         interview_code = data.get('interview_code')
         try:
             user = Profile.objects.get(phone_number=phone_number, interview_code=interview_code)
-            PrivateInterviewer.objects.create(
+            interviewer = PrivateInterviewer.objects.create(
                 phone_number=user.phone_number,
                 interview_code=user.interview_code,
                 first_name=user.first_name,
                 last_name=user.last_name,
             )
+            interview = Interview.objects.get(uuid=self.context['uuid'])
+            interview.privet_interviewers.add(interviewer)
+            interview.save()
             return {
                 'first_name': user.first_name,
                 'last_name': user.last_name,
@@ -687,7 +690,7 @@ class InterviewSerializer(serializers.ModelSerializer):
              'private_id': PrivateInterviewer.objects.filter(privet_interviews=instance,
                                                           interview_code=interviewer.interview_code).first().id
                             if PrivateInterviewer.objects.filter(privet_interviews=instance,
-                                                          interview_code=interviewer.interview_code)
+                                                          interview_code=interviewer.interview_code).exists()
              else None} for interviewer in
             instance.interviewers.all()]
         representation['folder'] = instance.folder.name if instance.folder else None
