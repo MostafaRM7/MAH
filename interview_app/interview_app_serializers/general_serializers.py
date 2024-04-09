@@ -503,7 +503,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
 class PrivetInterviewersListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrivateInterviewer
-        fields = ['phone_number', 'first_name', 'last_name', 'interview_code']
+        fields = ['id', 'phone_number', 'first_name', 'last_name', 'interview_code']
         read_only_fields = ('phone_number', 'first_name', 'last_name', 'interview_code')
 
 
@@ -692,7 +692,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             'first_name': instance.owner.first_name,
             'last_name': instance.owner.last_name,
             'phone_number': instance.owner.phone_number
-        }
+        } if instance.owner else None
         return representation
 
     def get_difficulty(self, instance: Interview):

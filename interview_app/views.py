@@ -4,10 +4,12 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import get_object_or_404, CreateAPIView, DestroyAPIView, ListAPIView
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer, \
     AnswerSerializer, TicketSerializer, PrivateInterviewSerializer, AddInterViewersSerializer, \
@@ -30,15 +32,23 @@ from wallet_app.models import Transaction
 #     permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
 
 
-class AddInterViewersViewSet(APIView):
+class AddInterViewersViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMixin):
     serializer_class = AddInterViewersSerializer
     permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
+    def get_queryset(self):
+        return PrivateInterviewer.objects.filter(privet_interviews__uuid=self.kwargs.get('uuid'))
 
-    def post(self, request):
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PrivetInterviewersListSerializer
+        return AddInterViewersSerializer
+
+    def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class PrivateInterviewViewSet(viewsets.ModelViewSet):
@@ -192,18 +202,18 @@ class InterviewViewSet(viewsets.ModelViewSet):
             return Response({"detail": "لطفا ابتدا مناطق مورد علاقه خود را از بخش حساب کاربری مشخص کنید"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['post'], url_path='add-interviewer', permission_classes=[IsInterviewer])
-    def add_interviewer(self, request, *args, **kwargs):
-        obj = self.get_object()
-        user = request.user.profile
-        if user not in obj.interviewers.all():
-            obj.interviewers.add(user)
-            obj.save()
-            if obj.interviewers.count() == obj.required_interviewer_count:
-                obj.approval_status = Interview.REACHED_INTERVIEWER_COUNT
-                obj.save()
-            return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
-        return Response({'detail': 'شما در حال حاضر این پروژه را برداشته اید'}, status=status.HTTP_400_BAD_REQUEST)
+    # @action(detail=True, methods=['post'], url_path='add-interviewer', permission_classes=[IsInterviewer])
+    # def add_interviewer(self, request, *args, **kwargs):
+    #     obj = self.get_object()
+    #     user = request.user.profile
+    #     if user not in obj.interviewers.all():
+    #         obj.interviewers.add(user)
+    #         obj.save()
+    #         if obj.interviewers.count() == obj.required_interviewer_count:
+    #             obj.approval_status = Interview.REACHED_INTERVIEWER_COUNT
+    #             obj.save()
+    #         return Response(self.get_serializer(obj).data, status=status.HTTP_200_OK)
+    #     return Response({'detail': 'شما در حال حاضر این پروژه را برداشته اید'}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'], url_path='my-interviews', permission_classes=[IsInterviewer])
     def my_interviews(self, request, *args, **kwargs):

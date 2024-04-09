@@ -27,6 +27,7 @@ interview_router.register(IntegerSelectiveQuestion.URL_PREFIX, views.IntegerSele
                           basename='integerselective_qustions')
 interview_router.register('picture-questions', views.PictureFieldQuestionViewSet,
                           basename='picture_qustions')
+interview_router.register('add-interviewer', views.AddInterViewersViewSet, basename='add_interviewer')
 interview_router.register(EmailFieldQuestion.URL_PREFIX, views.EmailFieldQuestionViewSet, basename='email_questions')
 interview_router.register(LinkQuestion.URL_PREFIX, views.LinkQuestionViewSet, basename='link_questions')
 interview_router.register(FileQuestion.URL_PREFIX, views.FileQuestionViewSet, basename='file_questions')
@@ -36,8 +37,8 @@ interview_router.register(NoAnswerQuestion.URL_PREFIX, views.NoAnswerQuestionVie
 urlpatterns = [
     path('search-questionnaires/', views.SearchInterview.as_view(),
          name='search_questionnaire'),
-    path('add-interviewers/', views.AddInterViewersViewSet.as_view(),
-         name='add-interviewers'),
+    # path('add-interviewers/', views.AddInterViewersViewSet.as_view(),
+    #      name='add-interviewers'),
     path('', include(base_router.urls)),
     path('', include(interview_router.urls)),
 ]
