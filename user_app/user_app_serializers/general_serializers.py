@@ -176,7 +176,7 @@ class ProfileSerializer(serializers.ModelSerializer):
                 'subscription_type_code': subscription.vip_subscription,
                 'start_date': None,
                 'end_date': None,
-                'remaining_days': subscription.remaining_days,
+                'remaining_days': None,
                 'price': subscription.price
             }
         return representation
