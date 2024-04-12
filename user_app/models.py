@@ -129,8 +129,8 @@ class District(models.Model):
     name = models.CharField(max_length=50, verbose_name='نام منطقه')
     city = models.ForeignKey(City, on_delete=models.CASCADE, verbose_name='شهر', related_name='districts')
 
-    def __str__(self):
-        return f'{self.name} - {self.city}'
+    # def __str__(self):
+    #     return f'{self.name} - {self.city}'
 
 
 class UserRoleApproveQueue(models.Model):
