@@ -186,7 +186,7 @@ AZ_IRANIAN_BANK_GATEWAYS = {
     },
     'IS_SAMPLE_FORM_ENABLE': True,
     'DEFAULT': 'ZARINPAL',
-    'CURRENCY': 'IRR',
+    'CURRENCY': 'IRT',
     'TRACKING_CODE_QUERY_PARAM': 'tc',
     'TRACKING_CODE_LENGTH': 16,
     'SETTING_VALUE_READER_CLASS': 'azbankgateways.readers.DefaultReader',
