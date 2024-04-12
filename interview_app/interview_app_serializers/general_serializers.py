@@ -595,7 +595,7 @@ class PrivateInterviewSerializer(serializers.ModelSerializer):
             'first_name': instance.owner.first_name,
             'last_name': instance.owner.last_name,
             'phone_number': instance.owner.phone_number
-        }
+        } if instance.owner else None
         return representation
 
     def validate(self, data):
@@ -688,9 +688,9 @@ class InterviewSerializer(serializers.ModelSerializer):
             {'id': interviewer.id, 'first_name': interviewer.first_name, 'last_name': interviewer.last_name,
              'phone_number': interviewer.phone_number,
              'private_id': PrivateInterviewer.objects.filter(privet_interviews=instance,
-                                                          interview_code=interviewer.interview_code).first().id
-                            if PrivateInterviewer.objects.filter(privet_interviews=instance,
-                                                          interview_code=interviewer.interview_code).exists()
+                                                             interview_code=interviewer.interview_code).first().id
+             if PrivateInterviewer.objects.filter(privet_interviews=instance,
+                                                  interview_code=interviewer.interview_code).exists()
              else None} for interviewer in
             instance.interviewers.all()]
         representation['folder'] = instance.folder.name if instance.folder else None

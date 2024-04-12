@@ -1,11 +1,11 @@
 from rest_framework import permissions
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-
 from interview_app.models import Interview
 
 
 class CanListUsers(permissions.BasePermission):
+
     def has_permission(self, request, view):
         return request.user.role in ['e', 'es', 'se', 'ie']
 

@@ -2,13 +2,10 @@ import re
 from random import randint
 from django.utils import timezone
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-from user_app.tasks import send_otp
-from user_app.models import OTPToken, Profile, User
 from porsline_config import settings
-from django.contrib.auth.hashers import make_password
+from user_app.models import OTPToken, Profile
+from user_app.tasks import send_otp
 
 
 # باید پسورد اضافه شود
