@@ -43,7 +43,7 @@ class BuyVipSubscription(APIView):
     serializer_class = BuySerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request' : request})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         # print(serializer.validated_data)
@@ -97,7 +97,8 @@ class PaymentResult(APIView):
                 user=request.user,
                 vip_subscription=VipSubscription.objects.filter(
                     vip_subscription=subscription_type).first(),
-                price=price)
+                price=price,
+                tracking_code=tracking_code)
             return redirect(
                 f'{config("SUCCESSFUL_REDIRECT_URL")}?subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
         else:

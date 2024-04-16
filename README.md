@@ -1,10 +1,11 @@
 # PorslineAPI
-An API for a survey app written Django-Rest-Framework
 
+An API for a survey app written Django-Rest-Framework
 
 1- Clone the project files
 
-2- Create a environment and install packages located in porsline_config/requirments.txt Or just install them globally(It's better to use an environment)
+2- Create a environment and install packages located in porsline_config/requirments.txt Or just install them globally(
+It's better to use an environmenkt)
 
 3- Activate your envirment(If you are using)
 

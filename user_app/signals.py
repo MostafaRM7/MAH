@@ -17,6 +17,11 @@ def create_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=VipSubscriptionHistory)
 def vip_subscription_history(sender, instance, created, **kwargs):
     if created:
-        instance.end_date = timezone.now() + timedelta(days=instance.vip_subscription.period)
+        last_subscription = VipSubscriptionHistory.objects.filter(
+            end_date__gte=timezone.now()).order_by('-end_date').first()
+        if last_subscription:
+            instance.end_date = last_subscription.end_date + timedelta(days=instance.vip_subscription.period)
+        else:
+            instance.end_date = timezone.now() + timedelta(days=instance.vip_subscription.period)
         instance.price = instance.vip_subscription.price
         instance.save()

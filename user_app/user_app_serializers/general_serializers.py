@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import serializers
 
 from question_app.models import Folder
@@ -10,6 +11,19 @@ from user_app.user_app_serializers.resume_serializers import ResumeSerializer
 
 class BuySerializer(serializers.Serializer):
     subscription = serializers.ChoiceField(choices=['g', 's'])
+
+    def validate_subscription(self, value):
+        request = self.context.get('request')
+        user = request.user
+        has_gold_subscription = VipSubscriptionHistory.objects.filter(
+            user=user,
+            vip_subscription__vip_subscription='g',
+            end_date__gt=timezone.now()
+        ).exists()
+        if has_gold_subscription and value == 's':
+            raise serializers.ValidationError(
+                "شما نمی‌توانید اشتراک نقره‌ای  خریداری کنید چون در حال حاضر اشتراک طلایی دارید.")
+        return value
 
 
 class VipSubscriptionHistorySerializer(serializers.ModelSerializer):
@@ -157,7 +171,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'name': instance.province.name
         } if instance.province else None
         representation['preferred_districts'] = represent_prefrred_districts(instance)
-        vip_subscription = VipSubscriptionHistory.objects.filter(user=instance).first()
+        vip_subscription = VipSubscriptionHistory.objects.filter(user=instance).order_by('-end_date').first()
         if vip_subscription:
             representation['vip_subscription'] = {
                 'id': vip_subscription.id,
@@ -166,7 +180,8 @@ class ProfileSerializer(serializers.ModelSerializer):
                 'start_date': vip_subscription.start_date,
                 'end_date': vip_subscription.end_date,
                 'remaining_days': vip_subscription.remaining_days,
-                'price': vip_subscription.price
+                'price': vip_subscription.price,
+                'tracking_code': vip_subscription.tracking_code
             }
         else:
             subscription = VipSubscription.objects.filter(vip_subscription='b').first()

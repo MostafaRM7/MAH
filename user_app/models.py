@@ -36,6 +36,7 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, validators=[
         RegexValidator(regex='^09[0-9]{9}$', message='شماره تلفن همراه وارد شده صحیح نمی باشد')], unique=True,
                                     verbose_name='شماره تلفن همراه')
+    # todo باید رمز عبور اضافه شود
     # password = models.CharField(max_length=1000, verbose_name='رمز عبور')
     username = None
     USERNAME_FIELD = 'phone_number'
@@ -53,6 +54,7 @@ class VipSubscriptionHistory(models.Model):
     price = models.IntegerField(verbose_name='قیمت')
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True)
+    tracking_code = models.CharField(max_length=100, null=True, blank=True, verbose_name='کد رهگیری')
 
     @property
     def remaining_days(self):

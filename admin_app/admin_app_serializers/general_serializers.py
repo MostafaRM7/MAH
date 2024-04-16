@@ -46,7 +46,8 @@ class InterviewSerializer(serializers.ModelSerializer):
         representation['districts'] = [{'id': district.id, 'name': district.name} for district in
                                        instance.districts.all()]
         representation['owner'] = {'id': instance.owner.id, 'first_name': instance.owner.first_name,
-                                   'last_name': instance.owner.last_name, 'phone_number': instance.owner.phone_number}
+                                   'last_name': instance.owner.last_name,
+                                   'phone_number': instance.owner.phone_number} if instance.owner else None
         representation['price_pack'] = PricePackSerializer(instance.price_pack).data
         representation['category'] = instance.category.name if instance.category else None
         return representation
