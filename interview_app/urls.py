@@ -7,8 +7,7 @@ from question_app.models import OptionalQuestion, DropDownQuestion, SortQuestion
 
 base_router = routers.DefaultRouter()
 base_router.register('interviews', views.InterviewViewSet, basename='interviews')
-base_router.register('privet-interviews', views.PrivateInterviewViewSet, basename='privet-interviews')
-# base_router.register('privet-interviewers-list', views.PrivateInterviewListViewSet, basename='privet-interviewers-list')
+base_router.register('private-interviews', views.PrivateInterviewViewSet, basename='private-interviews')
 base_router.register('tickets', views.TicketViewSet, basename='tickets')
 
 interview_router = routers.NestedDefaultRouter(base_router, 'interviews', lookup='intervinterviewsiew')

@@ -4,8 +4,6 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
-from rest_framework.generics import get_object_or_404
-
 from admin_app.admin_app_serializers.general_serializers import PricePackSerializer
 from interview_app.interview_app_serializers.question_serializers import NoGroupQuestionSerializer
 from interview_app.models import Interview, Ticket, PrivateInterviewer
@@ -500,7 +498,7 @@ class AnswerSetSerializer(serializers.ModelSerializer):
         return representation
 
 
-class PrivetInterviewersListSerializer(serializers.ModelSerializer):
+class PrivateInterviewersListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrivateInterviewer
         fields = ['id', 'phone_number', 'first_name', 'last_name', 'interview_code']

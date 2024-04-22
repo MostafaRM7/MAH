@@ -13,7 +13,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from interview_app.interview_app_serializers.general_serializers import InterviewSerializer, AnswerSetSerializer, \
     AnswerSerializer, TicketSerializer, PrivateInterviewSerializer, AddInterViewersSerializer, \
-    PrivetInterviewersListSerializer
+    PrivateInterviewersListSerializer
 from interview_app.interview_app_serializers.question_serializers import *
 from interview_app.models import Interview, Ticket, PrivateInterviewer
 from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerOrInterviewerReadOnly, IsInterviewer, \
@@ -25,30 +25,26 @@ from result_app.filtersets import AnswerSetFilterSet
 from wallet_app.models import Transaction
 
 
-# باید تبدیل به اکشن شود
-# class PrivateInterviewListViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = PrivetInterviewersListSerializer
-#     queryset = PrivateInterviewer.objects.all()
-#     permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
-
-
 class AddInterViewersViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMixin):
     serializer_class = AddInterViewersSerializer
     permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
+
     def get_queryset(self):
-        return PrivateInterviewer.objects.filter(privet_interviews=Interview.objects.get(uuid=self.kwargs.get('intervinterviewsiew_uuid')))
+        return PrivateInterviewer.objects.filter(
+            privet_interviews=Interview.objects.get(uuid=self.kwargs.get('intervinterviewsiew_uuid')))
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return PrivetInterviewersListSerializer
+            return PrivateInterviewersListSerializer
         return AddInterViewersSerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': self.request, 'view': self, 'uuid':self.kwargs.get('intervinterviewsiew_uuid')})
+        serializer = self.serializer_class(data=request.data, context={'request': self.request, 'view': self,
+                                                                       'uuid': self.kwargs.get(
+                                                                           'intervinterviewsiew_uuid')})
         if serializer.is_valid(raise_exception=True):
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class PrivateInterviewViewSet(viewsets.ModelViewSet):
@@ -70,7 +66,7 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(interview_code=interview_code)
         if not queryset.exists():
             return Response({"error": "متاسفانه پرسشگر خصوصی مورد نظر یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = PrivetInterviewersListSerializer(queryset, many=True)
+        serializer = PrivateInterviewersListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='search-questions')
