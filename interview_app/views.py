@@ -17,7 +17,7 @@ from interview_app.interview_app_serializers.general_serializers import Intervie
 from interview_app.interview_app_serializers.question_serializers import *
 from interview_app.models import Interview, Ticket, PrivateInterviewer
 from interview_app.permissions import IsQuestionOwnerOrReadOnly, InterviewOwnerOrInterviewerReadOnly, IsInterviewer, \
-    InterviewOwnerOrInterviewerAddAnswer, CanListUsers
+    InterviewOwnerOrInterviewerAddAnswer, CanListUsers, PrivateInterviewOwnerOrInterviewerReadOnly
 from porsline_config.paginators import MainPagination
 from question_app.copy_template import copy_template_interview
 from question_app.models import AnswerSet, Folder
@@ -49,7 +49,7 @@ class AddInterViewersViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyMode
 
 class PrivateInterviewViewSet(viewsets.ModelViewSet):
     serializer_class = PrivateInterviewSerializer
-    permission_classes = (InterviewOwnerOrInterviewerReadOnly, CanListUsers)
+    permission_classes = (PrivateInterviewOwnerOrInterviewerReadOnly, CanListUsers)
     lookup_field = 'uuid'
     queryset = Interview.objects.prefetch_related('districts', 'interviewers', 'questions').filter(
         is_delete=False).order_by('-created_at')
@@ -61,9 +61,9 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
         interview_code = request.query_params.get('interview_code', None)
         queryset = PrivateInterviewer.objects.all()
         if phone_number is not None:
-            queryset = queryset.filter(phone_number=phone_number)
+            queryset = queryset.filter(phone_number__icontains=phone_number)
         if interview_code is not None:
-            queryset = queryset.filter(interview_code=interview_code)
+            queryset = queryset.filter(interview_code__icontains=interview_code)
         if not queryset.exists():
             return Response({"error": "متاسفانه پرسشگر خصوصی مورد نظر یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
         serializer = PrivateInterviewersListSerializer(queryset, many=True)

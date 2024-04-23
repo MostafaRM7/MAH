@@ -12,6 +12,26 @@ class CanListUsers(permissions.BasePermission):
 
 class InterviewOwnerOrInterviewerReadOnly(BasePermission):
     def has_permission(self, request, view):
+        user = request.user
+        if not user.has_perm('view_interview'):
+            return False
+        uuid = view.kwargs.get('uuid')
+        if request.user.is_authenticated:
+            if uuid:
+                if view.get_object().owner == request.user.profile or request.user.is_staff:
+                    return True
+                else:
+                    if request.method in SAFE_METHODS:
+                        return request.user.role in ['ie', 'i']
+            else:
+                return request.user.role in ['ie', 'e'] or request.user.is_staff
+
+
+class PrivateInterviewOwnerOrInterviewerReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        if not user.has_perm('view_private_interview'):
+            return False
         uuid = view.kwargs.get('uuid')
         if request.user.is_authenticated:
             if uuid:
