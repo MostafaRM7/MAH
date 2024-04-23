@@ -519,6 +519,7 @@ class AddInterViewersSerializer(serializers.Serializer):
                 interview_code=user.interview_code,
                 first_name=user.first_name,
                 last_name=user.last_name,
+
             )
             interview = Interview.objects.get(uuid=self.context['uuid'])
             interview.privet_interviewers.add(interviewer)

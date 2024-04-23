@@ -69,6 +69,18 @@ class PrivateInterviewViewSet(viewsets.ModelViewSet):
         serializer = PrivateInterviewersListSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['delete'], url_path='delete-interviewer')
+    def delete_interviewer(self, request):
+        interviewer_id = request.query_params.get('id')
+        if interviewer_id is None:
+            return Response({"detail": "لطفا آیدی پرسشگر را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            interviewer = PrivateInterviewer.objects.get(id=interviewer_id)
+        except PrivateInterviewer.DoesNotExist:
+            return Response({"detail": "کاربری با این آیدی یافت نشد"}, status=status.HTTP_404_NOT_FOUND)
+        interviewer.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=['get'], url_path='search-questions')
     def search_in_questions(self, request, *args, **kwargs):
         search = request.query_params.get('search')
