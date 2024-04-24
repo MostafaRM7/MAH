@@ -111,6 +111,8 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
     def get_answer_set_count(self, obj):
         return obj.answer_sets.exclude(answers=None).count()
 
+
+
     def validate(self, data):
         folder = data.get('folder')
         name = data.get('name')

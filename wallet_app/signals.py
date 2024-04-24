@@ -9,8 +9,5 @@ def wallet_created(sender, instance: Wallet, created, **kwargs):
     if created:
         user = instance.owner
         if user.role == 'n':
-            user.role = 'e'
-        elif user.role == 'i':
-            user.role = 'ie'
-        user.save()
+            user.save()
         print('user.role', user.role)

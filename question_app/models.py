@@ -39,6 +39,7 @@ class Questionnaire(models.Model):
     category = models.ForeignKey('Category', on_delete=models.PROTECT, null=True, blank=True)
     is_template = models.BooleanField(default=False, verbose_name='قالب/غیرقالب')
     is_private = models.BooleanField(default=False, verbose_name='خصوصی ')
+    is_public = models.BooleanField(default=False, verbose_name='پرسشنامه همگانی ')
 
     class Meta:
         ordering = ['-created_at']
@@ -703,3 +704,15 @@ class ThanksPage(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام')
+
+
+class ConditionalQuestion(models.Model):
+    optional_question = models.ForeignKey(OptionalQuestion, on_delete=models.CASCADE,
+                                          related_name='conditional_questions', null=True, blank=True)
+    dropdown_question = models.ForeignKey(DropDownQuestion, on_delete=models.CASCADE,
+                                          related_name='conditional_questions', null=True, blank=True)
+    option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='conditional_questions', null=True,
+                               blank=True)
+    dropdown_option = models.ForeignKey(DropDownOption, on_delete=models.CASCADE, related_name='conditional_questions',
+                                        null=True, blank=True)
+    next_question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='next_questions')

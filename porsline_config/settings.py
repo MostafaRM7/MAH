@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
+
+from celery.schedules import crontab
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -169,6 +171,13 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
 }
 CELERY_BROKER_URL = 'redis://localhost:6379/1'
+
+CELERY_BEAT_SCHEDULE = {
+    'remove_expired_subscriptions_every_midnight': {
+        'task': 'user_app.tasks.daily_remove_expired_subscriptions',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
 
 AUTH_USER_MODEL = 'user_app.User'
 

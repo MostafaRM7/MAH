@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework import serializers
-
 from question_app.models import Folder
 from question_app.question_app_serializers import general_serializers
 from user_app.models import Profile, Country, Province, City, District, VipSubscriptionHistory, VipSubscription
@@ -173,13 +172,14 @@ class ProfileSerializer(serializers.ModelSerializer):
         representation['preferred_districts'] = represent_prefrred_districts(instance)
         vip_subscription = VipSubscriptionHistory.objects.filter(user=instance).order_by('-end_date').first()
         if vip_subscription:
+            remaining_days = vip_subscription.remaining_days if vip_subscription.end_date else None
             representation['vip_subscription'] = {
                 'id': vip_subscription.id,
                 'subscription_type': vip_subscription.vip_subscription.get_vip_subscription_display(),
                 'subscription_type_code': vip_subscription.vip_subscription.vip_subscription,
                 'start_date': vip_subscription.start_date,
                 'end_date': vip_subscription.end_date,
-                'remaining_days': vip_subscription.remaining_days,
+                'remaining_days': remaining_days,
                 'price': vip_subscription.price,
                 'tracking_code': vip_subscription.tracking_code
             }

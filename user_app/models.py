@@ -1,13 +1,9 @@
 import random
-from datetime import timedelta
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
-
-
-# from django.utils import timezone
 
 
 class VipSubscription(models.Model):
@@ -18,7 +14,7 @@ class VipSubscription(models.Model):
     )
     vip_subscription = models.CharField(max_length=1, choices=SUBS_CHOICES, verbose_name='نوع اشتراک ')
     period = models.PositiveIntegerField(max_length=2, default=90, verbose_name='بازه زمانی')
-    price = models.IntegerField(verbose_name='قیمت')
+    price = models.IntegerField(verbose_name='قیمت', null=True, blank=True)
 
     def __str__(self):
         return self.get_vip_subscription_display()
@@ -36,7 +32,6 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, validators=[
         RegexValidator(regex='^09[0-9]{9}$', message='شماره تلفن همراه وارد شده صحیح نمی باشد')], unique=True,
                                     verbose_name='شماره تلفن همراه')
-    # todo باید رمز عبور اضافه شود
     # password = models.CharField(max_length=1000, verbose_name='رمز عبور')
     username = None
     USERNAME_FIELD = 'phone_number'
@@ -59,6 +54,13 @@ class VipSubscriptionHistory(models.Model):
     @property
     def remaining_days(self):
         return max((self.end_date - timezone.now()).days, 0)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        group_name = self.vip_subscription.vip_subscription + 'subscription'
+        print(group_name)
+        group = Group.objects.get(name=group_name)
+        self.user.groups.add(group)
 
 
 class OTPToken(models.Model):

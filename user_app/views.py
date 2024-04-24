@@ -33,7 +33,8 @@ from user_app.user_app_serializers.general_serializers import FolderSerializer, 
     VipSubscriptionSerializer, BuySerializer
 from .models import OTPToken, Country, Province, City, District, Profile, WorkBackground, Achievement, ResearchHistory, \
     Skill, EducationalBackground, Resume, VipSubscription, VipSubscriptionHistory
-from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly, IsAdminOrSuperUser, IsAdminOrSuperUserOrReadOnly
+from .permissions import IsUserOrReadOnly, IsOwner, IsAdminOrReadOnly, IsAdminOrSuperUser, IsAdminOrSuperUserOrReadOnly, \
+    create_subscription_groups
 from .user_app_serializers.resume_serializers import WorkBackgroundSerializer, AchievementSerializer, \
     ResearchHistorySerializer, SkillSerializer, EducationalBackgroundSerializer, ResumeSerializer
 
@@ -43,12 +44,10 @@ class BuyVipSubscription(APIView):
     serializer_class = BuySerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data, context={'request' : request})
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # print(serializer.validated_data)
         vip_subscription_type = serializer.validated_data['subscription']
-        # print(vip_subscription)
         vip_subscription = VipSubscription.objects.filter(vip_subscription=vip_subscription_type).first()
         price = vip_subscription.price
         user_mobile_number = request.user.username
@@ -67,6 +66,7 @@ class BuyVipSubscription(APIView):
                 raise SafeSettingsEnabled()
             logging.debug("Redirect to bank")
             bank._set_payment_status(PaymentStatus.REDIRECT_TO_BANK)
+            create_subscription_groups()
             return Response({'url': bank.get_gateway_payment_url()})
         except AZBankGatewaysException as e:
             logging.critical(e)
@@ -100,12 +100,12 @@ class PaymentResult(APIView):
                 price=price,
                 tracking_code=tracking_code)
             return redirect(
-                f'{config("SUCCESSFUL_REDIRECT_URL")}?subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
+                config('SUCCESSFUL_REDIRECT_URL') + f'?subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
         else:
             subscription_type = request.GET.get('subscription')
             price = request.GET.get('price')
             return redirect(
-                f'{config("FAILED_REDIRECT_URL")}?subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
+                config('FAILED_REDIRECT_URL') + f'?subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
 
 
 class UserViewSet(viewsets.ModelViewSet):

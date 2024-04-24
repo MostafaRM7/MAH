@@ -8,7 +8,7 @@ from user_app.models import OTPToken, Profile
 from user_app.tasks import send_otp
 
 
-# باید پسورد اضافه شود
+# باید پسورد اضافه شود todo
 class GateWaySerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=20, min_length=11, required=True, label='شماره تلفن ')
 

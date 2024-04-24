@@ -1,7 +1,9 @@
-from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import permissions
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from .models import Profile
+
+from .models import VipSubscription
 
 
 class IsAdminOrSuperUser(permissions.BasePermission):
@@ -9,11 +11,13 @@ class IsAdminOrSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and (request.user.is_staff or request.user.is_superuser)
 
+
 class IsAdminOrSuperUserOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'GET':
             return True
         return request.user and (request.user.is_staff or request.user.is_superuser)
+
 
 class IsUserOrReadOnly(BasePermission):
     def has_permission(self, request, view):
@@ -55,3 +59,23 @@ class IsAdminOrReadOnly(BasePermission):
                 return True
             else:
                 return request.user.is_staff
+
+
+def create_subscription_groups():
+    for subscription in VipSubscription.objects.all():
+        group_name = subscription.vip_subscription + 'subscription'
+        group, created = Group.objects.get_or_create(name=group_name)
+        content_type = ContentType.objects.get_for_model(VipSubscription)
+        view_interview, created = Permission.objects.get_or_create(
+            codename='view_interview',
+            name='Can view interview',
+            content_type=content_type,
+        )
+        view_private_interview, created = Permission.objects.get_or_create(
+            codename='view_private_interview',
+            name='Can view private interview',
+            content_type=content_type,
+        )
+        group.permissions.add(view_interview)
+        group.permissions.add(view_private_interview)
+       

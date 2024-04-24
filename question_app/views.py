@@ -1,7 +1,6 @@
 from uuid import UUID
+
 from django.db.models import Q
-from django.utils import timezone
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -9,14 +8,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from interview_app.models import Interview
+
+from question_app.models import Question
 from wallet_app.models import Transaction
 from .copy_template import copy_template_questionnaire
 from .permissions import *
 from .question_app_serializers.answer_serializers import AnswerSetSerializer, AnswerSerializer
 from .question_app_serializers.general_serializers import *
 from .question_app_serializers.question_serializers import *
-from question_app.models import Question
 
 
 class PublicQuestionnaireViewSet(viewsets.mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -121,7 +120,7 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
             folder = None
         questionnaire = self.get_object()
         # if not questionnaire.is_template:
-        #     return Response({"detail": " نمی توانید پرسشنامه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
+        # return Response({"detail": " نمی توانید پرسشنامه غیر قالب را کپی کنید"}, status=status.HTTP_400_BAD_REQUEST)
         copied_questionnaire = copy_template_questionnaire(questionnaire, request.user.profile, folder)
         return Response(QuestionnaireSerializer(copied_questionnaire, context={'request': request}).data,
                         status=status.HTTP_201_CREATED)
@@ -187,6 +186,13 @@ class OptionalQuestionViewSet(viewsets.ModelViewSet):
         context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
 
+    @action(detail=True, methods=['post'], serializer_class=CreateConditionalOptionalQuestionSerializer)
+    def add_conditional_question(self, request, pk=None, questionnaire_uuid=None, id=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        conditional_question = serializer.save()
+        return Response({"status": "سوال شرطی ایجاد شد"}, status=201)
+
 
 class DropDownQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = DropDownQuestionSerializer
@@ -194,7 +200,7 @@ class DropDownQuestionViewSet(viewsets.ModelViewSet):
     permission_classes = (IsQuestionOwnerOrReadOnly,)
 
     def get_queryset(self):
-        queryset = DropDownQuestion.objects.prefetch_related('options').filter(
+        queryset = DropDownQuestion.objects.prefetch_related('options', 'conditional_questions').filter(
             questionnaire__uuid=self.kwargs['questionnaire_uuid'])
         return queryset
 
@@ -203,6 +209,13 @@ class DropDownQuestionViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
+
+    @action(detail=True, methods=['post'], serializer_class=CreateConditionalDropDownQuestionSerializer)
+    def add_conditional_question(self, request, pk=None, questionnaire_uuid=None, id=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        conditional_question = serializer.save()
+        return Response({"status": "conditional question created"}, status=201)
 
 
 class SortQuestionViewSet(viewsets.ModelViewSet):

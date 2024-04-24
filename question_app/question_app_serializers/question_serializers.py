@@ -1,14 +1,38 @@
 from django.db import transaction
 from django.http import HttpRequest
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework import status
+from rest_framework.utils import representation
+
 from ..models import *
 from porsline_config import settings
 from ..validators import option_in_html_tag_validator, tag_remover
 
 
+class ConditionalQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConditionalQuestion
+        fields = ['option', 'next_question']
+
+    next_question = serializers.SerializerMethodField()
+
+    def get_next_question(self, obj):
+        return QuestionSerializer(obj.next_question).data
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.optional_question is not None:
+            representation['option'] = OptionSerializer(instance.option).data
+        elif instance.dropdown_question is not None:
+            representation['dropdown_option'] = DropDownOptionSerializer(instance.dropdown_option).data
+        return representation
+
+
 class QuestionSerializer(serializers.ModelSerializer):
     question = serializers.SerializerMethodField(method_name='child_question')
+
+    # conditional_questions = ConditionalQuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Question
@@ -93,11 +117,14 @@ class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
         fields = ('id', 'text')
+        # exclude = ('',)
 
 
 class OptionalQuestionSerializer(serializers.ModelSerializer):
     url_prefix = serializers.SerializerMethodField(method_name='get_url_prefix')
     options = OptionSerializer(many=True)
+
+    # conditional_questions = ConditionalQuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = OptionalQuestion
@@ -118,6 +145,8 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
         data = super().to_representation(instance)
+        data['conditional_questions'] = ConditionalQuestionSerializer(instance.conditional_questions.all(),
+                                                                      many=True).data
         if data.get('media'):
             data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
         return data
@@ -254,7 +283,8 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
         options_data = validated_data.pop('options')
         questionnaire = Questionnaire.objects.get(uuid=self.context.get('questionnaire_uuid'))
         optional_question = OptionalQuestion.objects.create(**validated_data, questionnaire=questionnaire)
-        options = [Option(optional_question=optional_question, number=index+1, **option_data) for index, option_data in enumerate(options_data)]
+        options = [Option(optional_question=optional_question, number=index + 1, **option_data) for index, option_data
+                   in enumerate(options_data)]
         Option.objects.bulk_create(options)
         return optional_question
 
@@ -280,6 +310,95 @@ class OptionalQuestionSerializer(serializers.ModelSerializer):
                 option.delete()
 
         return super().update(instance, validated_data)
+
+
+class CreateConditionalOptionalQuestionSerializer(serializers.Serializer):
+    option_id = serializers.IntegerField()
+    next_question_id = serializers.IntegerField()
+
+    def validate(self, data):
+        question_id = self.context.get('view').kwargs.get('id')
+        option_id = data.get('option_id')
+        next_question_id = data.get('next_question_id')
+        if ConditionalQuestion.objects.filter(optional_question_id=question_id, option_id=option_id).exists():
+            raise serializers.ValidationError("برای این گزینه قبلاً سوال شرطی ایجاد شده است.")
+        if not Question.objects.filter(id=next_question_id).exists():
+            raise serializers.ValidationError("سوال بعدی موجود نیست.")
+        if self.is_in_conditional_chain(question_id, next_question_id):
+            raise serializers.ValidationError("ایجاد حلقه در سوالات شرطی مجاز نیست.")
+        return data
+
+    def is_in_conditional_chain(self, start_question_id, next_question_id):
+        visited = set()
+        queue = [start_question_id]
+        while queue:
+            question_id = queue.pop(0)
+            if question_id in visited:
+                continue
+            visited.add(question_id)
+            if question_id == next_question_id:
+                return True
+            next_questions = ConditionalQuestion.objects.filter(optional_question_id=question_id).values_list(
+                'next_question_id', flat=True)
+            queue.extend(next_questions)
+        return False
+
+    def create(self, validated_data):
+        question = get_object_or_404(OptionalQuestion, id=self.context.get('view').kwargs.get(
+            'id'))
+        option = get_object_or_404(Option, id=validated_data['option_id'])
+        next_question = get_object_or_404(Question, id=validated_data['next_question_id'])
+        conditional_question = ConditionalQuestion.objects.create(
+            optional_question=question,
+            option=option,
+            next_question=next_question
+        )
+        return conditional_question
+
+
+class CreateConditionalDropDownQuestionSerializer(serializers.Serializer):
+    dropdown_option_id = serializers.IntegerField()
+    next_question_id = serializers.IntegerField()
+
+    def validate(self, data):
+        question_id = self.context.get('view').kwargs.get('id')
+        dropdown_option_id = data.get('dropdown_option_id')
+        next_question_id = data.get('next_question_id')
+        if ConditionalQuestion.objects.filter(dropdown_question_id=question_id,
+                                              dropdown_option_id=dropdown_option_id).exists():
+            raise serializers.ValidationError("برای این گزینه قبلاً سوال شرطی ایجاد شده است.")
+        if not Question.objects.filter(id=next_question_id).exists():
+            raise serializers.ValidationError("سوال بعدی موجود نیست.")
+        if self.is_in_conditional_chain(question_id, next_question_id):
+            raise serializers.ValidationError("ایجاد حلقه در سوالات شرطی مجاز نیست.")
+        return data
+
+    def is_in_conditional_chain(self, start_question_id, next_question_id):
+        visited = set()
+        queue = [start_question_id]
+        while queue:
+            question_id = queue.pop(0)
+            if question_id in visited:
+                continue
+            visited.add(question_id)
+            if question_id == next_question_id:
+                return True
+            next_questions = ConditionalQuestion.objects.filter(dropdown_question_id=question_id).values_list(
+                'next_question_id', flat=True)
+            queue.extend(next_questions)
+        return False
+
+    def create(self, validated_data):
+        question = get_object_or_404(DropDownQuestion, id=self.context.get('view').kwargs.get(
+            'id'))
+        dropdown_option = get_object_or_404(DropDownOption, id=validated_data['dropdown_option_id'])
+        next_question = get_object_or_404(Question, id=validated_data['next_question_id'])
+        conditional_question = ConditionalQuestion.objects.create(
+            dropdown_question=question,
+            dropdown_option=dropdown_option,
+            next_question=next_question
+        )
+        return conditional_question
 
 
 class DropDownOptionSerializer(serializers.ModelSerializer):
@@ -308,6 +427,9 @@ class DropDownQuestionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         request: HttpRequest = self.context.get('request')
         data = super().to_representation(instance)
+        data['conditional_questions'] = ConditionalQuestionSerializer(instance.conditional_questions.all(),
+                                                                      many=True).data
+
         if data.get('media'):
             data['media'] = f'{request.scheme}://{request.get_host()}{settings.MEDIA_URL}{instance.media}'
         return data
