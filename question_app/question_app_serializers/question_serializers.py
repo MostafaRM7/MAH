@@ -25,7 +25,7 @@ class ConditionalQuestionSerializer(serializers.ModelSerializer):
         if instance.optional_question is not None:
             representation['option'] = OptionSerializer(instance.option).data
         elif instance.dropdown_question is not None:
-            representation['dropdown_option'] = DropDownOptionSerializer(instance.dropdown_option).data
+            representation['option'] = DropDownOptionSerializer(instance.dropdown_option).data
         return representation
 
 
@@ -344,8 +344,11 @@ class CreateConditionalOptionalQuestionSerializer(serializers.Serializer):
         return False
 
     def create(self, validated_data):
-        question = get_object_or_404(OptionalQuestion, id=self.context.get('view').kwargs.get(
-            'id'))
+        print(self.context.get('view').kwargs)
+        question = get_object_or_404(OptionalQuestion, id=int(self.context.get('view').kwargs[
+            'id']))
+        print(validated_data['option_id'], 'hi')
+        print(validated_data['next_question_id'])
         option = get_object_or_404(Option, id=validated_data['option_id'])
         next_question = get_object_or_404(Question, id=validated_data['next_question_id'])
         conditional_question = ConditionalQuestion.objects.create(
@@ -357,12 +360,12 @@ class CreateConditionalOptionalQuestionSerializer(serializers.Serializer):
 
 
 class CreateConditionalDropDownQuestionSerializer(serializers.Serializer):
-    dropdown_option_id = serializers.IntegerField()
+    option_id = serializers.IntegerField()
     next_question_id = serializers.IntegerField()
 
     def validate(self, data):
         question_id = self.context.get('view').kwargs.get('id')
-        dropdown_option_id = data.get('dropdown_option_id')
+        dropdown_option_id = data.get('option_id')
         next_question_id = data.get('next_question_id')
         if ConditionalQuestion.objects.filter(dropdown_question_id=question_id,
                                               dropdown_option_id=dropdown_option_id).exists():
@@ -391,7 +394,8 @@ class CreateConditionalDropDownQuestionSerializer(serializers.Serializer):
     def create(self, validated_data):
         question = get_object_or_404(DropDownQuestion, id=self.context.get('view').kwargs.get(
             'id'))
-        dropdown_option = get_object_or_404(DropDownOption, id=validated_data['dropdown_option_id'])
+
+        dropdown_option = get_object_or_404(DropDownOption, id=validated_data['option_id'])
         next_question = get_object_or_404(Question, id=validated_data['next_question_id'])
         conditional_question = ConditionalQuestion.objects.create(
             dropdown_question=question,
