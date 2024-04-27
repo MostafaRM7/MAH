@@ -10,10 +10,17 @@ from porsline_config import settings
 from ..validators import option_in_html_tag_validator, tag_remover
 
 
+class ConditionalListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConditionalQuestion
+        fields = ['id', 'option', 'next_question']
+        read_only_fields = ['id', 'option', 'next_question']
+
+
 class ConditionalQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConditionalQuestion
-        fields = ['option', 'next_question']
+        fields = ['id', 'option', 'next_question']
 
     next_question = serializers.SerializerMethodField()
 
@@ -346,7 +353,7 @@ class CreateConditionalOptionalQuestionSerializer(serializers.Serializer):
     def create(self, validated_data):
         print(self.context.get('view').kwargs)
         question = get_object_or_404(OptionalQuestion, id=int(self.context.get('view').kwargs[
-            'id']))
+                                                                  'id']))
         print(validated_data['option_id'], 'hi')
         print(validated_data['next_question_id'])
         option = get_object_or_404(Option, id=validated_data['option_id'])

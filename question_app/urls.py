@@ -5,11 +5,9 @@ from .models import *
 
 router = routers.SimpleRouter()
 router.register('', views.PublicQuestionnaireViewSet)
-
 base_router = routers.DefaultRouter()
 base_router.register('questionnaires', views.QuestionnaireViewSet)
 base_router.register('categories', views.CategoryViewSet)
-
 questionnaire_router = routers.NestedDefaultRouter(base_router, 'questionnaires', lookup='questionnaire')
 questionnaire_router.register(WelcomePage.URL_PREFIX, views.WelcomePageViewSet, basename='welcome_pages')
 questionnaire_router.register(ThanksPage.URL_PREFIX, views.ThanksPageViewSet, basename='thanks_pages')
@@ -33,14 +31,12 @@ questionnaire_router.register(LinkQuestion.URL_PREFIX, views.LinkQuestionViewSet
 questionnaire_router.register(FileQuestion.URL_PREFIX, views.FileQuestionViewSet, basename='file_questions')
 questionnaire_router.register(QuestionGroup.URL_PREFIX, views.QuestionGroupViewSet, basename='question_groups')
 questionnaire_router.register(NoAnswerQuestion.URL_PREFIX, views.NoAnswerQuestionViewSet, basename='noanswer_questions')
-
+# Define your urlpatterns
 urlpatterns = [
-    path('search-questionnaires/', views.SearchQuestionnaire.as_view(),
-         name='search_questionnaire'),
+    path('search-questionnaires/', views.SearchQuestionnaire.as_view(), name='search_questionnaire'),
     path('', include(base_router.urls)),
     path('', include(router.urls)),
     path('', include(questionnaire_router.urls)),
     path('questionnaires/<str:questionnaire_uuid>/change-questions-placements/',
-         views.ChangeQuestionsPlacements.as_view(),
-         name='change_questions_placements'),
+         views.ChangeQuestionsPlacements.as_view(), name='change_questions_placements'),
 ]

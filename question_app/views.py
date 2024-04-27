@@ -9,7 +9,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from question_app.models import Question
 from wallet_app.models import Transaction
 from .copy_template import copy_template_questionnaire
 from .permissions import *
@@ -170,6 +169,28 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class AddOptionalConditionalQuestionViewset(viewsets.ViewSet):
+    serializer_class = CreateConditionalOptionalQuestionSerializer
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def create(self, request, questionnaire_uuid, id):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        conditional_question = serializer.save()
+        return Response({"status": "سوال شرطی ایجاد شد"}, status=status.HTTP_201_CREATED)
+
+
+class AddDropDownConditionalQuestionViewset(viewsets.ViewSet):
+    serializer_class = CreateConditionalDropDownQuestionSerializer
+    permission_classes = (IsQuestionOwnerOrReadOnly,)
+
+    def create(self, request, questionnaire_uuid, id):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        conditional_question = serializer.save()
+        return Response({"status": "سوال شرطی ایجاد شد"}, status=status.HTTP_201_CREATED)
+
+
 class OptionalQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = OptionalQuestionSerializer
     lookup_field = 'id'
@@ -185,13 +206,6 @@ class OptionalQuestionViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
-
-    @action(detail=True, methods=['post'], serializer_class=CreateConditionalOptionalQuestionSerializer)
-    def add_conditional_question(self, request, pk=None, questionnaire_uuid=None, id=None):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        conditional_question = serializer.save()
-        return Response({"status": "سوال شرطی ایجاد شد"}, status=201)
 
 
 class DropDownQuestionViewSet(viewsets.ModelViewSet):
@@ -209,13 +223,6 @@ class DropDownQuestionViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         context.update({'questionnaire_uuid': self.kwargs['questionnaire_uuid']})
         return context
-
-    @action(detail=True, methods=['post'], serializer_class=CreateConditionalDropDownQuestionSerializer)
-    def add_conditional_question(self, request, pk=None, questionnaire_uuid=None, id=None):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        conditional_question = serializer.save()
-        return Response({"status": "conditional question created"}, status=201)
 
 
 class SortQuestionViewSet(viewsets.ModelViewSet):
