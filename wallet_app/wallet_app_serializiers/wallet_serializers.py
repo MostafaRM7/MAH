@@ -6,6 +6,17 @@ from rest_framework.serializers import ModelSerializer
 from wallet_app.models import Wallet, Transaction
 
 
+
+class IncreaseBalanceSerializer(serializers.Serializer):
+    amount = serializers.FloatField()
+
+    def validate(self, data):
+        amount = data.get('amount')
+        if amount <= 0:
+            raise serializers.ValidationError({'amount': 'مبلغ نمی تواند منفی یا صفر باشد.'})
+        return data
+
+
 class TransactionSerializer(ModelSerializer):
     class Meta:
         model = Transaction

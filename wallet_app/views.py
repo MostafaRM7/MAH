@@ -1,14 +1,89 @@
+import logging
 from datetime import datetime
 
+from decouple import config
+from azbankgateways import default_settings, models as bank_models
+from azbankgateways.bankfactories import BankFactory
+from azbankgateways.exceptions import SafeSettingsEnabled, AZBankGatewaysException
+from azbankgateways.models import PaymentStatus
+from django.http import Http404
+from django.shortcuts import redirect
 from rest_framework import permissions, status
+from rest_framework.reverse import reverse
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
-from wallet_app.models import Wallet
-from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializer, WithdrawSerializer
+from wallet_app.models import Wallet, Transaction
+from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializer, WithdrawSerializer, \
+    IncreaseBalanceSerializer
 from .utils import is_valid_date
+
+
+
+class PaymentResultAPIView(APIView):
+    def get(self, request):
+        tracking_code = request.GET.get(default_settings.TRACKING_CODE_QUERY_PARAM, None)
+        if not tracking_code:
+            logging.debug("این لینک معتبر نیست.")
+            raise Http404
+        try:
+            bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
+        except bank_models.Bank.DoesNotExist:
+            logging.debug("این لینک معتبر نیست.")
+            raise Http404
+        if bank_record.is_success:
+            amount = request.GET.get('amount')
+            user = request.user.profile
+            wallet = user.profile.wallet
+            wallet.balance += amount
+            wallet.save()
+            Transaction.objects.create(
+                transaction_type='i',
+                reason='i',
+                amount=amount,
+                wallet=wallet,
+                is_done=True,
+
+            )
+            return redirect(
+                config(
+                    'SUCCESSFUL_REDIRECT_URL'))
+        else:
+            return redirect(
+                config(
+                    'FAILED_REDIRECT_URL'))
+
+
+
+class IncreaseBalanceAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = IncreaseBalanceSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        amount = serializer.validated_data.get('amount')
+        user = request.user.profile
+        factory = BankFactory()
+        try:
+            bank = factory.create()
+            bank.set_request(request)
+            bank.set_amount(amount)
+            bank.set_client_callback_url(reverse('payment_result'))
+            bank.set_mobile_number(user.phone_number)
+            bank.ready()
+            bank._verify_payment_expiry()
+            if default_settings.IS_SAFE_GET_GATEWAY_PAYMENT:
+                raise SafeSettingsEnabled()
+            logging.debug("Redirect to bank")
+            bank._set_payment_status(PaymentStatus.REDIRECT_TO_BANK)
+            return Response({'url': bank.get_gateway_payment_url()})
+        except AZBankGatewaysException as e:
+            logging.critical(e)
+            return Response({'detail': 'خطایی رخ داده است.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WalletViewSet(CreateModelMixin, GenericViewSet):
