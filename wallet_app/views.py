@@ -35,7 +35,7 @@ class PaymentResultAPIView(APIView):
             logging.debug("این لینک معتبر نیست.")
             raise Http404
         if bank_record.is_success:
-            amount = request.GET.get('amount')
+            amount = int(request.GET.get('amount'))
             user = request.user.profile
             wallet = user.profile.wallet
             wallet.balance += amount
