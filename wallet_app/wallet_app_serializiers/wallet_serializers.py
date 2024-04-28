@@ -27,8 +27,9 @@ class TransactionSerializer(ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['wallet'] = instance.wallet.uuid
-        representation['source'] = instance.source.uuid
-        representation['destination'] = instance.destination.uuid
+        if instance.source and instance.destination:
+            representation['source'] = instance.source.uuid
+            representation['destination'] = instance.destination.uuid
         return representation
 
 
