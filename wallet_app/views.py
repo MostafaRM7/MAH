@@ -72,7 +72,7 @@ class IncreaseBalanceAPIView(APIView):
             bank = factory.create()
             bank.set_request(request)
             bank.set_amount(amount)
-            bank.set_client_callback_url(reverse('payment_result'))
+            bank.set_client_callback_url(reverse('wallet-payment-result'))
             bank.set_mobile_number(user.phone_number)
             bank.ready()
             bank._verify_payment_expiry()

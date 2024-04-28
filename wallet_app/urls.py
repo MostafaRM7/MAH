@@ -13,6 +13,6 @@ router.register('wallet', WalletViewSet, basename='wallet')
 urlpatterns = [
     path('', include(router.urls)),
     path('increase-balance/', IncreaseBalanceAPIView.as_view(), name='increase-balance'),
-    path('payment_result/', PaymentResultAPIView.as_view(), name='payment-result')
+    path('payment_result/', PaymentResultAPIView.as_view(), name='wallet-payment-result')
     # path('', include(wallet_router.urls)),
 ]
