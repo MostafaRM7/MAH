@@ -406,4 +406,19 @@ class CompositePlotAPIView(APIView):
         for res in result:
             res['sub_options'] = dict(Counter([option.get('id') for option in res['sub_options']]))
 
-        return Response(result, status=status.HTTP_200_OK)
+        response = {
+            'main_question': {
+                'id': main_question.id,
+                'title': main_question.title,
+                'options': [{'id': option.id, 'text': option.text} for option in
+                            main_question.optionalquestion.options.all()]
+            },
+            'sub_question': {
+                'id': sub_question.id,
+                'title': sub_question.title,
+                'options': [{'id': option.id, 'text': option.text} for option in
+                            sub_question.optionalquestion.options.all()]
+            },
+            'result': result
+        }
+        return Response(response, status=status.HTTP_200_OK)
