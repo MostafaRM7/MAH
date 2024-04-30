@@ -382,7 +382,7 @@ class CompositePlotAPIView(APIView):
         sub_question = serializer.validated_data.get('sub_question')
         answer_sets = questionnaire.answer_sets.all()
         main_unique_selcted_options = set()
-        result = {}
+        result = []
         for answer_set in answer_sets:
             main_answer = answer_set.answers.filter(question=main_question).first()
             if main_answer:
@@ -390,8 +390,9 @@ class CompositePlotAPIView(APIView):
                 if main_answer_body:
                     for option in main_answer_body.get('selected_options'):
                         main_unique_selcted_options.add(option.get('id'))
-        for option_id in main_unique_selcted_options:
-            result[option_id] = []
+        for index, option_id in enumerate(main_unique_selcted_options):
+            result.append({'id': option_id, 'text': main_question.optionalquestion.options.get(id=option_id).text,
+                           'sub_options': []})
             for answer_set in answer_sets:
                 main_answer = answer_set.answers.filter(question=main_question).first()
                 if main_answer:
@@ -400,5 +401,5 @@ class CompositePlotAPIView(APIView):
                         if option_id in [option.get('id') for option in main_answer_body.get('selected_options')]:
                             sub_answer = answer_set.answers.filter(question=sub_question).first()
                             if sub_answer:
-                                result[option_id] += sub_answer.answer.get('selected_options')
+                                result[index]['sub_options'] += sub_answer.answer.get('selected_options')
         return Response(result, status=status.HTTP_200_OK)
