@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from question_app.models import AnswerSet, Questionnaire
 from result_app.filtersets import AnswerSetFilterSet
-from result_app.serializers import AnswerSetSerializer
+from result_app.serializers import AnswerSetSerializer, CompositePlotSerializer
 from porsline_config.paginators import MainPagination
 from .permissions import IsQuestionnaireOwner
 from .serializers import NumberQuestionPlotSerializer, ChoiceQuestionPlotSerializer
@@ -368,3 +368,57 @@ class PlotAPIView(APIView):
         else:
             return Response([],
                             status=status.HTTP_200_OK)
+
+
+class CompositePlotAPIView(APIView):
+    serializer_class = CompositePlotSerializer
+    permission_classes = [IsQuestionnaireOwner]
+
+    def post(self, request, questionnaire_uuid, *args, **kwargs):
+        questionnaire = get_object_or_404(Questionnaire, uuid=questionnaire_uuid)
+        serializer = self.serializer_class(data=request.data, context={'questionnaire': questionnaire})
+        serializer.is_valid(raise_exception=True)
+        main_question = serializer.validated_data.get('main_question')
+        sub_question = serializer.validated_data.get('sub_question')
+        answer_sets = questionnaire.answer_sets.all()
+        main_unique_selcted_options = set()
+        result = []
+        for answer_set in answer_sets:
+            main_answer = answer_set.answers.filter(question=main_question).first()
+            if main_answer:
+                main_answer_body = main_answer.answer
+                if main_answer_body:
+                    for option in main_answer_body.get('selected_options'):
+                        main_unique_selcted_options.add(option.get('id'))
+        for index, option_id in enumerate(main_unique_selcted_options):
+            result.append({'id': option_id, 'text': main_question.optionalquestion.options.get(id=option_id).text,
+                           'sub_options': []})
+            for answer_set in answer_sets:
+                main_answer = answer_set.answers.filter(question=main_question).first()
+                if main_answer:
+                    main_answer_body = main_answer.answer
+                    if main_answer_body:
+                        if option_id in [option.get('id') for option in main_answer_body.get('selected_options')]:
+                            sub_answer = answer_set.answers.filter(question=sub_question).first()
+                            if sub_answer:
+                                result[index]['sub_options'] += sub_answer.answer.get('selected_options')
+
+        for res in result:
+            res['sub_options'] = dict(Counter([option.get('id') for option in res['sub_options']]))
+
+        response = {
+            'main_question': {
+                'id': main_question.id,
+                'title': main_question.title,
+                'options': [{'id': option.id, 'text': option.text} for option in
+                            main_question.optionalquestion.options.all()]
+            },
+            'sub_question': {
+                'id': sub_question.id,
+                'title': sub_question.title,
+                'options': [{'id': option.id, 'text': option.text} for option in
+                            sub_question.optionalquestion.options.all()]
+            },
+            'result': result
+        }
+        return Response(response, status=status.HTTP_200_OK)

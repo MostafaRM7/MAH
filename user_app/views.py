@@ -102,7 +102,7 @@ class PaymentResult(APIView):
                 tracking_code=tracking_code)
             return redirect(
                 config(
-                    'SUCCESSFUL_REDIRECT_URL') + f'?subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
+                    'SUCCESSFUL_REDIRECT_URL') + f'?type=subscription&subscription={subscription_type}&price={price}&created_at={bank_record.created_at.date()}')
         else:
             subscription_type = request.GET.get('subscription')
             price = request.GET.get('price')

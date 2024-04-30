@@ -6,6 +6,17 @@ from rest_framework.serializers import ModelSerializer
 from wallet_app.models import Wallet, Transaction
 
 
+
+class IncreaseBalanceSerializer(serializers.Serializer):
+    amount = serializers.FloatField()
+
+    def validate(self, data):
+        amount = data.get('amount')
+        if amount <= 0:
+            raise serializers.ValidationError({'amount': 'مبلغ نمی تواند منفی یا صفر باشد.'})
+        return data
+
+
 class TransactionSerializer(ModelSerializer):
     class Meta:
         model = Transaction
@@ -16,8 +27,9 @@ class TransactionSerializer(ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['wallet'] = instance.wallet.uuid
-        representation['source'] = instance.source.uuid
-        representation['destination'] = instance.destination.uuid
+        if instance.source and instance.destination:
+            representation['source'] = instance.source.uuid
+            representation['destination'] = instance.destination.uuid
         return representation
 
 

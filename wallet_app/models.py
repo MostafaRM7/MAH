@@ -33,7 +33,8 @@ class Transaction(models.Model):
     )
     REASON_CHOICES = (
         ('i', 'پرسشگری'),
-        ('a', 'پاسخ دادن')
+        ('a', 'پاسخ دادن'),
+        ('i', 'افزایش موجودی کیف پول')
     )
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions', verbose_name='کیف پول ')
     transaction_type = models.CharField(max_length=2, choices=TRANSACTION_TYPES, verbose_name='نوع تراکنش')
