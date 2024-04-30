@@ -50,7 +50,7 @@ class PaymentResultAPIView(APIView):
             )
             return redirect(
                 config(
-                    'SUCCESSFUL_REDIRECT_URL'))
+                    'SUCCESSFUL_REDIRECT_URL') + f'?type=wallet&price={amount}&tc={tracking_code}&created_at={bank_record.created_at.date()}')
         else:
             return redirect(
                 config(
