@@ -25,7 +25,6 @@ from .utils import is_valid_date
 
 
 class PaymentResultAPIView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
     def get(self, request):
         tracking_code = request.GET.get(default_settings.TRACKING_CODE_QUERY_PARAM, None)
         user_id = request.GET.get('user', None)
