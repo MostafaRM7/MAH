@@ -120,7 +120,7 @@ class CompositePlotSerializer(serializers.Serializer):
             raise serializers.ValidationError("سوال اصلی و سوال فرعی نمی توانند یکی باشند")
         if main_question.question_type not in CompositePlotSerializer.CHOICE_TYPES or sub_question.question_type not in CompositePlotSerializer.CHOICE_TYPES:
             raise serializers.ValidationError("سوال اصلی و سوال فرعی باید از نوع انتخابی باشند")
-        for filter_ in data.get('filters'):
+        for filter_ in data.get('filters', []):
             question = questionnaire.questions.filter(id=filter_.get('question')).first()
             if not question:
                 raise serializers.ValidationError("سوال فیلتر یافت نشد")
