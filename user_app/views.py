@@ -51,13 +51,14 @@ class BuyVipSubscription(APIView):
         vip_subscription = VipSubscription.objects.filter(vip_subscription=vip_subscription_type).first()
         price = vip_subscription.price
         user_mobile_number = request.user.username
+        user_id = request.user.id
         factory = BankFactory()
         try:
             bank = factory.create()
             bank.set_request(request)
             bank.set_amount(price)
             bank.set_client_callback_url(
-                reverse('payment_result') + f'?subscription={vip_subscription_type}&price={price}'
+                reverse('payment_result') + f'?subscription={vip_subscription_type}&price={price}&user_id={user_id}'
             )
             bank.set_mobile_number(user_mobile_number)
             bank.ready()
