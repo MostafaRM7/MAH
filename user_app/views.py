@@ -84,7 +84,7 @@ class VipSubscriptionViewSet(viewsets.ModelViewSet):
 class PaymentResult(APIView):
     def get(self, request):
         tracking_code = request.GET.get(default_settings.TRACKING_CODE_QUERY_PARAM, None)
-        user_id = request.GET.get('user', None)
+        profile = request.GET.get('user_id')
         if not tracking_code:
             logging.debug("این لینک معتبر نیست.")
             raise Http404
@@ -96,9 +96,10 @@ class PaymentResult(APIView):
         if bank_record.is_success:
             subscription_type = request.GET.get('subscription')
             price = request.GET.get('price')
-            user = Profile.objects.get(id=user_id)
+            print(profile)
+            profile = Profile.objects.get(id=int(profile))
             VipSubscriptionHistory.objects.create(
-                user=request.user,
+                user=profile,
                 vip_subscription=VipSubscription.objects.filter(
                     vip_subscription=subscription_type).first(),
                 price=price,
