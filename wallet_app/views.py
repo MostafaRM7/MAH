@@ -16,6 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from user_app.models import Profile
 from wallet_app.models import Wallet, Transaction
 from wallet_app.wallet_app_serializiers.wallet_serializers import WalletSerializer, WithdrawSerializer, \
     IncreaseBalanceSerializer
@@ -24,8 +25,10 @@ from .utils import is_valid_date
 
 
 class PaymentResultAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
     def get(self, request):
         tracking_code = request.GET.get(default_settings.TRACKING_CODE_QUERY_PARAM, None)
+        user_id = request.GET.get('user', None)
         if not tracking_code:
             logging.debug("این لینک معتبر نیست.")
             raise Http404
@@ -36,7 +39,7 @@ class PaymentResultAPIView(APIView):
             raise Http404
         if bank_record.is_success:
             amount = float(request.GET.get('amount'))
-            user = request.user.profile
+            user = Profile.objects.get(id=user_id)
             wallet = user.profile.wallet
             wallet.balance += amount
             wallet.save()
@@ -46,7 +49,6 @@ class PaymentResultAPIView(APIView):
                 amount=amount,
                 wallet=wallet,
                 is_done=True,
-
             )
             return redirect(
                 config(
@@ -72,7 +74,7 @@ class IncreaseBalanceAPIView(APIView):
             bank = factory.create()
             bank.set_request(request)
             bank.set_amount(amount)
-            bank.set_client_callback_url(reverse('wallet-payment-result') + f'?amount={amount}')
+            bank.set_client_callback_url(reverse('wallet-payment-result') + f'?amount={amount}&user={user.id}')
             bank.set_mobile_number(user.phone_number)
             bank.ready()
             bank._verify_payment_expiry()
