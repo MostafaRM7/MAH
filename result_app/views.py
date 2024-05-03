@@ -391,8 +391,12 @@ class CompositePlotAPIView(APIView):
                     for option in main_answer_body.get('selected_options'):
                         main_unique_selcted_options.add(option.get('id'))
         for index, option_id in enumerate(main_unique_selcted_options):
-            result.append({'id': option_id, 'text': main_question.optionalquestion.options.get(id=option_id).text,
-                           'sub_options': []})
+            if main_question.question_type == 'optional':
+                result.append({'id': option_id, 'text': main_question.optionalquestion.options.get(id=option_id).text,
+                               'sub_options': []})
+            elif main_question.question_type == 'drop_down':
+                result.append({'id': option_id, 'text': main_question.dropdownquestion.options.get(id=option_id).text,
+                               'sub_options': []})
             for answer_set in answer_sets:
                 main_answer = answer_set.answers.filter(question=main_question).first()
                 if main_answer:

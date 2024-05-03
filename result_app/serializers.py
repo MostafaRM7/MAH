@@ -107,7 +107,7 @@ class CompositePlotSerializer(serializers.Serializer):
     main_question = serializers.IntegerField()
     sub_question = serializers.IntegerField()
     filters = CompositePlotFilterSerializer(many=True, required=False, allow_null=True)
-    CHOICE_TYPES = ['drop_down', 'optional', 'sort']
+    CHOICE_TYPES = ['drop_down', 'optional']
     NUMBER_TYPES = ['number_answer', 'integer_range', 'integer_selective']
 
     def validate(self, data):
