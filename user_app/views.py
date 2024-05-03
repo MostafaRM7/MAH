@@ -51,14 +51,15 @@ class BuyVipSubscription(APIView):
         vip_subscription = VipSubscription.objects.filter(vip_subscription=vip_subscription_type).first()
         price = vip_subscription.price
         user_mobile_number = request.user.username
-        user_id = request.user.id
+        user = request.user.profile.id
+
         factory = BankFactory()
         try:
             bank = factory.create()
             bank.set_request(request)
             bank.set_amount(price)
             bank.set_client_callback_url(
-                reverse('payment_result') + f'?subscription={vip_subscription_type}&price={price}&user_id={user_id}'
+                reverse('payment_result') + f'?subscription={vip_subscription_type}&price={price}&user_id={user}'
             )
             bank.set_mobile_number(user_mobile_number)
             bank.ready()
@@ -83,6 +84,7 @@ class VipSubscriptionViewSet(viewsets.ModelViewSet):
 class PaymentResult(APIView):
     def get(self, request):
         tracking_code = request.GET.get(default_settings.TRACKING_CODE_QUERY_PARAM, None)
+        profile = request.GET.get('user_id')
         if not tracking_code:
             logging.debug("این لینک معتبر نیست.")
             raise Http404
@@ -94,8 +96,10 @@ class PaymentResult(APIView):
         if bank_record.is_success:
             subscription_type = request.GET.get('subscription')
             price = request.GET.get('price')
+            print(profile)
+            profile = Profile.objects.get(id=int(profile))
             VipSubscriptionHistory.objects.create(
-                user=request.user,
+                user=profile,
                 vip_subscription=VipSubscription.objects.filter(
                     vip_subscription=subscription_type).first(),
                 price=price,
