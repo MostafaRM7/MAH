@@ -444,8 +444,6 @@ class CompositePlotAPIView(APIView):
                 elif comparative_operator == 'in':
                     answer_sets = answer_sets.filter(answers__question_id=main_question.id,
                                                      answers__answer__number_answer__in=value)
-            answer_sets = answer_sets.filter(answers__question_id=filter_.get('question'),
-                                             answers__answer__selected_options__id__in=filter_.get('selected_options'))
         for answer_set in answer_sets:
             main_answer = answer_set.answers.filter(question=main_question).first()
             if main_answer:
