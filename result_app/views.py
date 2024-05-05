@@ -431,6 +431,7 @@ class CompositePlotAPIView(APIView):
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__integer_selective__in=value)
                 if question.question_type == 'number_answer':
+                    value = str(value)
                     if comparative_operator == 'gt':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__gt=value)
@@ -438,9 +439,8 @@ class CompositePlotAPIView(APIView):
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__lt=value)
                     elif comparative_operator == 'eq':
-                        print(answer_sets.filter(answers__question_id=question.id).first().answers.filter(question=question).first().answer)
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
-                                                         answers__answer__number_answer=str(value))
+                                                         answers__answer__number_answer=value)
                     elif comparative_operator == 'gte':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__gte=value)
