@@ -440,7 +440,7 @@ class CompositePlotAPIView(APIView):
                     elif comparative_operator == 'eq':
                         print(answer_sets.filter(answers__question_id=question.id).first().answers.filter(question=question).first().answer)
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
-                                                         answers__answer__number_answer=value)
+                                                         answers__answer__number_answer=str(value))
                     elif comparative_operator == 'gte':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__gte=value)
