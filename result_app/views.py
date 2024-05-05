@@ -390,6 +390,7 @@ class CompositePlotAPIView(APIView):
             question = questionnaire.questions.filter(id=filter_.get('question')).first()
             print(filter_)
             if question.question_type == 'integer_range':
+                print('integer_range')
                 if comparative_operator == 'gt':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__integer_range__gt=value)
@@ -409,6 +410,7 @@ class CompositePlotAPIView(APIView):
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__integer_range__in=value)
             elif question.question_type == 'integer_selective':
+                print('integer_selective')
                 if comparative_operator == 'gt':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__integer_selective__gt=value)
