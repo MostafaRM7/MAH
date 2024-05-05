@@ -409,7 +409,7 @@ class CompositePlotAPIView(APIView):
                 elif comparative_operator == 'in':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__integer_range__in=value)
-            elif question.question_type == 'integer_selective':
+            if question.question_type == 'integer_selective':
                 print('integer_selective')
                 if comparative_operator == 'gt':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
@@ -429,26 +429,25 @@ class CompositePlotAPIView(APIView):
                 elif comparative_operator == 'in':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__integer_selective__in=value)
-            elif question.question_type == 'number_answer':
+            if question.question_type == 'number_answer':
                 print('number_answer')
                 print(answer_sets)
                 if comparative_operator == 'gt':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__number_answer__gt=value)
-                elif comparative_operator == 'lt':
+                if comparative_operator == 'lt':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__number_answer__lt=value)
-                elif comparative_operator == 'eq':
+                if comparative_operator == 'eq':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__number_answer=value)
-                elif comparative_operator == 'gte':
-                    print('gte')
+                if comparative_operator == 'gte':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__number_answer__gte=value)
-                elif comparative_operator == 'lte':
+                if comparative_operator == 'lte':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__number_answer__lte=value)
-                elif comparative_operator == 'in':
+                if comparative_operator == 'in':
                     answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                      answers__answer__number_answer__in=value)
         print(answer_sets)
