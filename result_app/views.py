@@ -475,7 +475,9 @@ class CompositePlotAPIView(APIView):
                         if option_id in [option.get('id') for option in main_answer_body.get('selected_options')]:
                             sub_answer = answer_set.answers.filter(question=sub_question).first()
                             if sub_answer:
-                                result[index]['sub_options'] += sub_answer.answer.get('selected_options')
+                                sub_answer_body = sub_answer.answer
+                                if sub_answer_body:
+                                    result[index]['sub_options'] += sub_answer.answer.get('selected_options')
 
         for res in result:
             res['sub_options'] = dict(Counter([option.get('id') for option in res['sub_options']]))
