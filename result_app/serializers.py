@@ -100,7 +100,7 @@ class NumberQuestionPlotSerializer(serializers.Serializer):
 class CompositePlotFilterSerializer(serializers.Serializer):
     question = serializers.IntegerField()
     comparative_operator = serializers.ChoiceField(choices=['gt', 'lt', 'eq', 'gte', 'lte', 'in', 'nin'])
-    value = serializers.CharField()
+    value = serializers.IntegerField()
 
 
 class CompositePlotSerializer(serializers.Serializer):
