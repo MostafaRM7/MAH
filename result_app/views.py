@@ -431,24 +431,22 @@ class CompositePlotAPIView(APIView):
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__integer_selective__in=value)
                 if question.question_type == 'number_answer':
-                    print('number_answer')
-                    print(answer_sets)
                     if comparative_operator == 'gt':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__gt=value)
-                    if comparative_operator == 'lt':
+                    elif comparative_operator == 'lt':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__lt=value)
-                    if comparative_operator == 'eq':
+                    elif comparative_operator == 'eq':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer=value)
-                    if comparative_operator == 'gte':
+                    elif comparative_operator == 'gte':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__gte=value)
-                    if comparative_operator == 'lte':
+                    elif comparative_operator == 'lte':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__lte=value)
-                    if comparative_operator == 'in':
+                    elif comparative_operator == 'in':
                         answer_sets = answer_sets.filter(answers__question_id=question.id,
                                                          answers__answer__number_answer__in=value)
         print(answer_sets)
