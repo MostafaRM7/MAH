@@ -410,20 +410,70 @@ class CompositePlotAPIView(APIView):
 
         for res in result:
             res['sub_options'] = dict(Counter([option.get('id') for option in res['sub_options']]))
-
-        response = {
-            'main_question': {
-                'id': main_question.id,
-                'title': main_question.title,
-                'options': [{'id': option.id, 'text': option.text} for option in
-                            main_question.optionalquestion.options.all()]
-            },
-            'sub_question': {
-                'id': sub_question.id,
-                'title': sub_question.title,
-                'options': [{'id': option.id, 'text': option.text} for option in
-                            sub_question.optionalquestion.options.all()]
-            },
-            'result': result
-        }
+        if main_question.question_type == 'optional' and sub_question.question_type == 'optional':
+            response = {
+                'main_question': {
+                    'id': main_question.id,
+                    'title': main_question.title,
+                    'options': [{'id': option.id, 'text': option.text} for option in
+                                main_question.optionalquestion.options.all()]
+                },
+                'sub_question': {
+                    'id': sub_question.id,
+                    'title': sub_question.title,
+                    'options': [{'id': option.id, 'text': option.text} for option in
+                                sub_question.optionalquestion.options.all()]
+                },
+                'result': result
+            }
+        elif main_question.question_type == 'drop_down' and sub_question.question_type == 'drop_down':
+            response = {
+                'main_question': {
+                    'id': main_question.id,
+                    'title': main_question.title,
+                    'options': [{'id': option.id, 'text': option.text} for option in
+                                main_question.dropdownquestion.options.all()]
+                },
+                'sub_question': {
+                    'id': sub_question.id,
+                    'title': sub_question.title,
+                    'options': [{'id': option.id, 'text': option.text} for option in
+                                sub_question.dropdownquestion.options.all()]
+                },
+                'result': result
+            }
+        elif main_question.question_type == 'optional' and sub_question.question_type == 'drop_down':
+            response = {
+                'main_question': {
+                    'id': main_question.id,
+                    'title': main_question.title,
+                    'options': [{'id': option.id, 'text': option.text} for option in
+                                main_question.optionalquestion.options.all()]
+                },
+                'sub_question': {
+                    'id': sub_question.id,
+                    'title': sub_question.title,
+                    'options': [{'id': option.id, 'text': option.text} for option in
+                                sub_question.dropdownquestion.options.all()]
+                },
+                'result': result
+            }
+        elif main_question.question_type == 'drop_down' and sub_question.question_type == 'optional':
+            response = {
+                'main_question': {
+                    'id': main_question.id,
+                    'title': main_question.title,
+                    'options': [{'id': option.id, 'text': option.text} for option in
+                                main_question.dropdownquestion.options.all()]
+                },
+                'sub_question': {
+                    'id': sub_question.id,
+                    'title': sub_question.title,
+                    'options': [{'id': option.id, 'text': option.text} for option in
+                                sub_question.optionalquestion.options.all()]
+                },
+                'result': result
+            }
+        else:
+            response = {}
         return Response(response, status=status.HTTP_200_OK)
