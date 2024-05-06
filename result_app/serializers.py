@@ -137,8 +137,6 @@ class CompositePlotSerializer(serializers.Serializer):
                 raise serializers.ValidationError("سوال فیلتر یافت نشد")
             if question.question_type not in CompositePlotSerializer.CHOICE_TYPES:
                 raise serializers.ValidationError("سوال فیلتر باید از نوع انتخابی باشد")
-            if filter_.get('options') is None:
-                raise serializers.ValidationError("لطفا گزینه های سوال فیلتر را وارد کنید")
             if question.question_type == 'drop_down':
                 question_options = question.dropdownquestion.options.values_list('id', flat=True)
             else:
