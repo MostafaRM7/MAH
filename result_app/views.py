@@ -381,7 +381,7 @@ class CompositePlotAPIView(APIView):
         main_question = serializer.validated_data.get('main_question')
         sub_question = serializer.validated_data.get('sub_question')
         number_filters = serializer.validated_data.get('number_filters')
-
+        choice_filters = serializer.validated_data.get('choice_filters')
         answer_sets = questionnaire.answer_sets.all()
         main_unique_selcted_options = set()
         result = []
@@ -465,7 +465,15 @@ class CompositePlotAPIView(APIView):
                 #     elif comparative_operator == 'in':
                 #         answer_sets = answer_sets.filter(answers__question_id=question.id,
                 #                                          answers__answer__number_answer__in=value)
-        print(answer_sets)
+        if choice_filters:
+            for filter_ in choice_filters:
+                question = questionnaire.questions.filter(id=filter_.get('question')).first()
+                options = filter_.get('options')
+                filter_query = {
+                    f"answers__question_id": question.id,
+                    f"answers__answer__selected_options__id__in": options
+                }
+                answer_sets = answer_sets.filter(**filter_query)
         for answer_set in answer_sets:
             main_answer = answer_set.answers.filter(question=main_question).first()
             if main_answer:
