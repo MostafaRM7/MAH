@@ -97,16 +97,21 @@ class NumberQuestionPlotSerializer(serializers.Serializer):
         return representation
 
 
-class CompositePlotFilterSerializer(serializers.Serializer):
+class CompositePlotNumberFilterSerializer(serializers.Serializer):
     question = serializers.IntegerField()
     comparative_operator = serializers.ChoiceField(choices=['gt', 'lt', 'eq', 'gte', 'lte', 'in'])
     value = serializers.IntegerField()
 
 
+class CompositePlotChoiceFilterSerializer(serializers.Serializer):
+    question = serializers.IntegerField()
+    options = serializers.ListField(child=serializers.IntegerField())
+
 class CompositePlotSerializer(serializers.Serializer):
     main_question = serializers.IntegerField()
     sub_question = serializers.IntegerField()
-    filters = CompositePlotFilterSerializer(many=True, required=False, allow_null=True)
+    number_filters = CompositePlotNumberFilterSerializer(many=True, required=False, allow_null=True)
+    choice_filters = CompositePlotChoiceFilterSerializer(many=True, required=False, allow_null=True)
     CHOICE_TYPES = ['drop_down', 'optional']
     NUMBER_TYPES = ['number_answer', 'integer_range', 'integer_selective']
 
@@ -120,12 +125,24 @@ class CompositePlotSerializer(serializers.Serializer):
             raise serializers.ValidationError("سوال اصلی و سوال فرعی نمی توانند یکی باشند")
         if main_question.question_type not in CompositePlotSerializer.CHOICE_TYPES or sub_question.question_type not in CompositePlotSerializer.CHOICE_TYPES:
             raise serializers.ValidationError("سوال اصلی و سوال فرعی باید از نوع انتخابی باشند")
-        for filter_ in data.get('filters', []):
+        for filter_ in data.get('number_filters', []):
             question = questionnaire.questions.filter(id=filter_.get('question')).first()
             if not question:
                 raise serializers.ValidationError("سوال فیلتر یافت نشد")
             if question.question_type not in CompositePlotSerializer.NUMBER_TYPES:
                 raise serializers.ValidationError("سوال فیلتر باید از نوع عددی باشد")
+        for filter_ in data.get('choice_filters', []):
+            question = questionnaire.questions.filter(id=filter_.get('question')).first()
+            if not question:
+                raise serializers.ValidationError("سوال فیلتر یافت نشد")
+            if question.question_type not in CompositePlotSerializer.CHOICE_TYPES:
+                raise serializers.ValidationError("سوال فیلتر باید از نوع انتخابی باشد")
+            if filter_.get('options') is None:
+                raise serializers.ValidationError("لطفا گزینه های سوال فیلتر را وارد کنید")
+            question_options = question.options.values_list('id', flat=True)
+            for option in filter_.get('options'):
+                if option not in question_options:
+                    raise serializers.ValidationError("گزینه های سوال فیلتر صحیح نیست")
         data['main_question'] = main_question
         data['sub_question'] = sub_question
         return data
