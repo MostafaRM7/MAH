@@ -105,7 +105,7 @@ class CompositePlotNumberFilterSerializer(serializers.Serializer):
 
 class CompositePlotChoiceFilterSerializer(serializers.Serializer):
     question = serializers.IntegerField()
-    option = erializers.IntegerField()
+    option = serializers.IntegerField()
 
 class CompositePlotSerializer(serializers.Serializer):
     main_question = serializers.IntegerField()
