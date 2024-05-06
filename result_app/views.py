@@ -404,7 +404,8 @@ class CompositePlotAPIView(APIView):
                 filter_operation = comparative_operator_mapping.get(comparative_operator)
                 filter_query = {
                     f"answers__question_id": question.id,
-                    f"answers__answer__{question.question_type}{filter_operation}": value if question.question_type != 'number_answer' else str(value)
+                    f"answers__answer__{question.question_type}{filter_operation}": value if question.question_type != 'number_answer' else str(
+                        value)
                 }
                 answer_sets = answer_sets.filter(**filter_query)
                 # if question.question_type == 'integer_range':
@@ -472,11 +473,13 @@ class CompositePlotAPIView(APIView):
                 question = questionnaire.questions.filter(id=filter_.get('question')).first()
                 options = filter_.get('options')
                 option = options[0]
-                option_filters = [Q(answers__answer__selected_options__contains={"id": option_id}) for option_id in options]
-                combined_filter = Q()
-                for option_filter in option_filters:
-                    combined_filter |= option_filter
-                answer_sets = answer_sets.filter(answers__question_id=question.id, answers__answer__seleceted_options__contains={'id':int(option)})
+                # option_filters = [Q(answers__answer__selected_options__contains={"id": option_id}) for option_id in
+                #                   options]
+                # combined_filter = Q()
+                # for option_filter in option_filters:
+                #     combined_filter |= option_filter
+                answer_sets = answer_sets.filter(answers__question_id=question.id,
+                                                 answers__answer__seleceted_options__contains=[{'id': option}])
         for answer_set in answer_sets:
             main_answer = answer_set.answers.filter(question=main_question).first()
             if main_answer:
