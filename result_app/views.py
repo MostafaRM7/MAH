@@ -476,7 +476,7 @@ class CompositePlotAPIView(APIView):
                 combined_filter = Q()
                 for option_filter in option_filters:
                     combined_filter |= option_filter
-                answer_sets = answer_sets.filter(answers__question_id=question.id, answers__answer__seleceted_options__contains={'id':option})
+                answer_sets = answer_sets.filter(answers__question_id=question.id, answers__answer__seleceted_options__contains={'id':int(option)})
         for answer_set in answer_sets:
             main_answer = answer_set.answers.filter(question=main_question).first()
             if main_answer:
