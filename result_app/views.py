@@ -400,7 +400,10 @@ class CompositePlotAPIView(APIView):
                 question = questionnaire.questions.filter(id=filter_.get('question')).first()
                 print(filter_)
                 filter_operation = comparative_operator_mapping.get(comparative_operator)
-                filter_query = f"answers__question_id={question.id},answers__answer__{question.question_type}{filter_operation}={value}"
+                if question.question_type != 'number_answer':
+                    filter_query = f"answers__question_id={question.id},answers__answer__{question.question_type}{filter_operation}={value}"
+                else:
+                    filter_query = f"answers__question_id={question.id},answers__answer__{question.question_type}{filter_operation}={str(value)}"
                 answer_sets = answer_sets.filter(*filter_query)
                 # if question.question_type == 'integer_range':
                 #     print('integer_range')
