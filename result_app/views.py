@@ -1,4 +1,6 @@
 import statistics
+
+from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -469,11 +471,11 @@ class CompositePlotAPIView(APIView):
             for filter_ in choice_filters:
                 question = questionnaire.questions.filter(id=filter_.get('question')).first()
                 options = filter_.get('options')
-                filter_query = {
-                    f"answers__question_id": question.id,
-                    f"answers__answer__selected_options__id__contains": options
-                }
-                answer_sets = answer_sets.filter(**filter_query)
+                option_filters = [Q(answer__selected_options__contains={"id": option_id}) for option_id in options]
+                combined_filter = Q()
+                for option_filter in option_filters:
+                    combined_filter |= option_filter
+                answer_sets = answer_sets.filter(combined_filter, answers__question_id=question.id)
         for answer_set in answer_sets:
             main_answer = answer_set.answers.filter(question=main_question).first()
             if main_answer:
