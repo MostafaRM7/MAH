@@ -105,7 +105,7 @@ class CompositePlotNumberFilterSerializer(serializers.Serializer):
 
 class CompositePlotChoiceFilterSerializer(serializers.Serializer):
     question = serializers.IntegerField()
-    options = serializers.ListField(child=serializers.IntegerField())
+    option = erializers.IntegerField()
 
 class CompositePlotSerializer(serializers.Serializer):
     main_question = serializers.IntegerField()
@@ -143,9 +143,8 @@ class CompositePlotSerializer(serializers.Serializer):
                 question_options = question.dropdownquestion.options.values_list('id', flat=True)
             else:
                 question_options = question.optionalquestion.options.values_list('id', flat=True)
-            for option in filter_.get('options'):
-                if option not in question_options:
-                    raise serializers.ValidationError("گزینه های سوال فیلتر صحیح نیست")
+            if filter_.get('option') not in question_options:
+                raise serializers.ValidationError("گزینه سوال فیلتر صحیح نیست")
         data['main_question'] = main_question
         data['sub_question'] = sub_question
         return data

@@ -471,15 +471,14 @@ class CompositePlotAPIView(APIView):
         if choice_filters:
             for filter_ in choice_filters:
                 question = questionnaire.questions.filter(id=filter_.get('question')).first()
-                options = filter_.get('options')
-                option = options[0]
+                option = filter_.get('option')
                 # option_filters = [Q(answers__answer__selected_options__contains={"id": option_id}) for option_id in
                 #                   options]
                 # combined_filter = Q()
                 # for option_filter in option_filters:
                 #     combined_filter |= option_filter
                 answer_sets = answer_sets.filter(answers__question_id=question.id,
-                                                 answers__answer__seleceted_options__contains=[{'id': option}])
+                                                 answers__answer__selected_options__contains={"id": int(option)})
         for answer_set in answer_sets:
             main_answer = answer_set.answers.filter(question=main_question).first()
             if main_answer:
