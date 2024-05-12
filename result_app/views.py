@@ -387,7 +387,10 @@ class CompositePlotAPIView(APIView):
         number_filters = serializer.validated_data.get('number_filters')
         choice_filters = serializer.validated_data.get('choice_filters')
         answer_sets = questionnaire.answer_sets.all()
-        CompositePlot.objects.create(creator=request.user.profile, body=json.dumps(serializer.data))
+        body = serializer.data
+        body['main_question'] = main_question.id
+        body['sub_question'] = sub_question.id
+        CompositePlot.objects.create(creator=request.user.profile, body=json.dumps(body))
         main_unique_selcted_options = set()
         result = []
         comparative_operator_mapping = {
