@@ -395,7 +395,7 @@ class CompositePlotAPIView(APIView):
                 "choice_filters": choice_filters
             }
         }
-        CompositePlot.objects.create(creator=request.user.profile, body=body)
+        CompositePlot.objects.create(creator=request.user.profile, body=json.dumps(body))
         main_unique_selcted_options = set()
         result = []
         comparative_operator_mapping = {
