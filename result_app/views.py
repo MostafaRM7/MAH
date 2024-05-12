@@ -19,6 +19,7 @@ from question_app.models import AnswerSet, Questionnaire
 from result_app.filtersets import AnswerSetFilterSet
 from result_app.serializers import AnswerSetSerializer, CompositePlotSerializer
 from porsline_config.paginators import MainPagination
+from .models import CompositePlot
 from .permissions import IsQuestionnaireOwner
 from .serializers import NumberQuestionPlotSerializer, ChoiceQuestionPlotSerializer
 
@@ -385,6 +386,7 @@ class CompositePlotAPIView(APIView):
         number_filters = serializer.validated_data.get('number_filters')
         choice_filters = serializer.validated_data.get('choice_filters')
         answer_sets = questionnaire.answer_sets.all()
+        CompositePlot.objects.create(creator=request.user.profile)
         main_unique_selcted_options = set()
         result = []
         comparative_operator_mapping = {
@@ -570,3 +572,4 @@ class CompositePlotAPIView(APIView):
         else:
             response = {}
         return Response(response, status=status.HTTP_200_OK)
+

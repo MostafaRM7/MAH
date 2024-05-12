@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from question_app.models import Answer, AnswerSet
+from result_app.models import CompositePlot
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -146,3 +147,8 @@ class CompositePlotSerializer(serializers.Serializer):
         data['main_question'] = main_question
         data['sub_question'] = sub_question
         return data
+
+class SavedCompositePlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompositePlot
+        fields = ('id', 'creator', 'body')

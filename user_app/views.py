@@ -26,6 +26,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from porsline_config import settings
 from question_app.models import AnswerSet
+from result_app.models import CompositePlot
+from result_app.serializers import CompositePlotSerializer, SavedCompositePlotSerializer
 from user_app.user_app_serializers.authentication_serializers import GateWaySerializer, OTPCheckSerializer, \
     RefreshTokenSerializer
 from user_app.user_app_serializers.general_serializers import FolderSerializer, ProfileSerializer, \
@@ -130,6 +132,12 @@ class UserViewSet(viewsets.ModelViewSet):
                                                                                                  'nationality',
                                                                                                  'province').all()
         return queryset
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def get_composite_plots(self, request):
+        plot_bodies = CompositePlot.objects.filter(creator=request.user.profile)
+        serializer = SavedCompositePlotSerializer(data=plot_bodies, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
