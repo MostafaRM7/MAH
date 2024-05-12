@@ -390,6 +390,7 @@ class CompositePlotAPIView(APIView):
         body = serializer.data
         body['main_question'] = main_question.id
         body['sub_question'] = sub_question.id
+        print(body)
         CompositePlot.objects.create(creator=request.user.profile, body=json.dumps(body))
         main_unique_selcted_options = set()
         result = []
