@@ -35,3 +35,5 @@ pip-selfcheck.json
 /json_templates/
 /.pytest_cache/
 /question_app/tests/.pytest_cache/
+
+*/migrations/*
