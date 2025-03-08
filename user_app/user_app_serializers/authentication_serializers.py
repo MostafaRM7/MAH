@@ -13,6 +13,7 @@ from porsline_config import settings
 
 class GateWaySerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=20, min_length=11, required=True)
+    otp = serializers.CharField(max_length=5, min_length=5, read_only=True)
 
     def create(self, validated_data):
         otp = OTPToken.objects.filter(user__phone_number=validated_data.get('phone_number'))
@@ -21,7 +22,8 @@ class GateWaySerializer(serializers.Serializer):
         user = Profile.objects.get_or_create(phone_number=validated_data.get('phone_number'))
         otp = OTPToken.objects.create(token=randint(10000, 99999), user=user[0])
         print(otp.token)
-        send_otp.delay(otp.token, validated_data.get('phone_number'))
+        validated_data.update({'otp': otp.token})
+        # send_otp.delay(otp.token, validated_data.get('phone_number'))
         return validated_data
 
     def validate(self, attrs):
