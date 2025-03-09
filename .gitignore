@@ -37,3 +37,4 @@ pip-selfcheck.json
 /question_app/tests/.pytest_cache/
 
 */migrations/*
+dump.rdb
