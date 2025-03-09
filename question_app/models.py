@@ -34,7 +34,6 @@ class Questionnaire(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True, verbose_name='یو یو آی دی')
     show_number = models.BooleanField(default=True, verbose_name='نمایش شماره سوال')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد', editable=False)
-    bate_questions = ArrayField(models.PositiveIntegerField(), null=True, blank=True)
     price_pack = models.ForeignKey(PricePack, on_delete=models.CASCADE, verbose_name='بسته قیمت',
                                    related_name='interviews', null=True, blank=True)
     category = models.ForeignKey('Category', on_delete=models.PROTECT, null=True, blank=True)

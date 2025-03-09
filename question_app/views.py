@@ -435,17 +435,6 @@ class AnswerSetViewSet(viewsets.mixins.CreateModelMixin,
         else:
             return Response({"detail": "پرسشنامه تعیین قیمت نشده است"}, status=status.HTTP_400_BAD_REQUEST)
         answer_set.refresh_from_db()
-        bates = questionnaire.bate_questions
-        if bates is not None and len(bates) > 0:
-            bate_answers = answer_set.answers.filter(question__pk__in=bates).values_list('answer', flat=True)
-            option_numbers = []
-            for answer in bate_answers:
-                for selected_option in answer.get('selected_options'):
-                    option_numbers.append(selected_option.get('number'))
-            if len(set(option_numbers)) > 1:
-                answer_set.delete()
-                return Response({"detail": "پاسخ های شما با هم تناقض دارند"}, status=status.HTTP_400_BAD_REQUEST)
-
         return Response(self.get_serializer(answer_set).data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
